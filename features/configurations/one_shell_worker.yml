@@ -1,0 +1,3 @@
+controllers:
+  - type: shell
+    count: 1

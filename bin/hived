@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require 'socket'
+require 'daemons'
+
+def test(app)
+  app.default_show_status
+
+  system("kill -INFO #{app.pid.pid.to_s}")
+  puts
+  server = TCPSocket.open('localhost', 9999)
+  while line = server.gets
+    puts line.chop
+  end
+  server.close
+end
+
+Daemons.run(File.expand_path("..", __FILE__) + '/start_hive', { show_status_callback: :test })

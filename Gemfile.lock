@@ -1,0 +1,15 @@
+GIT
+  remote: https://github.com/jrmhaig/daemons.git
+  revision: cee17be908b893d0c84dae9046175cb79d44fc1d
+  specs:
+    daemons (1.1.10)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  daemons!

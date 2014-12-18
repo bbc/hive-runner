@@ -1,10 +1,15 @@
 Feature: Hive control
   As a hive administrator
   I want to start and stop a hive
-  
+
   Scenario: Starting a hive
     When I start the runner
-    Then the runner starts
+    Then the runner is running
+    
+  Scenario: Stopping a hive
+    Given The runner has been started
+    When I stop the runner
+    Then the runner is not running
     
   Scenario: Starting a shell hive
     Given hive is configured to use a shell worker
