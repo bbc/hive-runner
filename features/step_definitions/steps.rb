@@ -1,5 +1,11 @@
+Before do
+  `bundle exec ./bin/hived stop`
+  sleep 1
+end
+
 After do
   `bundle exec ./bin/hived stop`
+  sleep 1
 end
 
 Given(/^The runner has been started$/) do
