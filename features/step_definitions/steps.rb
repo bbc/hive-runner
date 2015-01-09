@@ -5,6 +5,7 @@ end
 
 After do
   `bundle exec ./bin/hived stop`
+  #`killall WORKER`
   sleep 1
 end
 
@@ -15,7 +16,7 @@ end
 
 When(/^I start the runner$/) do
   expect(system('bundle exec ./bin/hived start')).to be true
-  sleep 1
+  sleep 5
 end
 
 When(/^I stop the runner$/) do
@@ -24,33 +25,33 @@ When(/^I stop the runner$/) do
 end
 
 Then(/^the runner is running$/) do
-  expect(`bundle exec ./bin/hived status`).to match /: running \[pid/
+  expect(`bundle exec ./bin/hived status`).to match(/: running \[pid/)
 end
 
 Then(/^the runner is not running$/) do
-  # TODO Capture the stderr
-  #expect(`bundle exec ./bin/hived status`).to match /: no instances running/
-  expect(`bundle exec ./bin/hived status`).to match /^$/
+  # TODO: Capture the stderr
+  # expect(`bundle exec ./bin/hived status`).to match(/: no instances running/)
+  expect(`bundle exec ./bin/hived status`).to match(/^$/)
 end
 
 Given(/^hive is configured to use a shell worker$/) do
-  ENV['HIVE_CONFIG'] = File.expand_path("../../configurations/one_shell_worker.yml", __FILE__)
+  ENV['HIVE_CONFIG'] = File.expand_path('../../configurations/one_shell_worker.yml', __FILE__)
 end
 
 Then(/^the runner loads the shell controller$/) do
-  expect(`bundle exec ./bin/hived status`).to match /Using shell controller/
+  expect(`bundle exec ./bin/hived status`).to match(/Using shell controller/)
 end
 
-Then(/^the shell worker starts$/) do
-  expect(`bundle exec ./bin/hived status`).to match /- shell worker \[pid/
+Then(/^the shell worker is running$/) do
+  expect(`bundle exec ./bin/hived status`).to match(/- shell worker \[pid/)
 end
 
 Given(/^hive is configured to use (\d+) shell workers$/) do |arg1|
-  pending # express the regexp above with the code you wish you had
+  ENV['HIVE_CONFIG'] = File.expand_path("../../configurations/#{arg1}_shell_workers.yml", __FILE__)
 end
 
-Then(/^(\d+) shell workers start$/) do |arg1|
-  pending # express the regexp above with the code you wish you had
+Then(/^(\d+) shell worker\(s\) are running$/) do |arg1|
+  expect(`ps aux | grep SHELL_WORKER | grep -v grep | wc -l`.to_i).to be arg1.to_i
 end
 
 Given(/^a hive is running with a shell worker$/) do

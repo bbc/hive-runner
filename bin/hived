@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
 
 require 'pathname'
-ENV['BUNDLE_GEMFILE'] ||= File.expand_path("../../Gemfile",
-  Pathname.new(__FILE__).realpath)
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path(
+  '../../Gemfile',
+  Pathname.new(__FILE__).realpath
+)
 
 require 'rubygems'
 require 'bundler/setup'
@@ -12,7 +14,7 @@ require 'daemons'
 def test(app)
   app.default_show_status
 
-  Process.kill("INFO", app.pid.pid)
+  Process.kill('INFO', app.pid.pid)
   puts
   server = TCPSocket.open('localhost', 9999)
   while line = server.gets
@@ -21,4 +23,4 @@ def test(app)
   server.close
 end
 
-Daemons.run(File.expand_path("..", __FILE__) + '/start_hive', { show_status_callback: :test })
+Daemons.run(File.expand_path('..', __FILE__) + '/start_hive', show_status_callback: :test, log_output: '/tmp/hive.log')

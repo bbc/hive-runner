@@ -1,12 +1,11 @@
 require 'hive/controller'
-require 'hive/worker/shell'
 
 module Hive
   class Controller
-    # The Shell controller
-    class Shell < Controller
+    # Dummy test controller
+    class Test < Controller
       def initialize(config)
-        @type = 'shell'
+        @type = 'test'
         super
       end
     end

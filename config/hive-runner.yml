@@ -1,3 +1,9 @@
 ---
 controllers:
   shell:
+    max_workers: 5
+    name_stub: SHELL_WORKER
+logging:
+  directory: logs
+  pids: pids
+  main_filename: hive.log

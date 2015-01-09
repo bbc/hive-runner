@@ -1,6 +1,6 @@
 controllers:
   shell:
-    max_workers: 1
+    max_workers: 2
     name_stub: SHELL_WORKER
 logging:
   directory: features/tmp

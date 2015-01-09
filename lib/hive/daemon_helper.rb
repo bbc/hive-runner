@@ -9,10 +9,21 @@ module Hive
       @controllers
     end
 
+    def self.workers
+      workers = []
+      @controllers.each do |c|
+        workers.concat(c.workers)
+      end
+      workers
+    end
+
     def self.instantiate_controllers(controller_details = Hive::CONFIG['controllers'])
       controller_details.each do |type, opts|
+        LOG.info("Adding controller for '#{type}'")
         require "hive/controller/#{type}"
-        @controllers << Object.const_get('Hive').const_get('Controller').const_get(type.capitalize).new(opts)
+        controller = Object.const_get('Hive').const_get('Controller').const_get(type.capitalize).new(opts)
+        controller.check_workers
+        @controllers << controller
       end
       @controllers
     end
@@ -20,9 +31,9 @@ module Hive
     def self.run
       loop do
         @controllers.each do |c|
-          c.step
+          c.check_workers
+          sleep 1
         end
-        sleep 5
       end
     end
   end

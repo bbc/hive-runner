@@ -4,4 +4,3 @@ controllers:
       arg: value
 
 logging:
-  directory: '/tmp'
