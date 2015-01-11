@@ -5,6 +5,10 @@ module Hive
     # Dummy test worker
     class Test < Worker
       def initialize(config)
+        super
+      end
+
+      def poll_queue
       end
     end
   end

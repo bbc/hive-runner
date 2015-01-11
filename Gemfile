@@ -7,3 +7,4 @@ group :test do
   gem 'rubocop'
 end
 gem 'daemons', git: 'https://github.com/jrmhaig/daemons.git'
+#gem 'hive-messages'

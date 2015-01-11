@@ -4,4 +4,7 @@ controllers:
       arg: value
 
 logging:
-  directory: '/tmp'
+  directory: 'spec/tmp'
+
+timings:
+  worker_loop_interval: 5
