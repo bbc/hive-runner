@@ -10,6 +10,7 @@ logging:
   directory: logs
   pids: pids
   main_filename: hive.log
+  home_directory: /path/to/test/home
 
 timings:
   worker_loop_interval: 5

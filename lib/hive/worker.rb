@@ -1,4 +1,6 @@
 require 'hive'
+require 'hive/job_paths'
+require 'hive/execution_script'
 
 require 'hive/messages'
 
@@ -139,10 +141,12 @@ module Hive
         @log.info('No job found')
       else
         @log.info('Job starting')
-        # job.start( <devicedb id> )
+        job.start( 123 ) # TODO: Device ID
         if execute_job(job)
+          @log.info('Job ending')
           job.end
         else
+          @log.info('Job terminating with error')
           job.error
         end
         cleanup
@@ -174,11 +178,29 @@ module Hive
     end
 
     def reservation_details
-      { hive_id: '???', worker_pid: Process.pid }
+      # TODO: Get hive id
+      { hive_id: 1, worker_pid: Process.pid }
     end
 
     # Execute a job
     def execute_job(job)
+      begin
+        @log.info "Setting job paths"
+        job_paths = Hive::JobPaths.new(job.job_id, CONFIG['logging']['home'], @log)
+
+        @log.info "Initialising execution script"
+        script = Hive::ExecutionScript.new(job_paths.executed_script_path, @log)
+
+        @log.info "Appending test script to execution script"
+        script.append_bash_cmd job.command
+
+        @log.info "Running execution script"
+        script.run #(parameters || "")
+
+        true
+      rescue Exception => e
+        false
+      end
     end
 
     # Cycle the queue list and return the queue that has been move to the end
