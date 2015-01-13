@@ -1,6 +1,6 @@
 require 'hive'
 
-#require 'hive/messages'
+require 'hive/messages'
 
 module Hive
   # The generic worker class
@@ -93,13 +93,19 @@ module Hive
 
       setup_ipc
 
+      Hive::Messages.configure do |config|
+        config.base_path = CONFIG['network']['scheduler']
+        config.pem_file = CONFIG['network']['cert']
+        config.ssl_verify_mode = OpenSSL::SSL::VERIFY_NONE
+      end
+
       @log.info('Starting worker')
       loop do
         begin
           diagnostics
           poll_queue
         rescue StandardError => e
-          @log.warning("Worker loop aborted: #{e.message}\n  : #{e.backtrace.join("\n  : ")}")
+          @log.warn("Worker loop aborted: #{e.message}\n  : #{e.backtrace.join("\n  : ")}")
         end
         sleep CONFIG['timings']['worker_loop_interval']
       end
@@ -148,11 +154,12 @@ module Hive
       q = next_queue
       if q
         @log.info "Trying to reserve job for queue '#{q}'"
-#        job = job_message_klass.reserve(q, reservation_details)
-#        if job.present?
-#          raise InvalidJobReservationError.new("Invalid Job Reserved") unless job.valid?
-#          return job
-#        end
+        job = job_message_klass.reserve(q, reservation_details)
+        @log.info "Job: #{job.inspect}"
+        if job.present?
+          raise InvalidJobReservationError.new("Invalid Job Reserved") unless job.valid?
+          return job
+        end
       else
         @log.info "No queues for device"
       end
@@ -162,6 +169,7 @@ module Hive
     # Get the correct job class
     # This should usually be replaced in the child class
     def job_message_klass
+      @log.info 'Generic job class'
       Hive::Messages::Job
     end
 

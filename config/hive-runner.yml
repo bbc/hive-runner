@@ -13,3 +13,8 @@ logging:
 
 timings:
   worker_loop_interval: 5
+
+network:
+  scheduler: https://example.com/scheduler
+  cert: /path/to/certificate.pem
+  cafile: /path/to/certificate-authorities.pem

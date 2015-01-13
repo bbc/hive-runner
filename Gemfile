@@ -7,4 +7,5 @@ group :test do
   gem 'rubocop'
 end
 gem 'daemons', git: 'https://github.com/jrmhaig/daemons.git'
-#gem 'hive-messages'
+gem 'roar', git: 'https://github.com/bbc-test/roar.git', branch: '0.2-x.bbc'
+gem 'hive-messages', git: 'git@github.com:bbc-test/hive-messages.git', tag: '0.2.7'
