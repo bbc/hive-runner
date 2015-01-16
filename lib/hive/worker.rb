@@ -1,3 +1,5 @@
+require 'yaml'
+
 require 'hive'
 require 'hive/job_paths'
 require 'hive/execution_script'
@@ -7,6 +9,9 @@ require 'hive/messages'
 module Hive
   # The generic worker class
   class Worker
+    class InvalidJobReservationError < StandardError
+    end
+
     attr_reader :type
     attr_reader :pid
 
@@ -189,16 +194,25 @@ module Hive
         job_paths = Hive::JobPaths.new(job.job_id, CONFIG['logging']['home'], @log)
 
         @log.info "Initialising execution script"
-        script = Hive::ExecutionScript.new(job_paths.executed_script_path, @log)
+        script = Hive::ExecutionScript.new(job_paths, @log)
 
         @log.info "Appending test script to execution script"
         script.append_bash_cmd job.command
 
         @log.info "Running execution script"
-        script.run #(parameters || "")
+        script.run
+
+        # Upload results
+        job_paths.finalise_results_directory
+        upload_files(job, job_paths.results_path, job_paths.logs_path)
+        results = gather_results(job_paths)
+        @log.info("The results are ...")
+        @log.info(results.inspect)
+        job.update_results(results)
 
         true
       rescue Exception => e
+        @log.error("Error running test: #{e.message}\n  : #{e.backtrace.join("\n  : ")}")
         false
       end
     end
@@ -212,6 +226,48 @@ module Hive
 
     # Dummy function to be replaced in child class, as required
     def diagnostics
+    end
+
+    # Upload any files from the test
+    def upload_files(job, *paths)
+      @log.info("Uploading assets")
+      paths.each do |path|
+        @log.info("Uploading files from #{path}")
+        Dir.foreach(path) do |item|
+          @log.info("File: #{item}")
+          next if item == '.' or item == '..'
+          begin
+            artifact = job.report_artifact("#{path}/#{item}")
+            @log.info("Artifact uploaded: #{artifact.attributes.to_s}")
+          rescue => e
+            @log.error("Error uploading artifact #{item}: #{e.message}")
+            @log.error("  : #{e.backtrace.join("\n  : ")}")
+          end
+        end
+      end
+    end
+
+    # Gather the results from the tests
+    # This is the simplest case where the results are written to a file
+    # Child classes will probably replace this function
+    def gather_results(paths)
+      file = "#{paths.results_path}/results.yml"
+      @log.debug "Gathering data from #{file}"
+      # Default values
+      results = {
+        running_count: 0,
+        passed_count: 0,
+        failed_count: 0,
+        errored_count: 0
+      }
+      data = {}
+      if File.file?(file)
+        @log.debug "#{file} exists"
+        results.merge(YAML.load_file(file).symbolize_keys)
+      else
+        @log.debug "#{file} does not exist"
+        results
+      end
     end
 
     # Do whatever device cleanup is required

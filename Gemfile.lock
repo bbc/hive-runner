@@ -1,9 +1,9 @@
 GIT
   remote: git@github.com:bbc-test/hive-messages.git
-  revision: 9b2e8d06e2663fed138a6686fc2bc805cd666370
-  tag: 0.2.7
+  revision: e6752de0c875b6284a4e2f6667e54143e5085528
+  tag: 0.2.8
   specs:
-    hive-messages (0.2.7)
+    hive-messages (0.2.8)
       activemodel
       activesupport
       mimemagic
@@ -108,7 +108,7 @@ GEM
     thread_safe (0.3.4)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
-    uber (0.0.12)
+    uber (0.0.13)
     version (1.0.0)
     virtus (1.0.4)
       axiom-types (~> 0.1)
