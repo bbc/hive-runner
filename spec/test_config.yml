@@ -8,3 +8,7 @@ logging:
 
 timings:
   worker_loop_interval: 5
+
+network:
+  scheduler: http://example.co.uk
+  cert: cert.pem

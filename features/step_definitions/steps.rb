@@ -78,6 +78,11 @@ def create_configuration(options = {})
     f.puts '  directory: features/tmp'
     f.puts '  pids: features/tmp'
     f.puts '  main_filename: hive.log'
+    f.puts 'timings:'
+    f.puts '  worker_loop_interval: 5'
+    f.puts 'network:'
+    f.puts '  scheduler: https://example.co.uk'
+    f.puts '  cert: cert.pem'
   end
   name
 end
