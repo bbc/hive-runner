@@ -78,3 +78,32 @@ The shell controller section contains the following additional field:
 | Field    | Content                                   |
 |----------|-------------------------------------------|
 | `queues` | Array of job queues for the shell workers |
+
+## Setting up a new Hive Runner
+
+Check out the Hive Runner from Github:
+
+    # Using HTTPS
+    git clone https://github.com/bbc-test/hive-runner
+    # ... or using SSH
+    git clone ssh@github.com:bbc-test/hive-runner
+    # Ensure ruby gems are installed
+    cd hive-runner
+    bundle install
+
+Configure the hive, either by editing the default configuration file,
+`hive-runner/config/hive-runner.yml`, or creating a separate configuration
+file in a separate location (recommended) and ensuring that the `HIVE_CONFIG`
+environment variable is set correctly:
+
+    echo HIVE_CONFIG=/path/to/hive-runner.yml >> ~/.bashrc
+
+See the "Configuration file" above for details.
+
+Start the Hive Runner:
+
+    ./bin/hived start
+
+Ensure that your Hive Runner is running and that your workers have started:
+
+    ./bin/hived status
