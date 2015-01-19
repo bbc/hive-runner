@@ -11,6 +11,10 @@ require 'bundler/setup'
 require 'socket'
 require 'daemons'
 
+# require 'hive' here to cause a failure if the configuration is not correct
+$LOAD_PATH << File.expand_path('../../lib', __FILE__)
+require 'hive'
+
 def test(app)
   app.default_show_status
 
