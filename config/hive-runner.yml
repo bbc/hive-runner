@@ -7,8 +7,8 @@ controllers:
       - bash
 
 logging:
-  directory: logs
-  pids: pids
+  directory: /log/directory
+  pids: /pid/directory
   main_filename: hive.log
   home_directory: /path/to/test/home
 

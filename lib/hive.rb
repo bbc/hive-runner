@@ -10,7 +10,7 @@ module Hive
   if CONFIG['logging']
     LOG = Hive::Log.new
     if CONFIG['logging']['directory']
-      LOG_DIRECTORY = File.expand_path("../../#{CONFIG['logging']['directory']}", __FILE__)
+      LOG_DIRECTORY = CONFIG['logging']['directory']
       if CONFIG['logging']['main_filename']
         LOG.add_logger("#{LOG_DIRECTORY}/#{CONFIG['logging']['main_filename']}", CONFIG['logging']['main_level'] || 'INFO')
       end
@@ -21,7 +21,7 @@ module Hive
       fail 'Missing log directory'
     end
     if CONFIG['logging']['pids']
-      PIDS_DIRECTORY = File.expand_path("../../#{CONFIG['logging']['pids']}", __FILE__)
+      PIDS_DIRECTORY = CONFIG['logging']['pids']
     else
       PIDS_DIRECTORY = LOG_DIRECTORY
     end
