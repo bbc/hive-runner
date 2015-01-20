@@ -22,6 +22,7 @@ module Hive
     def run
       @log.info 'bash.rb - Writing script out to file'
       File.open(@path, 'w') do |f|
+        f.write("#!/bin/bash\n")
         f.write("# Set environment\n")
         @env.each do |key, value|
           f.write("export #{key}=#{value}\n")
