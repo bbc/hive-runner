@@ -18,7 +18,7 @@ require 'hive'
 def test(app)
   app.default_show_status
 
-  Process.kill('INFO', app.pid.pid)
+  Process.kill('USR1', app.pid.pid)
   puts
   server = TCPSocket.open('localhost', 9999)
   while line = server.gets

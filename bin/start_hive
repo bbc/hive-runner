@@ -8,7 +8,7 @@ require 'hive/daemon_helper'
 
 # Communication with daemon launcher
 comm = TCPServer.open(9999)
-Signal.trap('INFO') do
+Signal.trap('USR1') do
   client = comm.accept
   Hive::DaemonHelper.controllers.each do |c|
     client.puts "Using #{c.class.name.split('::').last.downcase} controller"
