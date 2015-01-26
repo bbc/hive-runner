@@ -108,19 +108,11 @@ module Hive
 
     # Try to find and reserve a job
     def reserve_job
-      q = next_queue
-      if q
-        @log.info "Trying to reserve job for queue '#{q}'"
-        job = job_message_klass.reserve(q, reservation_details)
-        @log.info "Job: #{job.inspect}"
-        if job.present?
-          raise InvalidJobReservationError.new("Invalid Job Reserved") unless job.valid?
-          return job
-        end
-      else
-        @log.info "No queues for device"
-      end
-      nil
+      @log.info "Trying to reserve job for queues: #{@queues.join(', ')}"
+      job = job_message_klass.reserve(@queues, reservation_details)
+      @log.debug "Job: #{job.inspect}"
+      raise InvalidJobReservationError.new("Invalid Job Reserved") unless job.valid? if job.present?
+      job
     end
 
     # Get the correct job class
@@ -164,13 +156,6 @@ module Hive
       job.update_results(results)
 
       true
-    end
-
-    # Cycle the queue list and return the queue that has been move to the end
-    def next_queue
-      q = @queues.shift
-      @queues << q
-      q
     end
 
     # Dummy function to be replaced in child class, as required
