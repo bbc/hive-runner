@@ -81,6 +81,9 @@ module Hive
       rescue => e
         @log.warn e
       end
+
+      # TODO: Return true or false depending on script exit status
+      true
     end
   end
 end

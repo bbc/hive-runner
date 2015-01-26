@@ -145,9 +145,10 @@ module Hive
       script.append_bash_cmd job.command
 
       @log.info "Running execution script"
-      script.run
+      state = script.run
 
       # Upload results
+      # TODO: Do this outside of the execute_job method
       job_paths.finalise_results_directory
       upload_files(job, job_paths.results_path, job_paths.logs_path)
       results = gather_results(job_paths)
@@ -155,7 +156,7 @@ module Hive
       @log.info(results.inspect)
       job.update_results(results)
 
-      true
+      state
     end
 
     # Dummy function to be replaced in child class, as required
