@@ -32,7 +32,7 @@ module Hive
       loop do
         @controllers.each do |c|
           c.check_workers
-          sleep 1
+          sleep Hive::CONFIG['timings']['controller_loop_interval']
         end
       end
     end

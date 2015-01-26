@@ -84,6 +84,7 @@ def create_configuration(options = {})
     f.puts '  home_directory: features/tmp'
     f.puts 'timings:'
     f.puts '  worker_loop_interval: 5'
+    f.puts '  controller_loop_interval: 5'
     f.puts 'network:'
     f.puts '  scheduler: https://example.co.uk'
     f.puts '  cert: cert.pem'
