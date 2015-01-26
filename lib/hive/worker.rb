@@ -22,6 +22,7 @@ module Hive
       @parent_reader, @child_writer = IO.pipe
       @child_reader, @parent_writer = IO.pipe
 
+      @controller_pid = Process.pid
       @pid = Process.fork do
         @parent_reader.close
         @parent_writer.close
@@ -107,7 +108,7 @@ module Hive
       end
 
       @log.info('Starting worker')
-      loop do
+      while keep_running?
         begin
           diagnostics
           poll_queue
@@ -116,6 +117,7 @@ module Hive
         end
         sleep CONFIG['timings']['worker_loop_interval']
       end
+      @log.info('Exiting worker')
     end
 
     # Set up the interprocess communication
@@ -267,6 +269,17 @@ module Hive
       else
         @log.debug "#{file} does not exist"
         results
+      end
+    end
+
+    # Determine whether to keep the worker running
+    # This just checks the presense of the controller process
+    def keep_running?
+      begin
+        Process.getpgid(@controller_pid)
+        true
+      rescue
+        false
       end
     end
 

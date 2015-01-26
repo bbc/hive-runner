@@ -24,14 +24,6 @@ Signal.trap('USR1') do
   client.close
 end
 
-at_exit do
-  # TODO: This is being called for each worker. How can I stop this?
-  workers = Hive::DaemonHelper.workers
-  workers.each do |w|
-    w.stop
-  end
-end
-
 # Initialise
 Hive::DaemonHelper.instantiate_controllers
 # Hive::DaemonHelper.check_workers

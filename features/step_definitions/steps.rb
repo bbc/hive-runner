@@ -1,4 +1,5 @@
 Before do
+  ENV['HIVE_CONFIG'] = create_configuration()
   `bundle exec ./bin/hived stop`
   sleep 1
 end
@@ -74,10 +75,13 @@ def create_configuration(options = {})
     f.puts '  shell:'
     f.puts "    max_workers: #{options[:n_workers] || 5}"
     f.puts '    name_stub: SHELL_WORKER'
+    f.puts '    queues:'
+    f.puts '      - test_queue'
     f.puts 'logging:'
     f.puts '  directory: features/tmp'
     f.puts '  pids: features/tmp'
     f.puts '  main_filename: hive.log'
+    f.puts '  home_directory: features/tmp'
     f.puts 'timings:'
     f.puts '  worker_loop_interval: 5'
     f.puts 'network:'
