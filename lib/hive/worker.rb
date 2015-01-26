@@ -93,11 +93,13 @@ module Hive
       else
         @log.info('Job starting')
         job.start( 123 ) # TODO: Device ID
-        if execute_job(job)
-          @log.info('Job ending')
-          job.end
-        else
-          @log.info('Job terminating with error')
+
+        begin
+          # TODO: Use job.success and job.fail, when implemented
+          execute_job(job) ? job.end : job.end
+        rescue => e
+          @log.info("Error running test: #{e.message}\n : #{e.backtrace.join("\n :")}")
+          # TODO: job.error(e.message), when implemented
           job.error
         end
         cleanup
@@ -135,32 +137,33 @@ module Hive
 
     # Execute a job
     def execute_job(job)
-      begin
-        @log.info "Setting job paths"
-        job_paths = Hive::JobPaths.new(job.job_id, CONFIG['logging']['home'], @log)
+      @log.info "Setting job paths"
+      job_paths = Hive::JobPaths.new(job.job_id, CONFIG['logging']['home'], @log)
 
-        @log.info "Initialising execution script"
-        script = Hive::ExecutionScript.new(job_paths, @log)
+      @log.info "Initialising execution script"
+      script = Hive::ExecutionScript.new(job_paths, @log)
 
-        @log.info "Appending test script to execution script"
-        script.append_bash_cmd job.command
-
-        @log.info "Running execution script"
-        script.run
-
-        # Upload results
-        job_paths.finalise_results_directory
-        upload_files(job, job_paths.results_path, job_paths.logs_path)
-        results = gather_results(job_paths)
-        @log.info("The results are ...")
-        @log.info(results.inspect)
-        job.update_results(results)
-
-        true
-      rescue Exception => e
-        @log.error("Error running test: #{e.message}\n  : #{e.backtrace.join("\n  : ")}")
-        false
+      @log.info "Setting the execution variables in the environment"
+      script.set_env 'HIVE_RESULTS', job_paths.results_path
+      job.execution_variables.to_h.each_pair do |var, val|
+        script.set_env "HIVE_#{var.to_s}".upcase, val if ! val.kind_of?(Array)
       end
+
+      @log.info "Appending test script to execution script"
+      script.append_bash_cmd job.command
+
+      @log.info "Running execution script"
+      script.run
+
+      # Upload results
+      job_paths.finalise_results_directory
+      upload_files(job, job_paths.results_path, job_paths.logs_path)
+      results = gather_results(job_paths)
+      @log.info("The results are ...")
+      @log.info(results.inspect)
+      job.update_results(results)
+
+      true
     end
 
     # Cycle the queue list and return the queue that has been move to the end
