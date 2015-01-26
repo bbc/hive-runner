@@ -47,6 +47,13 @@ module Hive
           # Do something. Eg, upload log files.
         end
       end
+
+      # Kill off anything that is still running
+      begin
+        Process.kill(-9, pgid)
+      rescue => e
+        @log.warn e
+      end
     end
   end
 end
