@@ -19,19 +19,10 @@ module Hive
     # In the master thread, the worker instance is used to control the forked
     # process.
     def initialize(options)
-      @parent_reader, @child_writer = IO.pipe
-      @child_reader, @parent_writer = IO.pipe
-
       @controller_pid = Process.pid
       @pid = Process.fork do
-        @parent_reader.close
-        @parent_writer.close
-
         worker_process(options)
       end
-
-      @child_reader.close
-      @child_writer.close
 
       LOG.info("Worker started with pid #{@pid}")
     end
@@ -59,31 +50,7 @@ module Hive
       end
     end
 
-    # Get the list of queues that the worker knows about
-    def queues
-      send_message "queues"
-    end
-
-    def add_queue(queue)
-      send_message "add_queue #{queue}"
-    end
-
-    def remove_queue(queue)
-      send_message "remove_queue #{queue}"
-    end
-
     private
-
-    # Send a message to the forked process and receive the response
-    def send_message(message)
-      Process.kill 'USR1', @pid
-      @parent_writer.puts message
-      response = []
-      while (message = @parent_reader.gets) && ! /^\.\.\./.match(message)
-        response << message.chomp
-      end
-      response
-    end
 
     # Methods below this line are used by the forked process
 
@@ -98,8 +65,6 @@ module Hive
       )
 
       @queues = options['queues'].class == Array ? options['queues'] : []
-
-      setup_ipc
 
       Hive::Messages.configure do |config|
         config.base_path = CONFIG['network']['scheduler']
@@ -118,27 +83,6 @@ module Hive
         sleep CONFIG['timings']['worker_loop_interval']
       end
       @log.info('Exiting worker')
-    end
-
-    # Set up the interprocess communication
-    def setup_ipc
-      Signal.trap('USR1') do
-        command, arguments = @child_reader.gets.chomp.split(' ', 2)
-        case command
-        when 'queues'
-          @queues.each do |q|
-            @child_writer.puts q
-          end
-        when 'add_queue'
-          @queues << arguments
-          @queues.uniq!
-        when 'remove_queue'
-          @queues.delete(arguments)
-        else
-          @child_writer.puts 'Unknown command'
-        end
-        @child_writer.puts '...'
-      end
     end
 
     # Check the queues for work
