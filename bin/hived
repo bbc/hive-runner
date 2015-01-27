@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+require 'pathname'
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path(
+  '../../Gemfile',
+  Pathname.new(__FILE__).realpath
+)
+
+require 'rubygems'
+require 'bundler/setup'
+require 'socket'
+require 'daemons'
+
+# require 'hive' here to cause a failure if the configuration is not correct
+$LOAD_PATH << File.expand_path('../../lib', __FILE__)
+require 'hive'
+
+def test(app)
+  app.default_show_status
+
+  Process.kill('USR1', app.pid.pid)
+  puts
+  server = TCPSocket.open('localhost', 9999)
+  while line = server.gets
+    puts line.chop
+  end
+  server.close
+end
+
+Daemons.run(File.expand_path('..', __FILE__) + '/start_hive', show_status_callback: :test, log_output: '/tmp/hive.log')

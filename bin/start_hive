@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH << File.expand_path('../../lib', __FILE__)
+$PROGRAM_NAME = 'HIVE'
+
+require 'socket'
+require 'hive/daemon_helper'
+
+# Communication with daemon launcher
+comm = TCPServer.open(9999)
+Signal.trap('USR1') do
+  client = comm.accept
+  Hive::DaemonHelper.controllers.each do |c|
+    client.puts "Using #{c.class.name.split('::').last.downcase} controller"
+  end
+  workers = Hive::DaemonHelper.workers
+  client.puts "Number of workers: #{workers.length}"
+  if workers.length > 0
+    client.puts 'Workers:'
+    workers.each do |w|
+      client.puts " - #{w.type} worker [pid #{w.pid}]"
+    end
+  end
+  client.close
+end
+
+# Initialise
+Hive::DaemonHelper.instantiate_controllers
+# Hive::DaemonHelper.check_workers
+
+# Execution loop
+Hive::LOG.info('Starting execution loop')
+Hive::DaemonHelper.run

@@ -1,0 +1,8 @@
+controllers:
+  shell:
+    max_workers: 1
+    name_stub: SHELL_WORKER
+logging:
+  directory: features/tmp
+  pids: features/tmp
+  main_filename: hive.log
