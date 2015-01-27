@@ -1,4 +1,6 @@
 ---
+daemon_name: HIVE
+
 controllers:
   shell:
     max_workers: 5

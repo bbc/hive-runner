@@ -13,6 +13,13 @@ GIT
       virtus
 
 GIT
+  remote: git@github.com:bbc-test/rvc.git
+  revision: 4de7ef9a25fa90a7a63c8bb56b436587a03e8fd5
+  tag: v0.0.7
+  specs:
+    hive-rvc (0.0.6)
+
+GIT
   remote: https://github.com/bbc-test/roar.git
   revision: 3b1d7ccb515ebb5ee80be307c28f262ae766dc73
   branch: 0.2-x.bbc
@@ -71,7 +78,7 @@ GEM
     multi_json (1.10.1)
     multi_test (0.1.1)
     multipart-post (2.0.0)
-    nokogiri (1.6.5)
+    nokogiri (1.6.6.2)
       mini_portile (~> 0.6.0)
     parser (2.2.0.2)
       ast (>= 1.1, < 3.0)
@@ -123,6 +130,7 @@ DEPENDENCIES
   cucumber
   daemons!
   hive-messages!
+  hive-rvc!
   roar!
   rspec
   rubocop
