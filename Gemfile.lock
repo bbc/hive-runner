@@ -1,7 +1,6 @@
 GIT
   remote: git@github.com:bbc-test/code_cache.git
-  revision: 11984b679acbc2f7a028a40d885d43e834f0940f
-  branch: svn-and-git
+  revision: 542722e58a41a7b45997debbd3f3b3d809bb7545
   specs:
     code_cache (0.1.2)
 
