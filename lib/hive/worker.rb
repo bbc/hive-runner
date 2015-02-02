@@ -5,7 +5,7 @@ require 'hive/job_paths'
 require 'hive/execution_script'
 
 require 'hive/messages'
-require 'hive/rvc'
+require 'code_cache'
 
 module Hive
   # The generic worker class
@@ -192,24 +192,7 @@ module Hive
 
     # Get a checkout of the repository
     def checkout_code(repository, checkout_directory)
-      repo = Hive::RVC.repo(url: repository)
-      cache_strategy = nil
-      cache_directory = nil
-      if CONFIG['rvc']
-        if CONFIG['rvc']['cache_strategy']
-          cache_strategy = CONFIG['rvc']['cache_strategy'].to_sym
-        end
-        cache_directory = CONFIG['rvc']['cache_directory']
-      end
-      @log.debug("Repository: #{repository}")
-      @log.debug("Cache strategy: #{cache_strategy}")
-      @log.debug("Cache directory: #{cache_directory}")
-      repo.checkout(
-                      :head,
-                      destination_dir: checkout_directory,
-                      cache: cache_strategy,
-                      cache_dir: cache_directory
-                   )
+      CodeCache.repo(repository).checkout(:head, checkout_directory) or raise "Unable to checkout repository #{repository}"
     end
 
     # Gather the results from the tests

@@ -1,4 +1,11 @@
 GIT
+  remote: git@github.com:bbc-test/code_cache.git
+  revision: 11984b679acbc2f7a028a40d885d43e834f0940f
+  branch: svn-and-git
+  specs:
+    code_cache (0.1.2)
+
+GIT
   remote: git@github.com:bbc-test/hive-messages.git
   revision: e6752de0c875b6284a4e2f6667e54143e5085528
   tag: 0.2.8
@@ -11,13 +18,6 @@ GIT
       roar (= 0.2.1.bbc)
       version
       virtus
-
-GIT
-  remote: git@github.com:bbc-test/rvc.git
-  revision: 4de7ef9a25fa90a7a63c8bb56b436587a03e8fd5
-  tag: v0.0.7
-  specs:
-    hive-rvc (0.0.6)
 
 GIT
   remote: https://github.com/bbc-test/roar.git
@@ -127,10 +127,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  code_cache!
   cucumber
   daemons!
   hive-messages!
-  hive-rvc!
   roar!
   rspec
   rubocop
