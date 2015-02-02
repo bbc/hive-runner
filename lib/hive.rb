@@ -6,6 +6,7 @@ module Hive
   config_file = ENV['HIVE_CONFIG'] || File.expand_path('../../config/hive-runner.yml', __FILE__)
 
   CONFIG = YAML.load_file(config_file)
+  DAEMON_NAME = CONFIG['daemon_name'] || 'HIVE'
 
   if CONFIG['logging']
     LOG = Hive::Log.new
