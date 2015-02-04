@@ -5,6 +5,7 @@ require 'hive/job_paths'
 require 'hive/execution_script'
 
 require 'hive/messages'
+require 'code_cache'
 
 module Hive
   # The generic worker class
@@ -132,6 +133,11 @@ module Hive
       @log.info "Setting job paths"
       job_paths = Hive::JobPaths.new(job.job_id, Chamber.env.logging.env.home, @log)
 
+      if ! job.repository.to_s.empty?
+        @log.info "Checking out the repository"
+        checkout_code(job.repository, job_paths.testbed_path)
+      end
+
       @log.info "Initialising execution script"
       script = Hive::ExecutionScript.new(job_paths, @log)
 
@@ -152,9 +158,11 @@ module Hive
       job_paths.finalise_results_directory
       upload_files(job, job_paths.results_path, job_paths.logs_path)
       results = gather_results(job_paths)
-      @log.info("The results are ...")
-      @log.info(results.inspect)
-      job.update_results(results)
+      if results
+        @log.info("The results are ...")
+        @log.info(results.inspect)
+        job.update_results(results)
+      end
 
       state
     end
@@ -182,6 +190,11 @@ module Hive
       end
     end
 
+    # Get a checkout of the repository
+    def checkout_code(repository, checkout_directory)
+      CodeCache.repo(repository).checkout(:head, checkout_directory) or raise "Unable to checkout repository #{repository}"
+    end
+
     # Gather the results from the tests
     # This is the simplest case where the results are written to a file
     # Child classes will probably replace this function
@@ -201,7 +214,7 @@ module Hive
         results.merge(YAML.load_file(file).symbolize_keys)
       else
         @log.debug "#{file} does not exist"
-        results
+        nil
       end
     end
 

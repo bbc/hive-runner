@@ -1,4 +1,10 @@
 GIT
+  remote: git@github.com:bbc-test/code_cache.git
+  revision: 542722e58a41a7b45997debbd3f3b3d809bb7545
+  specs:
+    code_cache (0.1.2)
+
+GIT
   remote: git@github.com:bbc-test/hive-messages.git
   revision: e6752de0c875b6284a4e2f6667e54143e5085528
   tag: 0.2.8
@@ -127,6 +133,7 @@ PLATFORMS
 
 DEPENDENCIES
   chamber
+  code_cache!
   cucumber
   daemons!
   hive-messages!
