@@ -26,21 +26,21 @@ use a different file set the environment variable `HIVE_CONFIG`:
 
 Example config file:
 
-    ---
-    controllers:
-      shell:
-        max_workers: 5
-        name_stub: SHELL_WORKER
-        queues:
-          - bash
-
-    logging:
-      directory: logs
-      pids: pids
-      main_filename: hive.log
-
-    timings:
-      worker_loop_interval: 5
+    test:
+      controllers:
+        shell:
+          max_workers: 5
+          name_stub: SHELL_WORKER
+          queues:
+            - bash
+    
+      logging:
+        directory: logs
+        pids: pids
+        main_filename: hive.log
+    
+      timings:
+        worker_loop_interval: 5
 
 ### Controllers
 

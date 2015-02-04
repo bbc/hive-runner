@@ -1,18 +1,3 @@
-#development:
-#  setting:                development_value
-#  # The following will become 'secure_setting'
-#  _secure_secure_setting: secure_development_value
-#
-#test:
-#  setting:                test_value
-#  # The following will become 'secure_setting'
-#  _secure_secure_setting: secure_test_value
-#
-#production:
-#  setting:                production_value
-#  # The following will become 'secure_setting'
-#  _secure_secure_setting: secure_production_value
-#---
 test:
   controllers:
     shell:
