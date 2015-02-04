@@ -10,7 +10,7 @@ module Hive
     }
   )
 
-  DAEMON_NAME = Chamber.env.daemon_name || 'HIVE'
+  DAEMON_NAME = Chamber.env.daemon_name? ? Chamber.env.daemon_name : 'HIVE'
 
   if Chamber.env.logging?
     LOG = Hive::Log.new
