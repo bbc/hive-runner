@@ -17,7 +17,7 @@ module Hive
       workers
     end
 
-    def self.instantiate_controllers(controller_details = Hive::CONFIG['controllers'])
+    def self.instantiate_controllers(controller_details = Chamber[:controllers])
       controller_details.each do |type, opts|
         LOG.info("Adding controller for '#{type}'")
         require "hive/controller/#{type}"
@@ -32,7 +32,7 @@ module Hive
       loop do
         @controllers.each do |c|
           c.check_workers
-          sleep Hive::CONFIG['timings']['controller_loop_interval']
+          sleep Chamber[:timings][:controller_loop_interval]
         end
       end
     end

@@ -1,0 +1,37 @@
+#development:
+#  setting:                development_value
+#  # The following will become 'secure_setting'
+#  _secure_secure_setting: secure_development_value
+#
+#test:
+#  setting:                test_value
+#  # The following will become 'secure_setting'
+#  _secure_secure_setting: secure_test_value
+#
+#production:
+#  setting:                production_value
+#  # The following will become 'secure_setting'
+#  _secure_secure_setting: secure_production_value
+#---
+test:
+  controllers:
+    shell:
+      max_workers: 5
+      name_stub: SHELL_WORKER
+      queues:
+        - bash
+  
+  logging:
+    directory: /log/directory
+    pids: /pid/directory
+    main_filename: hive.log
+    home_directory: /path/to/test/home
+  
+  timings:
+    worker_loop_interval: 5
+    controller_loop_interval: 5
+  
+  network:
+    scheduler: https://example.com/scheduler
+    cert: /path/to/certificate.pem
+    cafile: /path/to/certificate-authorities.pem

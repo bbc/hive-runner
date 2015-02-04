@@ -1,6 +1,0 @@
----
-controllers:
-  - controller1:
-      arg: value
-
-logging:
