@@ -67,8 +67,8 @@ module Hive
       @queues = options['queues'].class == Array ? options['queues'] : []
 
       Hive::Messages.configure do |config|
-        config.base_path = Chamber[:network][:scheduler]
-        config.pem_file = Chamber[:network][:cert]
+        config.base_path = Chamber.env.network.scheduler
+        config.pem_file = Chamber.env.network.cert
         config.ssl_verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
 
@@ -80,7 +80,7 @@ module Hive
         rescue StandardError => e
           @log.warn("Worker loop aborted: #{e.message}\n  : #{e.backtrace.join("\n  : ")}")
         end
-        sleep Chamber[:timings][:worker_loop_interval]
+        sleep Chamber.env.timings.worker_loop_interval
       end
       @log.info('Exiting worker')
     end
@@ -130,7 +130,7 @@ module Hive
     # Execute a job
     def execute_job(job)
       @log.info "Setting job paths"
-      job_paths = Hive::JobPaths.new(job.job_id, Chamber[:logging][:home], @log)
+      job_paths = Hive::JobPaths.new(job.job_id, Chamber.env.logging.env.home, @log)
 
       @log.info "Initialising execution script"
       script = Hive::ExecutionScript.new(job_paths, @log)
