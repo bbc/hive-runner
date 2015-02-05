@@ -1,0 +1,44 @@
+no_log_directory:
+  controllers:
+    - controller1:
+        arg: value
+
+  logging:
+    arg: value
+
+
+no_logging_section:
+  controllers:
+    - controller1:
+        arg: value
+
+default: &shared
+  controllers:
+    controller1:
+      arg: value
+  
+  logging:
+    directory: 'spec/tmp'
+  
+  timings:
+    worker_loop_interval: 5
+  
+  network:
+    scheduler: http://example.co.uk
+    cert: cert.pem
+
+test:
+  <<: *shared
+
+test_daemon_helper_instantiate:
+  <<: *shared
+  controllers:
+    test:
+      arg1: value
+      arg2: value2
+
+test_daemon_helper_single_controller:
+  <<: *shared
+  controllers:
+    test:
+      max_workers: 5
