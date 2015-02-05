@@ -131,7 +131,7 @@ module Hive
     # Execute a job
     def execute_job(job)
       @log.info "Setting job paths"
-      job_paths = Hive::JobPaths.new(job.job_id, Chamber.env.logging.env.home, @log)
+      job_paths = Hive::JobPaths.new(job.job_id, Chamber.env.logging.home, @log)
 
       if ! job.repository.to_s.empty?
         @log.info "Checking out the repository"

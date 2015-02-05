@@ -12,7 +12,7 @@ test:
     directory: /log/directory
     pids: /pid/directory
     main_filename: hive.log
-    home_directory: /path/to/test/home
+    home: /path/to/test/home
   
   timings:
     worker_loop_interval: 5
