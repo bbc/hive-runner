@@ -68,26 +68,27 @@ end
 
 # TODO: Do this a bit better, and perhaps put in a 'helpers' file
 def create_configuration(options = {})
-  name = File.expand_path('../../tmp/config.yml', __FILE__)
+  dir = File.expand_path('../../tmp', __FILE__)
+  name = File.join(dir, 'settings.yml')
   File.open(name, 'w') do |f|
-    f.puts '---'
-    f.puts 'controllers:'
-    f.puts '  shell:'
-    f.puts "    max_workers: #{options[:n_workers] || 5}"
-    f.puts '    name_stub: SHELL_WORKER'
-    f.puts '    queues:'
-    f.puts '      - test_queue'
-    f.puts 'logging:'
-    f.puts '  directory: features/tmp'
-    f.puts '  pids: features/tmp'
-    f.puts '  main_filename: hive.log'
-    f.puts '  home_directory: features/tmp'
-    f.puts 'timings:'
-    f.puts '  worker_loop_interval: 5'
-    f.puts '  controller_loop_interval: 5'
-    f.puts 'network:'
-    f.puts '  scheduler: https://example.co.uk'
-    f.puts '  cert: cert.pem'
+    f.puts 'test:'
+    f.puts '  controllers:'
+    f.puts '    shell:'
+    f.puts "      max_workers: #{options[:n_workers] || 5}"
+    f.puts '      name_stub: SHELL_WORKER'
+    f.puts '      queues:'
+    f.puts '        - test_queue'
+    f.puts '  logging:'
+    f.puts '    directory: features/tmp'
+    f.puts '    pids: features/tmp'
+    f.puts '    main_filename: hive.log'
+    f.puts '    home_directory: features/tmp'
+    f.puts '  timings:'
+    f.puts '    worker_loop_interval: 5'
+    f.puts '    controller_loop_interval: 5'
+    f.puts '  network:'
+    f.puts '    scheduler: https://example.co.uk'
+    f.puts '    cert: cert.pem'
   end
-  name
+  dir
 end
