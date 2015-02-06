@@ -16,7 +16,7 @@ module Hive
     LOG = Hive::Log.new
     if Chamber.env.logging.directory?
       LOG_DIRECTORY = Chamber.env.logging.directory
-      if Chamber.env.logging.main_filename
+      if Chamber.env.logging.main_filename?
         LOG.add_logger("#{LOG_DIRECTORY}/#{Chamber.env.logging.main_filename}", Chamber.env.logging.main_level || 'INFO')
       end
       if Chamber.env.logging.console_level?

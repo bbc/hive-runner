@@ -20,7 +20,7 @@ def test(app)
 
   Process.kill('USR1', app.pid.pid)
   puts
-  server = TCPSocket.open('localhost', 9999)
+  server = TCPSocket.open('localhost', ENV.fetch('HIVE_COMM_PORT', 9999).to_i)
   while line = server.gets
     puts line.chop
   end
