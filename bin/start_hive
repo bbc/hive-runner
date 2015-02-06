@@ -7,7 +7,7 @@ require 'socket'
 require 'hive/daemon_helper'
 
 # Communication with daemon launcher
-comm = TCPServer.open(9999)
+comm = TCPServer.open(ENV.fetch('HIVE_COMM_PORT', 9999).to_i)
 Signal.trap('USR1') do
   client = comm.accept
   Hive::DaemonHelper.controllers.each do |c|
@@ -26,7 +26,6 @@ end
 
 # Initialise
 Hive::DaemonHelper.instantiate_controllers
-# Hive::DaemonHelper.check_workers
 
 # Execution loop
 Hive::LOG.info('Starting execution loop')

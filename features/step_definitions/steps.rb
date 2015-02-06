@@ -1,5 +1,6 @@
 Before do
   ENV['HIVE_CONFIG'] = create_configuration()
+  ENV['HIVE_COMM_PORT'] = '9990'
   `bundle exec ./bin/hived stop`
   sleep 1
 end
