@@ -1,5 +1,6 @@
 Before do
   ENV['HIVE_CONFIG'] = create_configuration()
+  ENV['HIVE_ENVIRONMENT'] = 'test'
   ENV['HIVE_COMM_PORT'] = '9990'
   `bundle exec ./bin/hived stop`
   sleep 1
@@ -28,7 +29,7 @@ end
 Then(/^the runner is running$/) do
   # TODO: Does this need two checks?
   expect(`bundle exec ./bin/hived status`).to match(/: running \[pid/)
-  expect(`ps aux | grep HIVE | grep -v grep | wc -l`.to_i).to be 1
+  expect(`ps aux | grep TEST_HIVE | grep -v grep | wc -l`.to_i).to be 1
 end
 
 Then(/^the runner is not running$/) do
@@ -36,7 +37,7 @@ Then(/^the runner is not running$/) do
   # TODO: Capture the stderr
   # expect(`bundle exec ./bin/hived status`).to match(/: no instances running/)
   expect(`bundle exec ./bin/hived status`).to match(/^$/)
-  expect(`ps aux | grep HIVE | grep -v grep | wc -l`.to_i).to be 0
+  expect(`ps aux | grep TEST_HIVE | grep -v grep | wc -l`.to_i).to be 0
 end
 
 Then(/^the runner loads the shell controller$/) do
@@ -73,6 +74,7 @@ def create_configuration(options = {})
   name = File.join(dir, 'settings.yml')
   File.open(name, 'w') do |f|
     f.puts 'test:'
+    f.puts '  daemon_name: TEST_HIVE'
     f.puts '  controllers:'
     f.puts '    shell:'
     f.puts "      max_workers: #{options[:n_workers] || 5}"
