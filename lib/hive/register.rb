@@ -1,8 +1,8 @@
 require 'hive'
 
 module Hive
-  # Helper functions for the Hive Daemon
-  module DaemonHelper
+  # Central register of devices and workers in the hive
+  module Register
     @controllers = []
 
     def self.controllers

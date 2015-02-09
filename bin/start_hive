@@ -11,10 +11,10 @@ $PROGRAM_NAME = Hive::DAEMON_NAME
 comm = TCPServer.open(ENV.fetch('HIVE_COMM_PORT', 9999).to_i)
 Signal.trap('USR1') do
   client = comm.accept
-  Hive::DaemonHelper.controllers.each do |c|
+  Hive::Register.controllers.each do |c|
     client.puts "Using #{c.class.name.split('::').last.downcase} controller"
   end
-  workers = Hive::DaemonHelper.workers
+  workers = Hive::Register.workers
   client.puts "Number of workers: #{workers.length}"
   if workers.length > 0
     client.puts 'Workers:'
@@ -26,8 +26,8 @@ Signal.trap('USR1') do
 end
 
 # Initialise
-Hive::DaemonHelper.instantiate_controllers
+Hive::Register.instantiate_controllers
 
 # Execution loop
 Hive::LOG.info('Starting execution loop')
-Hive::DaemonHelper.run
+Hive::Register.run

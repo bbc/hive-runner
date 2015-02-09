@@ -36,3 +36,6 @@ build/
 # Private and protected key files for Chamber
 .chamber.pem
 .chamber.pem.enc
+
+# Daemon output files
+bin/*.output
