@@ -4,7 +4,7 @@ module Hive
   class Worker
     # The Shell worker
     class Shell < Worker
-      def initialize(options)
+      def initialize(parent_pid, options)
         @type = 'shell'
         super
       end

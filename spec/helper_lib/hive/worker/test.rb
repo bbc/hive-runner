@@ -4,11 +4,8 @@ module Hive
   class Worker
     # Dummy test worker
     class Test < Worker
-      def initialize(config)
+      def initialize(parent_pid, config)
         super
-      end
-
-      def poll_queue
       end
     end
   end

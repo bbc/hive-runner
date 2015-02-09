@@ -13,50 +13,9 @@ module Hive
     class InvalidJobReservationError < StandardError
     end
 
-    attr_reader :type
-    attr_reader :pid
-
-    # A worker process is forked on creation.
-    # In the master thread, the worker instance is used to control the forked
-    # process.
-    def initialize(options)
-      @controller_pid = Process.pid
-      @pid = Process.fork do
-        worker_process(options)
-      end
-
-      LOG.info("Worker started with pid #{@pid}")
-    end
-
-    # Terminate the worker process
-    def stop
-      # TODO: Which of these is preferable to avoid leaving a zombie process?
-
-      # Detach then kill
-      Process.detach @pid
-      Process.kill 'TERM', @pid
-
-      # Kill then clean up
-      # Process.kill 'TERM', @pid
-      # Process.wait @pid
-    end
-
-    # Test the state of the worker process
-    def running?
-      begin
-        Process.kill 0, @pid
-        true
-      rescue Errno::ESRCH
-        false
-      end
-    end
-
-    private
-
-    # Methods below this line are used by the forked process
-
     # The main worker process loop
-    def worker_process(options)
+    def initialize(parent_pid, options)
+      @parent_pid = parent_pid
       pid = Process.pid
       $PROGRAM_NAME = "#{options['name_stub'] || 'WORKER'}.#{pid}"
       @log = Hive::Log.new
@@ -219,10 +178,10 @@ module Hive
     end
 
     # Determine whether to keep the worker running
-    # This just checks the presense of the controller process
+    # This just checks the presense of the parent process
     def keep_running?
       begin
-        Process.getpgid(@controller_pid)
+        Process.getpgid(@parent_pid)
         true
       rescue
         false

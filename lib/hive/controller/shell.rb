@@ -5,10 +5,6 @@ module Hive
   class Controller
     # The Shell controller
     class Shell < Controller
-      def initialize(config)
-        @type = 'shell'
-        super
-      end
     end
   end
 end

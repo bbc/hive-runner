@@ -7,7 +7,7 @@ describe Hive::Controller do
     it 'starts a stopped worker' do
       shell = Hive::Controller::Test.new('max_workers' => 1)
       shell.check_workers
-      expect(shell.instance_variable_get(:@workers)[0]).to be_a Hive::Worker::Test
+      expect(shell.instance_variable_get(:@workers)[0]).to be_a Hive::Device::Test
     end
 
     it 'starts multiple workers' do
