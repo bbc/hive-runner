@@ -4,11 +4,11 @@ module Hive
   # The generic device class
   class Device
     attr_reader :type
-    attr_reader :pid
+    attr_reader :worker_pid
 
     # Initialise the device
     def initialize(options)
-      @pid = nil
+      @worker_pid = nil
       @options = options
       @worker_class = self.class.to_s.sub('Device', 'Worker')
       require @worker_class.downcase.gsub(/::/, '/')
@@ -18,24 +18,24 @@ module Hive
     # Start the worker process
     def start
       parent_pid = Process.pid
-      @pid = Process.fork do
+      @worker_pid = Process.fork do
         worker = Object.const_get(@worker_class).new(parent_pid, @options)
       end
-      Process.detach @pid
+      Process.detach @worker_pid
 
-      Hive.logger.info("Worker started with pid #{@pid}")
+      Hive.logger.info("Worker started with pid #{@worker_pid}")
     end
 
     # Terminate the worker process
     def stop
-      Process.kill 'TERM', @pid
+      Process.kill 'TERM', @worker_pid
     end
 
     # Test the state of the worker process
     def running?
-      if @pid
+      if @worker_pid
         begin
-          Process.kill 0, @pid
+          Process.kill 0, @worker_pid
           true
         rescue Errno::ESRCH
           false
