@@ -21,7 +21,7 @@ Signal.trap('USR1') do
   if devices.length > 0
     client.puts 'Devices:'
     devices.each do |d|
-      client.puts " - #{d.identity}"
+      client.puts " - #{d.identity} [worker pid #{d.worker_pid}]"
     end
   end
   client.close

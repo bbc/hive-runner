@@ -39,8 +39,4 @@ module Hive
     end
     @logger
   end
-
-  def self.logger=(logger)
-    @logger = logger
-  end
 end
