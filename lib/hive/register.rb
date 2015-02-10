@@ -3,6 +3,7 @@ require 'hive'
 module Hive
   # Central register of devices and workers in the hive
   class Register
+    attr_reader :controllers
     attr_reader :devices
 
     def initialize
@@ -11,13 +12,13 @@ module Hive
       @max_devices = 5 # TODO Add to configuration file
     end
 
-    def controllers
-      @controllers
-    end
+    #def controllers
+    #  @controllers
+    #end
 
     #def devices
-    #  Hive.logger.info("XXX Devices: #{@@devices.inspect}")
-    #  @@devices
+    #  #Hive.logger.info("XXX Devices: #{@@devices.inspect}")
+    #  @devices
     #end
 
     def instantiate_controllers(controller_details = Chamber.env.controllers)
@@ -33,54 +34,40 @@ module Hive
 
     def run
       loop do
-#        new_device_list = []
-#        @controllers.each do |c|
-#          Hive.logger.info("Checking controller #{c.class}")
-#          c.detect.each do |device|
-#            Hive.logger.info("Found #{device.inspect}")
-#            i = @@devices.find_index(device)
-#            new_device_list << (i ? @@devices.delete_at(i) : device)
-#          end
-#          sleep Chamber.env.timings.controller_loop_interval
-#        end
-#
-#        # Any devices left in the @devices list were not found to be connected
-#        @@devices.each { |d| d.stop }
-#        @@devices = new_device_list
-#
-#        Hive.logger.info("Devices: #{@@devices.inspect}")
-#
-#        @@devices.each do |d|
-#          d.start if ! d.running?
-#        end
         check_controllers
+        sleep Chamber.env.timings.controller_loop_interval
       end
     end
 
     def check_controllers
-      Hive.logger.info("Pid: #{Process.pid}")
-      Hive.logger.info("Devices before: #{@devices.inspect}")
+      Hive.logger.debug("Devices before update: #{@devices.inspect}")
       new_device_list = []
       @controllers.each do |c|
         Hive.logger.info("Checking controller #{c.class}")
         c.detect.each do |device|
           Hive.logger.info("Found #{device.inspect}")
           i = @devices.find_index(device)
-          new_device_list << (i ? @devices.delete_at(i) : device)
+          new_device_list << (i ? @devices[i] : device)
         end
         Hive.logger.info("new_device_list: #{new_device_list.inspect}")
-        sleep Chamber.env.timings.controller_loop_interval
       end
 
-      # Any devices left in the @devices list were not found to be connected
-      @devices.each { |d| d.stop }
-      @devices = new_device_list
+      # Remove any devices that have not been rediscovered
+      (@devices - new_device_list).each do |d|
+        d.stop
+        @devices.delete(d)
+      end
 
-      Hive.logger.info("Devices after: #{@devices.inspect}")
+      # Add any new devices
+      (new_device_list - @devices).each do |d|
+        @devices << d
+      end
 
+      # Check that all known devices have running workers
       @devices.each do |d|
         d.start if ! d.running?
       end
+      Hive.logger.debug("Devices after update: #{@devices.inspect}")
     end
   end
 end

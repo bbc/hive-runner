@@ -8,28 +8,19 @@ require 'hive/register'
 $PROGRAM_NAME = Hive::DAEMON_NAME
 
 # Communication with daemon launcher
-p ENV
-p ENV['HIVE_COMM_PORT']
 comm_port = ENV.fetch('HIVE_COMM_PORT', 9999).to_i
-p "Comm port: #{comm_port}"
 comm = TCPServer.open(comm_port)
 register = Hive::Register.new
 Signal.trap('USR1') do
   client = comm.accept
-  #Hive::Register.controllers.each do |c|
   register.controllers.each do |c|
     client.puts "Using #{c.class.name.split('::').last.downcase} controller"
   end
-  #devices = Hive::Register.devices
   devices = register.devices
   client.puts "Number of devices: #{devices.length}"
-  client.puts "Register: #{register.inspect}"
-  client.puts "Devices: #{devices.inspect}"
-  client.puts "PID: #{Process.pid}"
   if devices.length > 0
     client.puts 'Devices:'
-    devices.each do |w|
-      #client.puts " - #{w.type} worker [pid #{w.pid}]"
+    devices.each do |d|
       client.puts " - #{d.identity}"
     end
   end
@@ -37,11 +28,9 @@ Signal.trap('USR1') do
 end
 
 # Initialise
-#Hive::Register.instantiate_controllers
 register.instantiate_controllers
 
 # Execution loop
 Hive::logger.info('*** HIVE STARTING ***')
 Hive::logger.info('Starting execution loop')
-#Hive::Register.run
 register.run
