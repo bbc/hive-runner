@@ -12,15 +12,6 @@ module Hive
       @max_devices = 5 # TODO Add to configuration file
     end
 
-    #def controllers
-    #  @controllers
-    #end
-
-    #def devices
-    #  #Hive.logger.info("XXX Devices: #{@@devices.inspect}")
-    #  @devices
-    #end
-
     def instantiate_controllers(controller_details = Chamber.env.controllers)
       controller_details.each do |type, opts|
         Hive.logger.info("Adding controller for '#{type}'")
