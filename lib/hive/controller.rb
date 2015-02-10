@@ -7,12 +7,11 @@ module Hive
       @config = config
       @device_class = self.class.to_s.sub('Controller', 'Device')
       require @device_class.downcase.gsub(/::/, '/')
+      Hive.logger.info("Controller '#{self.class}' created")
     end
 
-    def find_devices(number)
-      (1..number).collect do
-        Object.const_get(@device_class).new(@config)
-      end
+    def detect
+      raise NotImplementedError, "'detect' method not defined for '#{self.class}'"
     end
   end
 end

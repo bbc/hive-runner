@@ -12,6 +12,7 @@ module Hive
       @options = options
       @worker_class = self.class.to_s.sub('Device', 'Worker')
       require @worker_class.downcase.gsub(/::/, '/')
+      raise ArgumentError "Identity not set for #{self.class} device" if ! @identity
     end
 
     # Start the worker process
@@ -22,7 +23,7 @@ module Hive
       end
       Process.detach @pid
 
-      LOG.info("Worker started with pid #{@pid}")
+      Hive.logger.info("Worker started with pid #{@pid}")
     end
 
     # Terminate the worker process
@@ -32,12 +33,26 @@ module Hive
 
     # Test the state of the worker process
     def running?
-      begin
-        Process.kill 0, @pid
-        true
-      rescue Errno::ESRCH
+      if @pid
+        begin
+          Process.kill 0, @pid
+          true
+        rescue Errno::ESRCH
+          false
+        end
+      else
         false
       end
+    end
+
+    # Test equality with another device
+    def ==(other)
+      self.identity == other.identity
+    end
+
+    # Return the unique identity of the device
+    def identity
+      "#{self.class}-#{@identity}"
     end
   end
 end

@@ -1,6 +1,7 @@
 require 'spec_helper'
 
-require 'hive/device/test'
+# Using Hive::Device::Shell as a Hive::Device cannot be started on its own
+require 'hive/device/shell'
 
 describe Hive::Device do
   after(:each) do
@@ -11,7 +12,7 @@ describe Hive::Device do
 
   describe '#start' do
     it 'forks a test worker' do
-      device = Hive::Device::Test.new('name_stub' => 'TEST_WORKER')
+      device = Hive::Device::Shell.new('id' => 1, 'name_stub' => 'TEST_WORKER')
       device.start
       expect(`ps aux | grep TEST_WORKER | grep -v grep | wc -l`.to_i).to be 1
       # Clean up
@@ -21,7 +22,7 @@ describe Hive::Device do
 
   describe '#stop' do
     it 'terminates a test worker' do
-      device = Hive::Device::Test.new('name_stub' => 'TEST_WORKER')
+      device = Hive::Device::Shell.new('id' => 1, 'name_stub' => 'TEST_WORKER')
       device.start
       sleep 1
       device.stop
@@ -32,7 +33,7 @@ describe Hive::Device do
 
   describe '#running?' do
     it 'shows that a worker is running' do
-      device = Hive::Device::Test.new('name_stub' => 'TEST_WORKER')
+      device = Hive::Device::Shell.new('id' => 1, 'name_stub' => 'TEST_WORKER')
       device.start
       expect(device.running?).to be true
       # Clean up
@@ -40,7 +41,7 @@ describe Hive::Device do
     end
 
     it 'shows that a worker is not running' do
-      device = Hive::Device::Test.new('name_stub' => 'TEST_WORKER')
+      device = Hive::Device::Shell.new('id' => 1, 'name_stub' => 'TEST_WORKER')
       device.start
       sleep 1
       device.stop

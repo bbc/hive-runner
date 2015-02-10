@@ -7,18 +7,18 @@ describe Hive::Register do
       ENV['HIVE_ENVIRONMENT'] = 'test_daemon_helper_instantiate'
       load File.expand_path('../../../lib/hive.rb', __FILE__)
       Hive::Register.instantiate_controllers
-      expect(Hive::Register.controllers[0]).to be_a Hive::Controller::Test
+      expect(Hive::Register.controllers[0]).to be_a Hive::Controller::Shell
     end
   end
 
-  describe '#workers' do
-    it 'returns the list of workers from a single controller' do
+  describe '#devices' do
+    it 'returns the list of devices from a single controller' do
       ENV['HIVE_ENVIRONMENT'] = 'test_daemon_helper_single_controller'
       load File.expand_path('../../../lib/hive.rb', __FILE__)
       Hive::Register.instantiate_controllers
-      w = Hive::Register.workers
-      expect(w).to be_an Array
-      expect(w.length).to be 5
+      d = Hive::Register.devices
+      expect(d).to be_an Array
+      expect(d.length).to be 5
     end
   end
 end
