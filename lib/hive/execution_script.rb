@@ -8,6 +8,7 @@ module Hive
       @log = log
       @log.debug "Creating execution script with path=#{@path}"
       @env = {
+        'HIVE_SCHEDULER' => Hive.config.network.scheduler,
         'HIVE_WORKING_DIRECTORY' => job_paths.testbed_path,
         'RESULTS_FILE' => job_paths.results_file
       }
@@ -18,6 +19,11 @@ module Hive
         'RUBYOPT',
         'rvm_'
       ]
+      # Environment variables that should not be made visible in the execution
+      # script uploaded with the results
+      @env_secure = {
+        'HIVE_CERT' => Hive.config.network.cert
+      }
       @script_lines = []
     end
 
@@ -60,7 +66,7 @@ module Hive
       end
       File.chmod(0700, @path)
 
-      pid = Process.spawn "#{@path} > #{@log_path}/stdout.log 2> #{@log_path}/stderr.log", pgroup: true
+      pid = Process.spawn @env_secure, "#{@path} > #{@log_path}/stdout.log 2> #{@log_path}/stderr.log", pgroup: true
       pgid = Process.getpgid(pid)
 
       running = true
