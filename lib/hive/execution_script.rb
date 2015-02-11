@@ -60,7 +60,7 @@ module Hive
       end
       File.chmod(0700, @path)
 
-      pid = Process.spawn "#{@path} > #{@log_path}/log.out 2> #{@log_path}/log.err", pgroup: true
+      pid = Process.spawn "#{@path} > #{@log_path}/stdout.log 2> #{@log_path}/stderr.log", pgroup: true
       pgid = Process.getpgid(pid)
 
       running = true
