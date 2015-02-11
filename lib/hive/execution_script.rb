@@ -2,10 +2,10 @@ require 'timeout'
 
 module Hive
   class ExecutionScript
-    def initialize(job_paths, logger)
+    def initialize(job_paths, log)
       @path = job_paths.executed_script_path
       @log_path = job_paths.logs_path
-      @log = logger
+      @log = log
       @log.debug "Creating execution script with path=#{@path}"
       @env = {
         'HIVE_WORKING_DIRECTORY' => job_paths.testbed_path,

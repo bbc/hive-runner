@@ -82,10 +82,10 @@ def create_configuration(options = {})
     f.puts '      queues:'
     f.puts '        - test_queue'
     f.puts '  logging:'
-    f.puts '    directory: features/tmp'
-    f.puts '    pids: features/tmp'
+    f.puts "    directory: #{dir}"
+    f.puts "    pids: #{dir}"
     f.puts '    main_filename: hive.log'
-    f.puts '    home_directory: features/tmp'
+    f.puts "    home_directory: #{dir}"
     f.puts '  timings:'
     f.puts '    worker_loop_interval: 5'
     f.puts '    controller_loop_interval: 5'

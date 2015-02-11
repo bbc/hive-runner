@@ -3,31 +3,34 @@
 $LOAD_PATH << File.expand_path('../../lib', __FILE__)
 
 require 'socket'
-require 'hive/daemon_helper'
+require 'hive/register'
 
 $PROGRAM_NAME = Hive::DAEMON_NAME
 
 # Communication with daemon launcher
-comm = TCPServer.open(ENV.fetch('HIVE_COMM_PORT', 9999).to_i)
+comm_port = ENV.fetch('HIVE_COMM_PORT', 9999).to_i
+comm = TCPServer.open(comm_port)
+register = Hive::Register.new
 Signal.trap('USR1') do
   client = comm.accept
-  Hive::DaemonHelper.controllers.each do |c|
+  register.controllers.each do |c|
     client.puts "Using #{c.class.name.split('::').last.downcase} controller"
   end
-  workers = Hive::DaemonHelper.workers
-  client.puts "Number of workers: #{workers.length}"
-  if workers.length > 0
-    client.puts 'Workers:'
-    workers.each do |w|
-      client.puts " - #{w.type} worker [pid #{w.pid}]"
+  devices = register.devices
+  client.puts "Number of devices: #{devices.length}"
+  if devices.length > 0
+    client.puts 'Devices:'
+    devices.each do |d|
+      client.puts " - #{d.identity} [worker pid #{d.worker_pid}]"
     end
   end
   client.close
 end
 
 # Initialise
-Hive::DaemonHelper.instantiate_controllers
+register.instantiate_controllers
 
 # Execution loop
-Hive::LOG.info('Starting execution loop')
-Hive::DaemonHelper.run
+Hive::logger.info('*** HIVE STARTING ***')
+Hive::logger.info('Starting execution loop')
+register.run

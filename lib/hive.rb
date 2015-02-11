@@ -13,15 +13,8 @@ module Hive
   DAEMON_NAME = Chamber.env.daemon_name? ? Chamber.env.daemon_name : 'HIVE'
 
   if Chamber.env.logging?
-    LOG = Hive::Log.new
     if Chamber.env.logging.directory?
       LOG_DIRECTORY = Chamber.env.logging.directory
-      if Chamber.env.logging.main_filename?
-        LOG.add_logger("#{LOG_DIRECTORY}/#{Chamber.env.logging.main_filename}", Chamber.env.logging.main_level || 'INFO')
-      end
-      if Chamber.env.logging.console_level?
-        LOG.add_logger(STDOUT, Chamber.env.logging.console_level)
-      end
     else
       fail 'Missing log directory'
     end
@@ -34,6 +27,21 @@ module Hive
     fail 'Missing logging section in configuration file'
   end
 
+  def self.config
+    Chamber.env
+  end
 
-  LOG.info('*** HIVE STARTING ***')
+  def self.logger
+    if ! @logger
+      @logger = Hive::Log.new
+
+      if Hive.config.logging.main_filename?
+        @logger.add_logger("#{LOG_DIRECTORY}/#{Hive.config.logging.main_filename}", Chamber.env.logging.main_level || 'INFO')
+      end
+      if Hive.config.logging.console_level?
+        @logger.add_logger(STDOUT, Hive.config.logging.console_level)
+      end
+    end
+    @logger
+  end
 end

@@ -13,63 +13,22 @@ module Hive
     class InvalidJobReservationError < StandardError
     end
 
-    attr_reader :type
-    attr_reader :pid
-
-    # A worker process is forked on creation.
-    # In the master thread, the worker instance is used to control the forked
-    # process.
-    def initialize(options)
-      @controller_pid = Process.pid
-      @pid = Process.fork do
-        worker_process(options)
-      end
-
-      LOG.info("Worker started with pid #{@pid}")
-    end
-
-    # Terminate the worker process
-    def stop
-      # TODO: Which of these is preferable to avoid leaving a zombie process?
-
-      # Detach then kill
-      Process.detach @pid
-      Process.kill 'TERM', @pid
-
-      # Kill then clean up
-      # Process.kill 'TERM', @pid
-      # Process.wait @pid
-    end
-
-    # Test the state of the worker process
-    def running?
-      begin
-        Process.kill 0, @pid
-        true
-      rescue Errno::ESRCH
-        false
-      end
-    end
-
-    private
-
-    # Methods below this line are used by the forked process
-
     # The main worker process loop
-    def worker_process(options)
+    def initialize(parent_pid, options)
+      @parent_pid = parent_pid
       pid = Process.pid
       $PROGRAM_NAME = "#{options['name_stub'] || 'WORKER'}.#{pid}"
       @log = Hive::Log.new
       @log.add_logger(
         "#{LOG_DIRECTORY}/#{pid}.log",
-        Chamber.env.logging.worker_level || 'INFO'
+        Hive.config.logging.worker_level || 'INFO'
       )
 
       @queues = options['queues'].class == Array ? options['queues'] : []
 
       Hive::Messages.configure do |config|
-        config.base_path = Chamber.env.network.scheduler
-        config.pem_file = Chamber.env.network.cert
+        config.base_path = Hive.config.network.scheduler
+        config.pem_file = Hive.config.network.cert
         config.ssl_verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
 
@@ -81,7 +40,7 @@ module Hive
         rescue StandardError => e
           @log.warn("Worker loop aborted: #{e.message}\n  : #{e.backtrace.join("\n  : ")}")
         end
-        sleep Chamber.env.timings.worker_loop_interval
+        sleep Hive.config.timings.worker_loop_interval
       end
       @log.info('Exiting worker')
     end
@@ -131,7 +90,7 @@ module Hive
     # Execute a job
     def execute_job(job)
       @log.info "Setting job paths"
-      job_paths = Hive::JobPaths.new(job.job_id, Chamber.env.logging.home, @log)
+      job_paths = Hive::JobPaths.new(job.job_id, Hive.config.logging.home, @log)
 
       if ! job.repository.to_s.empty?
         @log.info "Checking out the repository"
@@ -219,10 +178,10 @@ module Hive
     end
 
     # Determine whether to keep the worker running
-    # This just checks the presense of the controller process
+    # This just checks the presense of the parent process
     def keep_running?
       begin
-        Process.getpgid(@controller_pid)
+        Process.getpgid(@parent_pid)
         true
       rescue
         false

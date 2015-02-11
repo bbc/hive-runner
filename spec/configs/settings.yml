@@ -22,6 +22,7 @@ default: &shared
   
   timings:
     worker_loop_interval: 5
+    controller_loop_interval: 1
   
   network:
     scheduler: http://example.co.uk
@@ -33,12 +34,12 @@ test:
 test_daemon_helper_instantiate:
   <<: *shared
   controllers:
-    test:
+    shell:
       arg1: value
       arg2: value2
 
 test_daemon_helper_single_controller:
   <<: *shared
   controllers:
-    test:
-      max_workers: 5
+    shell:
+      maximum: 5

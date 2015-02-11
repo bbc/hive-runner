@@ -3,22 +3,15 @@ require 'hive'
 module Hive
   # Generic hive controller class
   class Controller
-    attr_reader :workers
-    attr_reader :type
-
-    def initialize(config)
-      @config = {
-        'max_workers' => 0
-      }.merge(config)
-      @workers = []
-      @type ||= 'undefined'
-      require "hive/worker/#{@type}"
+    def initialize(config = {})
+      @config = config
+      @device_class = self.class.to_s.sub('Controller', 'Device')
+      require @device_class.downcase.gsub(/::/, '/')
+      Hive.logger.info("Controller '#{self.class}' created")
     end
 
-    def check_workers
-      (1..(@config['max_workers'] - @workers.length)).each do
-        @workers << Object.const_get('Hive').const_get('Worker').const_get(@type.capitalize).new(@config)
-      end
+    def detect
+      raise NotImplementedError, "'detect' method not defined for '#{self.class}'"
     end
   end
 end
