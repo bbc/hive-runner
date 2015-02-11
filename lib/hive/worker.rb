@@ -21,14 +21,14 @@ module Hive
       @log = Hive::Log.new
       @log.add_logger(
         "#{LOG_DIRECTORY}/#{pid}.log",
-        Chamber.env.logging.worker_level || 'INFO'
+        Hive.config.logging.worker_level || 'INFO'
       )
 
       @queues = options['queues'].class == Array ? options['queues'] : []
 
       Hive::Messages.configure do |config|
-        config.base_path = Chamber.env.network.scheduler
-        config.pem_file = Chamber.env.network.cert
+        config.base_path = Hive.config.network.scheduler
+        config.pem_file = Hive.config.network.cert
         config.ssl_verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
 
@@ -40,7 +40,7 @@ module Hive
         rescue StandardError => e
           @log.warn("Worker loop aborted: #{e.message}\n  : #{e.backtrace.join("\n  : ")}")
         end
-        sleep Chamber.env.timings.worker_loop_interval
+        sleep Hive.config.timings.worker_loop_interval
       end
       @log.info('Exiting worker')
     end
@@ -90,7 +90,7 @@ module Hive
     # Execute a job
     def execute_job(job)
       @log.info "Setting job paths"
-      job_paths = Hive::JobPaths.new(job.job_id, Chamber.env.logging.home, @log)
+      job_paths = Hive::JobPaths.new(job.job_id, Hive.config.logging.home, @log)
 
       if ! job.repository.to_s.empty?
         @log.info "Checking out the repository"

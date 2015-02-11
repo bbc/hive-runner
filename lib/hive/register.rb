@@ -12,7 +12,7 @@ module Hive
       @max_devices = 5 # TODO Add to configuration file
     end
 
-    def instantiate_controllers(controller_details = Chamber.env.controllers)
+    def instantiate_controllers(controller_details = Hive.config.controllers)
       controller_details.each do |type, opts|
         Hive.logger.info("Adding controller for '#{type}'")
         require "hive/controller/#{type}"
@@ -26,7 +26,7 @@ module Hive
     def run
       loop do
         check_controllers
-        sleep Chamber.env.timings.controller_loop_interval
+        sleep Hive.config.timings.controller_loop_interval
       end
     end
 
