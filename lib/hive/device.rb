@@ -19,7 +19,7 @@ module Hive
     def start
       parent_pid = Process.pid
       @worker_pid = Process.fork do
-        worker = Object.const_get(@worker_class).new(parent_pid, @options)
+        worker = Object.const_get(@worker_class).new(@options.merge('parent_pid' => parent_pid))
       end
       Process.detach @worker_pid
 
@@ -28,7 +28,11 @@ module Hive
 
     # Terminate the worker process
     def stop
-      Process.kill 'TERM', @worker_pid
+      begin
+        Process.kill 'TERM', @worker_pid
+      rescue
+        Hive.logger.info("Process had already terminated")
+      end
     end
 
     # Test the state of the worker process
