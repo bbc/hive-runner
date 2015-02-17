@@ -8,6 +8,7 @@ group :test do
 end
 
 gem 'chamber'
+gem 'macaddr'
 
 gem 'daemons', git: 'https://github.com/jrmhaig/daemons.git'
 gem 'roar', git: 'https://github.com/bbc-test/roar.git', branch: '0.2-x.bbc'

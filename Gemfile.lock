@@ -6,9 +6,10 @@ GIT
 
 GIT
   remote: git@github.com:bbc-test/devicedb_comms.git
-  revision: d534c6d183ecfba3c6a84f9535aa7a3feae6af26
+  revision: 3b5fb7f2c460eef6e720c4b0bccdf81072a27aef
   specs:
     devicedb_comms (0.0.14)
+      activesupport
 
 GIT
   remote: git@github.com:bbc-test/hive-messages.git
@@ -81,6 +82,8 @@ GEM
     i18n (0.7.0)
     ice_nine (0.11.1)
     json (1.8.2)
+    macaddr (1.7.1)
+      systemu (~> 2.6.2)
     mimemagic (0.2.1)
     mini_portile (0.6.2)
     minitest (5.5.1)
@@ -122,6 +125,7 @@ GEM
       multi_json (~> 1.0)
       simplecov-html (~> 0.8.0)
     simplecov-html (0.8.0)
+    systemu (2.6.4)
     thor (0.19.1)
     thread_safe (0.3.4)
     tzinfo (1.2.2)
@@ -144,6 +148,7 @@ DEPENDENCIES
   daemons!
   devicedb_comms!
   hive-messages!
+  macaddr
   roar!
   rspec
   rubocop

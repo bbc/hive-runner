@@ -72,7 +72,7 @@ module Hive
       @log.info "Trying to reserve job for queues: #{@queues.join(', ')}"
       job = job_message_klass.reserve(@queues, reservation_details)
       @log.debug "Job: #{job.inspect}"
-      raise InvalidJobReservationError.new("Invalid Job Reserved") unless job.valid? if job.present?
+      raise InvalidJobReservationError.new("Invalid Job Reserved") if job.present? && ! job.valid?
       job
     end
 
@@ -111,13 +111,13 @@ module Hive
       script.append_bash_cmd job.command
 
       @log.info "Pre-execution setup"
-      pre_script
+      pre_script(job, job_paths, script)
 
       @log.info "Running execution script"
       state = script.run
 
       @log.info "Post-execution cleanup"
-      post_script
+      post_script(job, job_paths, script)
 
       # Upload results
       # TODO: Do this outside of the execute_job method
