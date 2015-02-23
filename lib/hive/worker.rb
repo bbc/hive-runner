@@ -110,26 +110,36 @@ module Hive
       @log.info "Appending test script to execution script"
       script.append_bash_cmd job.command
 
-      @log.info "Pre-execution setup"
-      pre_script(job, job_paths, script)
+      exception = nil
+      begin
+        @log.info "Pre-execution setup"
+        pre_script(job, job_paths, script)
 
-      @log.info "Running execution script"
-      state = script.run
-
-      @log.info "Post-execution cleanup"
-      post_script(job, job_paths, script)
-
-      # Upload results
-      # TODO: Do this outside of the execute_job method
-      job_paths.finalise_results_directory
-      upload_files(job, job_paths.results_path, job_paths.logs_path)
-      results = gather_results(job_paths)
-      if results
-        @log.info("The results are ...")
-        @log.info(results.inspect)
-        job.update_results(results)
+        @log.info "Running execution script"
+        state = script.run
+      rescue => e
+        exception = e
       end
 
+      begin
+        @log.info "Post-execution cleanup"
+        post_script(job, job_paths, script)
+
+        # Upload results
+        # TODO: Do this outside of the execute_job method
+        job_paths.finalise_results_directory
+        upload_files(job, job_paths.results_path, job_paths.logs_path)
+        results = gather_results(job_paths)
+        if results
+          @log.info("The results are ...")
+          @log.info(results.inspect)
+          job.update_results(results)
+        end
+      rescue => e
+        raise exception || e
+      end
+
+      raise exception if exception
       state
     end
 
