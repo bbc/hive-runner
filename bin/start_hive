@@ -3,20 +3,19 @@
 $LOAD_PATH << File.expand_path('../../lib', __FILE__)
 
 require 'socket'
-require 'hive/register'
+require 'hive'
 
 $PROGRAM_NAME = Hive::DAEMON_NAME
 
 # Communication with daemon launcher
 comm_port = ENV.fetch('HIVE_COMM_PORT', 9999).to_i
 comm = TCPServer.open(comm_port)
-register = Hive::Register.new
 Signal.trap('USR1') do
   client = comm.accept
-  register.controllers.each do |c|
+  Hive.register.controllers.each do |c|
     client.puts "Using #{c.class.name.split('::').last.downcase} controller"
   end
-  devices = register.devices
+  devices = Hive.register.devices
   client.puts "Number of devices: #{devices.length}"
   if devices.length > 0
     client.puts 'Devices:'
@@ -28,9 +27,9 @@ Signal.trap('USR1') do
 end
 
 # Initialise
-register.instantiate_controllers
+Hive.register.instantiate_controllers
 
 # Execution loop
 Hive::logger.info('*** HIVE STARTING ***')
 Hive::logger.info('Starting execution loop')
-register.run
+Hive.register.run

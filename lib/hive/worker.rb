@@ -14,17 +14,18 @@ module Hive
     end
 
     # The main worker process loop
-    def initialize(parent_pid, options)
-      @parent_pid = parent_pid
+    def initialize(options)
+      @options = options
+      @parent_pid = @options['parent_pid']
       pid = Process.pid
-      $PROGRAM_NAME = "#{options['name_stub'] || 'WORKER'}.#{pid}"
+      $PROGRAM_NAME = "#{@options['name_stub'] || 'WORKER'}.#{pid}"
       @log = Hive::Log.new
       @log.add_logger(
         "#{LOG_DIRECTORY}/#{pid}.log",
         Hive.config.logging.worker_level || 'INFO'
       )
 
-      @queues = options['queues'].class == Array ? options['queues'] : []
+      @queues = @options['queues'].class == Array ? @options['queues'] : []
 
       Hive::Messages.configure do |config|
         config.base_path = Hive.config.network.scheduler
@@ -71,7 +72,7 @@ module Hive
       @log.info "Trying to reserve job for queues: #{@queues.join(', ')}"
       job = job_message_klass.reserve(@queues, reservation_details)
       @log.debug "Job: #{job.inspect}"
-      raise InvalidJobReservationError.new("Invalid Job Reserved") unless job.valid? if job.present?
+      raise InvalidJobReservationError.new("Invalid Job Reserved") if ! (job.nil? || job.valid?)
       job
     end
 
@@ -109,20 +110,36 @@ module Hive
       @log.info "Appending test script to execution script"
       script.append_bash_cmd job.command
 
-      @log.info "Running execution script"
-      state = script.run
+      exception = nil
+      begin
+        @log.info "Pre-execution setup"
+        pre_script(job, job_paths, script)
 
-      # Upload results
-      # TODO: Do this outside of the execute_job method
-      job_paths.finalise_results_directory
-      upload_files(job, job_paths.results_path, job_paths.logs_path)
-      results = gather_results(job_paths)
-      if results
-        @log.info("The results are ...")
-        @log.info(results.inspect)
-        job.update_results(results)
+        @log.info "Running execution script"
+        state = script.run
+      rescue => e
+        exception = e
       end
 
+      begin
+        @log.info "Post-execution cleanup"
+        post_script(job, job_paths, script)
+
+        # Upload results
+        # TODO: Do this outside of the execute_job method
+        job_paths.finalise_results_directory
+        upload_files(job, job_paths.results_path, job_paths.logs_path)
+        results = gather_results(job_paths)
+        if results
+          @log.info("The results are ...")
+          @log.info(results.inspect)
+          job.update_results(results)
+        end
+      rescue => e
+        raise exception || e
+      end
+
+      raise exception if exception
       state
     end
 
@@ -186,6 +203,14 @@ module Hive
       rescue
         false
       end
+    end
+
+    # Any setup required before the execution script
+    def pre_script(job, job_paths, script)
+    end
+
+    # Any device specific steps immediately after the execution script
+    def post_script(job, job_paths, script)
     end
 
     # Do whatever device cleanup is required
