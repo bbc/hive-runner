@@ -72,7 +72,7 @@ module Hive
       @log.info "Trying to reserve job for queues: #{@queues.join(', ')}"
       job = job_message_klass.reserve(@queues, reservation_details)
       @log.debug "Job: #{job.inspect}"
-      raise InvalidJobReservationError.new("Invalid Job Reserved") if job.present? && ! job.valid?
+      raise InvalidJobReservationError.new("Invalid Job Reserved") if ! (job.nil? || job.valid?)
       job
     end
 

@@ -1,4 +1,5 @@
 require 'active_record'
+require 'hive/data_store/port'
 
 module Hive
   class DataStore
@@ -18,6 +19,10 @@ module Hive
           end
         end
       end
+    end
+
+    def port
+      Hive::DataStore::Port
     end
   end
 end

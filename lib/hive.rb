@@ -100,6 +100,6 @@ module Hive
 
   # The local datastore
   def self.data_store
-    @data_store ||= new Hive::DataStore.new(self.config.datastore.filename)
+    @data_store ||= Hive::DataStore.new(self.config.datastore.filename)
   end
 end
