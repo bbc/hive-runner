@@ -13,6 +13,9 @@ module Hive
     class InvalidJobReservationError < StandardError
     end
 
+    class DeviceNotReady < StandardError
+    end
+
     # The main worker process loop
     def initialize(options)
       @options = options
@@ -37,7 +40,10 @@ module Hive
       while keep_running?
         begin
           diagnostics
+          update_queues
           poll_queue
+        rescue DeviceNotReady => e
+          @log.info("#{e.message}\n");
         rescue StandardError => e
           @log.warn("Worker loop aborted: #{e.message}\n  : #{e.backtrace.join("\n  : ")}")
         end
@@ -143,8 +149,29 @@ module Hive
       state
     end
 
-    # Dummy function to be replaced in child class, as required
+    # Diagnostics function to be extended in child class, as required
     def diagnostics
+      status = device_status
+      raise DeviceNotReady.new("Current device status: '#{status}'") if status != 'idle'
+    end
+
+    # Current state of the device
+    # This method should be replaced in child classes, as appropriate
+    def device_status
+      'idle'
+    end
+
+    def update_queues
+      details = Hive.devicedb('Device').find(@options['id'])
+      @log.debug("Device details: #{details.inspect}")
+
+      new_queues = details['device_queues'].collect do |queue_details|
+        queue_details['name']
+      end
+      if @queues.sort != new_queues.sort
+        @log.info("Updated queue list: #{new_queues.join(', ')}")
+        @queues = new_queues
+      end
     end
 
     # Upload any files from the test
