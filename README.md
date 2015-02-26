@@ -6,21 +6,21 @@ Run automated jobs on devices
 
 Start the Hive daemom:
 
-    ./bin/hived start
+    bundle exec ./bin/hived start
 
 Determine the status of the Hive:
 
-    ./bin/hived status
+    bundle exec ./bin/hived status
 
 Stop the Hive:
 
-    ./bin/hived stop
+    bundle exec ./bin/hived stop
 
 By default, the Hive will use the configuration in `config/hive-runner.yml`. To
 use a different file set the environment variable `HIVE_CONFIG`:
 
     export HIVE_CONFIG=/path/to/hive-config-file.yml
-    ./bin/hived start
+    bundle exec ./bin/hived start
 
 ## Configuration file
 
@@ -102,8 +102,8 @@ See the "Configuration file" above for details.
 
 Start the Hive Runner:
 
-    ./bin/hived start
+    bundle exec ./bin/hived start
 
 Ensure that your Hive Runner is running and that your workers have started:
 
-    ./bin/hived status
+    bundle exec ./bin/hived status
