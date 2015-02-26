@@ -1,29 +1,16 @@
-Before do
-  ENV['HIVE_CONFIG'] = create_configuration()
-  ENV['HIVE_ENVIRONMENT'] = 'test'
-  ENV['HIVE_COMM_PORT'] = '9990'
-  `bundle exec ./bin/hived stop`
-  sleep 1
-end
-
-After do
-  `bundle exec ./bin/hived stop`
-  sleep 1
-end
-
 Given(/^The runner has been started$/) do
   expect(system('bundle exec ./bin/hived start')).to be true
-  sleep 1
+  sleep 8
 end
 
 When(/^I start the runner$/) do
   expect(system('bundle exec ./bin/hived start')).to be true
-  sleep 5
+  sleep 8
 end
 
 When(/^I stop the runner$/) do
   expect(system('bundle exec ./bin/hived stop')).to be true
-  sleep 1
+  sleep 5
 end
 
 Then(/^the runner is running$/) do
@@ -77,7 +64,7 @@ def create_configuration(options = {})
     f.puts '  daemon_name: TEST_HIVE'
     f.puts '  controllers:'
     f.puts '    shell:'
-    f.puts "      max_workers: #{options[:n_workers] || 5}"
+    f.puts "      maximum: #{options[:n_workers] || 5}"
     f.puts '      name_stub: SHELL_WORKER'
     f.puts '      queues:'
     f.puts '        - test_queue'
@@ -90,8 +77,8 @@ def create_configuration(options = {})
     f.puts '    worker_loop_interval: 5'
     f.puts '    controller_loop_interval: 5'
     f.puts '  network:'
-    f.puts '    scheduler: https://example.co.uk'
-    f.puts '    cert: cert.pem'
+    f.puts '    scheduler: http://example.co.uk'
+    f.puts '    devicedb: http://devicedb.mock'
   end
   dir
 end
