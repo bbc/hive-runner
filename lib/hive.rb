@@ -82,6 +82,27 @@ module Hive
     @devicedb_id || -1
   end
 
+  # Poll the device database
+  def self.poll
+    id = self.id
+    if id and  id > 0
+      Hive.logger.debug "Polling hive: #{id}"
+      rtn = Hive.devicedb('Hive').poll(id)
+      Hive.logger.debug "Return data: #{rtn}"
+      if rtn['error'].present?
+        Hive.logger.warn "Hive polling failed: #{rtn['error']}"
+      else
+        Hive.logger.info "Successfully polled hive"
+      end
+    else
+      if db
+        LOG.debug "Skipping polling of hive"
+      else
+        LOG.warn "Unable to poll hive"
+      end
+    end
+  end
+
   # Get the IP address of the Hive
   def self.ip_address
     ip = Socket.ip_address_list.detect { |intf| intf.ipv4_private? }
