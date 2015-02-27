@@ -25,6 +25,7 @@ module Hive
 
     def run
       loop do
+        Hive.poll
         check_controllers
         sleep Hive.config.timings.controller_loop_interval
       end
