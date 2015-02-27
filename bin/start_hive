@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
 
+require 'pathname'
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path(
+  '../../Gemfile',
+  Pathname.new(__FILE__).realpath
+)
+
 $LOAD_PATH << File.expand_path('../../lib', __FILE__)
 
 require 'socket'
