@@ -20,6 +20,7 @@ module Hive
     def initialize(options)
       @options = options
       @parent_pid = @options['parent_pid']
+      @device_id = @options['id']
       pid = Process.pid
       $PROGRAM_NAME = "#{@options['name_stub'] || 'WORKER'}.#{pid}"
       @log = Hive::Log.new
@@ -59,7 +60,7 @@ module Hive
         @log.info('No job found')
       else
         @log.info('Job starting')
-        job.start( 123 ) # TODO: Device ID
+        job.start( @device_id )
 
         begin
           # TODO: Use job.success and job.fail, when implemented
