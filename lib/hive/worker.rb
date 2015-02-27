@@ -165,12 +165,16 @@ module Hive
       details = Hive.devicedb('Device').find(@options['id'])
       @log.debug("Device details: #{details.inspect}")
 
-      new_queues = details['device_queues'].collect do |queue_details|
-        queue_details['name']
-      end
-      if @queues.sort != new_queues.sort
-        @log.info("Updated queue list: #{new_queues.join(', ')}")
-        @queues = new_queues
+      if details['device_queues']
+        new_queues = details['device_queues'].collect do |queue_details|
+          queue_details['name']
+        end
+        if @queues.sort != new_queues.sort
+          @log.info("Updated queue list: #{new_queues.join(', ')}")
+          @queues = new_queues
+        end
+      else
+        @log.warn("Queue list missing from DeviceDB response")
       end
     end
 
