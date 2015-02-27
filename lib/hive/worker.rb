@@ -13,10 +13,14 @@ module Hive
     class InvalidJobReservationError < StandardError
     end
 
+    class DeviceNotReady < StandardError
+    end
+
     # The main worker process loop
     def initialize(options)
       @options = options
       @parent_pid = @options['parent_pid']
+      @device_id = @options['id']
       pid = Process.pid
       $PROGRAM_NAME = "#{@options['name_stub'] || 'WORKER'}.#{pid}"
       @log = Hive::Log.new
@@ -37,7 +41,10 @@ module Hive
       while keep_running?
         begin
           diagnostics
+          update_queues
           poll_queue
+        rescue DeviceNotReady => e
+          @log.info("#{e.message}\n");
         rescue StandardError => e
           @log.warn("Worker loop aborted: #{e.message}\n  : #{e.backtrace.join("\n  : ")}")
         end
@@ -52,7 +59,7 @@ module Hive
       if job.nil?
         @log.info('No job found')
       else
-
+        @log.info('Job starting')
         begin
           execute_job(job)
         rescue => e
@@ -111,7 +118,7 @@ module Hive
         script.append_bash_cmd job.command
         
 
-        job.start
+        job.start(@devicedb_id)
 
         @log.info "Pre-execution setup"
         pre_script(job, job_paths, script)
@@ -151,8 +158,33 @@ module Hive
       exit_value == 0
     end
 
-    # Dummy function to be replaced in child class, as required
+    # Diagnostics function to be extended in child class, as required
     def diagnostics
+      status = device_status
+      raise DeviceNotReady.new("Current device status: '#{status}'") if status != 'idle'
+    end
+
+    # Current state of the device
+    # This method should be replaced in child classes, as appropriate
+    def device_status
+      'idle'
+    end
+
+    def update_queues
+      details = Hive.devicedb('Device').find(@options['id'])
+      @log.debug("Device details: #{details.inspect}")
+
+      if details['device_queues']
+        new_queues = details['device_queues'].collect do |queue_details|
+          queue_details['name']
+        end
+        if @queues.sort != new_queues.sort
+          @log.info("Updated queue list: #{new_queues.join(', ')}")
+          @queues = new_queues
+        end
+      else
+        @log.warn("Queue list missing from DeviceDB response")
+      end
     end
 
     # Upload any files from the test
