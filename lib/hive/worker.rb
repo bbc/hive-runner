@@ -52,15 +52,11 @@ module Hive
       if job.nil?
         @log.info('No job found')
       else
-        @log.info('Job starting')
-        job.prepare( 123 ) # TODO: Device ID
 
         begin
           execute_job(job)
-          job.complete
         rescue => e
           @log.info("Error running test: #{e.message}\n : #{e.backtrace.join("\n :")}")
-          job.error(e.message)
         end
         cleanup
       end
@@ -89,30 +85,34 @@ module Hive
 
     # Execute a job
     def execute_job(job)
-      @log.info "Setting job paths"
-      job_paths = Hive::JobPaths.new(job.job_id, Hive.config.logging.home, @log)
-
-      if ! job.repository.to_s.empty?
-        @log.info "Checking out the repository"
-        checkout_code(job.repository, job_paths.testbed_path)
-      end
-
-      @log.info "Initialising execution script"
-      script = Hive::ExecutionScript.new(job_paths, @log)
-
-      @log.info "Setting the execution variables in the environment"
-      script.set_env 'HIVE_RESULTS', job_paths.results_path
-      job.execution_variables.to_h.each_pair do |var, val|
-        script.set_env "HIVE_#{var.to_s}".upcase, val if ! val.kind_of?(Array)
-      end
-
-      @log.info "Appending test script to execution script"
-      script.append_bash_cmd job.command
-
-      job.start
-
+      @log.info('Job starting')
+      job.prepare( 123 ) # TODO: Device ID
+      
       exception = nil
       begin
+        @log.info "Setting job paths"
+        job_paths = Hive::JobPaths.new(job.job_id, Hive.config.logging.home, @log)
+
+        if ! job.repository.to_s.empty?
+          @log.info "Checking out the repository"
+          checkout_code(job.repository, job_paths.testbed_path)
+        end
+
+        @log.info "Initialising execution script"
+        script = Hive::ExecutionScript.new(job_paths, @log)
+
+        @log.info "Setting the execution variables in the environment"
+        script.set_env 'HIVE_RESULTS', job_paths.results_path
+        job.execution_variables.to_h.each_pair do |var, val|
+          script.set_env "HIVE_#{var.to_s}".upcase, val if ! val.kind_of?(Array)
+        end
+
+        @log.info "Appending test script to execution script"
+        script.append_bash_cmd job.command
+        
+
+        job.start
+
         @log.info "Pre-execution setup"
         pre_script(job, job_paths, script)
 
@@ -129,7 +129,6 @@ module Hive
         post_script(job, job_paths, script)
 
         # Upload results
-        # TODO: Do this outside of the execute_job method
         job_paths.finalise_results_directory
         upload_files(job, job_paths.results_path, job_paths.logs_path)
         results = gather_results(job_paths)
@@ -139,10 +138,15 @@ module Hive
           job.update_results(results)
         end
       rescue => e
-        raise exception || e
+        @log.info( "Post execution failed " + e.message  + " " + e.backtrace)
       end
 
-      raise exception if exception
+      if exception
+        job.error( exception.message )
+        raise exception
+      else
+        job.complete
+      end
 
       exit_value == 0
     end
