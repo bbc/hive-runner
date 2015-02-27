@@ -53,15 +53,14 @@ module Hive
         @log.info('No job found')
       else
         @log.info('Job starting')
-        job.start( 123 ) # TODO: Device ID
+        job.prepare( 123 ) # TODO: Device ID
 
         begin
-          # TODO: Use job.success and job.fail, when implemented
-          execute_job(job) ? job.end : job.end
+          execute_job(job)
+          job.complete
         rescue => e
           @log.info("Error running test: #{e.message}\n : #{e.backtrace.join("\n :")}")
-          # TODO: job.error(e.message), when implemented
-          job.error
+          job.error(e.message)
         end
         cleanup
       end
@@ -110,16 +109,20 @@ module Hive
       @log.info "Appending test script to execution script"
       script.append_bash_cmd job.command
 
+      job.start
+
       exception = nil
       begin
         @log.info "Pre-execution setup"
         pre_script(job, job_paths, script)
 
         @log.info "Running execution script"
-        state = script.run
+        exit_value = script.run
+        job.end(exit_value)
       rescue => e
         exception = e
       end
+
 
       begin
         @log.info "Post-execution cleanup"
@@ -140,7 +143,8 @@ module Hive
       end
 
       raise exception if exception
-      state
+
+      exit_value == 0
     end
 
     # Dummy function to be replaced in child class, as required
