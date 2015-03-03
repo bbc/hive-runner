@@ -66,7 +66,11 @@ module Hive
 
           # Check that all known devices have running workers
           @devices[c.class].each do |d|
-            d.start if ! d.running?
+            if d.claimed?
+              d.stop if d.running?
+            else
+              d.start if ! d.running?
+            end
           end
         rescue Hive::Controller::DeviceDetectionFailed
           Hive.logger.warn("Failed to detect devices for #{c.class}")

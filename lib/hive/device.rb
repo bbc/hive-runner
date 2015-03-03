@@ -49,6 +49,12 @@ module Hive
       end
     end
 
+    # Return true if the device is claimed
+    # If the device has no status set it is assumed not to be claimed
+    def claimed?
+      @options.has_key?('status') && @options['status'] == 'claimed'
+    end
+
     # Test equality with another device
     def ==(other)
       self.identity == other.identity
