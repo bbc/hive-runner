@@ -5,11 +5,13 @@ module Hive
   class Device
     attr_reader :type
     attr_reader :worker_pid
+    attr_accessor :status
 
     # Initialise the device
     def initialize(options)
       @worker_pid = nil
       @options = options
+      @status = @options.has_key?('status') ? @options['status'] : 'none'
       @worker_class = self.class.to_s.sub('Device', 'Worker')
       require @worker_class.downcase.gsub(/::/, '/')
       raise ArgumentError, "Identity not set for #{self.class} device" if ! @identity
@@ -52,7 +54,7 @@ module Hive
     # Return true if the device is claimed
     # If the device has no status set it is assumed not to be claimed
     def claimed?
-      @options.has_key?('status') && @options['status'] == 'claimed'
+      @status == 'claimed'
     end
 
     # Test equality with another device
