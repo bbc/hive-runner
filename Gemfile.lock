@@ -13,10 +13,10 @@ GIT
 
 GIT
   remote: git@github.com:bbc-test/hive-messages.git
-  revision: 889b697a1f0266e5339fa9aec82e74cc2e86cdbe
-  branch: upgrade-roar
+  revision: 8324f7074ae1014b42cd90124ca2bd31ae7a4df8
+  branch: better-results
   specs:
-    hive-messages (0.3.0)
+    hive-messages (0.4.0)
       activemodel
       activesupport
       mimemagic

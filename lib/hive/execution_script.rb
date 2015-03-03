@@ -69,11 +69,13 @@ module Hive
       pid = Process.spawn @env_secure, "#{@path} > #{@log_path}/stdout.log 2> #{@log_path}/stderr.log", pgroup: true
       pgid = Process.getpgid(pid)
 
+      exit_value = nil
       running = true
       while running
         begin
           Timeout.timeout(5) do
             Process.wait pid
+            exit_value = $?.exitstatus
             running = false
           end
         rescue Timeout::Error
@@ -88,8 +90,8 @@ module Hive
         @log.warn e
       end
 
-      # TODO: Return true or false depending on script exit status
-      true
+      # Return exit value of the script
+      exit_value
     end
   end
 end
