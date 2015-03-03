@@ -43,3 +43,11 @@ test_daemon_helper_single_controller:
   controllers:
     shell:
       maximum: 5
+
+test_daemon_helper_two_controllers:
+  <<: *shared
+  controllers:
+    test:
+      maximum: 5
+    shell:
+      maximum: 5

@@ -12,7 +12,7 @@ module Hive
       @options = options
       @worker_class = self.class.to_s.sub('Device', 'Worker')
       require @worker_class.downcase.gsub(/::/, '/')
-      raise ArgumentError "Identity not set for #{self.class} device" if ! @identity
+      raise ArgumentError, "Identity not set for #{self.class} device" if ! @identity
     end
 
     # Start the worker process

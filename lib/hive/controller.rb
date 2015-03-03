@@ -3,6 +3,9 @@ require 'hive'
 module Hive
   # Generic hive controller class
   class Controller
+    class DeviceDetectionFailed < StandardError
+    end
+
     def initialize(config = {})
       @config = config
       @device_class = self.class.to_s.sub('Controller', 'Device')

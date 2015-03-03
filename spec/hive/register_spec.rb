@@ -23,4 +23,33 @@ describe Hive::Register do
       expect(d.length).to be 5
     end
   end
+
+  describe '#check_controllers' do
+    before(:each) do
+      ENV['HIVE_ENVIRONMENT'] = 'test_daemon_helper_two_controllers'
+      load File.expand_path('../../../lib/hive.rb', __FILE__)
+      register.instantiate_controllers
+    end
+
+    it 'does not remove devices if device detect fails' do
+      controller_list = {}
+      register.controllers.each do |c|
+        controller_list[c.class] = c
+      end
+      controller_list[Hive::Controller::Test].detect_success = false
+      register.check_controllers
+      expect(register.devices.length).to be 10 # 5 for each controller
+    end
+
+    it "allows one controller's devices to update if another fails" do
+      controller_list = {}
+      register.controllers.each do |c|
+        controller_list[c.class] = c
+      end
+      controller_list[Hive::Controller::Test].detect_success = false
+      controller_list[Hive::Controller::Shell].instance_variable_set(:@maximum, 2)
+      register.check_controllers
+      expect(register.devices.length).to be 7
+    end
+  end
 end
