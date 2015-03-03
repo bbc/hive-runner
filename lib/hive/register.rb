@@ -4,12 +4,19 @@ module Hive
   # Central register of devices and workers in the hive
   class Register
     attr_reader :controllers
-    attr_reader :devices
 
     def initialize
       @controllers = []
-      @devices = []
+      @devices = {}
       @max_devices = 5 # TODO Add to configuration file
+    end
+
+    def devices
+      list = []
+      @devices.each do |controller, device_list|
+        list.concat(device_list)
+      end
+      list
     end
 
     def instantiate_controllers(controller_details = Hive.config.controllers)
@@ -33,31 +40,37 @@ module Hive
 
     def check_controllers
       Hive.logger.debug("Devices before update: #{@devices.inspect}")
-      new_device_list = []
+      new_device_list = {}
       @controllers.each do |c|
-        Hive.logger.info("Checking controller #{c.class}")
-        c.detect.each do |device|
-          Hive.logger.info("Found #{device.inspect}")
-          i = @devices.find_index(device)
-          new_device_list << (i ? @devices[i] : device)
+        begin
+          new_device_list[c.class] = []
+          @devices[c.class] = [] if ! @devices.has_key?(c.class)
+          Hive.logger.info("Checking controller #{c.class}")
+          c.detect.each do |device|
+            Hive.logger.debug("Found #{device.inspect}")
+            i = @devices[c.class].find_index(device)
+            new_device_list[c.class] << (i ? @devices[c.class][i] : device)
+          end
+          Hive.logger.debug("new_device_list: #{new_device_list.inspect}")
+
+          # Remove any devices that have not been rediscovered
+          (@devices[c.class] - new_device_list[c.class]).each do |d|
+            d.stop
+            @devices[c.class].delete(d)
+          end
+
+          # Add any new devices
+          (new_device_list[c.class] - @devices[c.class]).each do |d|
+            @devices[c.class] << d
+          end
+
+          # Check that all known devices have running workers
+          @devices[c.class].each do |d|
+            d.start if ! d.running?
+          end
+        rescue Hive::Controller::DeviceDetectionFailed
+          Hive.logger.warn("Failed to detect devices for #{c.class}")
         end
-        Hive.logger.info("new_device_list: #{new_device_list.inspect}")
-      end
-
-      # Remove any devices that have not been rediscovered
-      (@devices - new_device_list).each do |d|
-        d.stop
-        @devices.delete(d)
-      end
-
-      # Add any new devices
-      (new_device_list - @devices).each do |d|
-        @devices << d
-      end
-
-      # Check that all known devices have running workers
-      @devices.each do |d|
-        d.start if ! d.running?
       end
       Hive.logger.debug("Devices after update: #{@devices.inspect}")
     end
