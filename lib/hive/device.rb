@@ -35,6 +35,7 @@ module Hive
       rescue
         Hive.logger.info("Process had already terminated")
       end
+      @worker_pid = nil
     end
 
     # Test the state of the worker process
