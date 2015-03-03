@@ -55,7 +55,6 @@ module Hive
             else
               new_device_list[c.class] << device
             end
-            new_device_list[c.class] << (i ? @devices[c.class][i] : device)
           end
           Hive.logger.debug("new_device_list: #{new_device_list.inspect}")
 
