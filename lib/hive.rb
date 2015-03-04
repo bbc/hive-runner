@@ -95,10 +95,10 @@ module Hive
         Hive.logger.info "Successfully polled hive"
       end
     else
-      if db
-        LOG.debug "Skipping polling of hive"
+      if id
+        Hive.logger.debug "Skipping polling of hive"
       else
-        LOG.warn "Unable to poll hive"
+        Hive.logger.warn "Unable to poll hive"
       end
     end
   end

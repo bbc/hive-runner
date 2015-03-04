@@ -1,4 +1,4 @@
-require 'logger'
+require 'mono_logger'
 
 module Hive
   # Hive logging
@@ -33,11 +33,11 @@ module Hive
     #   # DEBUG level log to standard output
     #   log.add_logger( STDOUT, 'DEBUG' )
     def add_logger(stream, level)
-      log = Logger.new(stream)
+      log = MonoLogger.new(stream)
       log.formatter = proc do |severity, datetime, _progname, msg|
         "#{severity[0, 1]} #{datetime.strftime('%Y-%m-%d %H:%M:%S')}: #{msg}\n"
       end
-      log.level = Logger.const_get(level)
+      log.level = MonoLogger.const_get(level)
       @loggers[stream] = log
     end
 
@@ -51,7 +51,7 @@ module Hive
       @loggers.delete(stream)
     end
 
-    Logger::Severity.constants.each do |level|
+    MonoLogger::Severity.constants.each do |level|
       define_method(level.downcase) do |*args|
         @loggers.each { |_s, l| l.send(level.downcase, *args) }
       end
