@@ -37,6 +37,11 @@ module Hive
         config.ssl_verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
 
+      Signal.trap('TERM') do
+        @log.info("Worker terminated")
+        exit
+      end
+
       @log.info('Starting worker')
       while keep_running?
         begin
@@ -92,6 +97,19 @@ module Hive
 
     # Execute a job
     def execute_job(job)
+      # Ensure that a killed worker cleans up correctly
+      Signal.trap('TERM') do |s|
+        @log.info "Worker terminated"
+        @log.info "Post-execution cleanup"
+        post_script(job, job_paths, script)
+
+        # Upload results
+        job_paths.finalise_results_directory
+        upload_files(job, job_paths.results_path, job_paths.logs_path)
+        job.error('Worker killed')
+        exit
+      end
+
       @log.info('Job starting')
       job.prepare( 123 ) # TODO: Device ID
       
@@ -153,6 +171,11 @@ module Hive
         raise exception
       else
         job.complete
+      end
+
+      Signal.trap('TERM') do
+        @log.info("Worker terminated")
+        exit
       end
 
       exit_value == 0
