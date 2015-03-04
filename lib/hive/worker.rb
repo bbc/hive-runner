@@ -60,13 +60,13 @@ module Hive
 
     # Check the queues for work
     def poll_queue
-      job = reserve_job
-      if job.nil?
+      @job = reserve_job
+      if @job.nil?
         @log.info('No job found')
       else
         @log.info('Job starting')
         begin
-          execute_job(job)
+          execute_job
         rescue => e
           @log.info("Error running test: #{e.message}\n : #{e.backtrace.join("\n :")}")
         end
@@ -96,54 +96,55 @@ module Hive
     end
 
     # Execute a job
-    def execute_job(job)
+    def execute_job
       # Ensure that a killed worker cleans up correctly
       Signal.trap('TERM') do |s|
-        @log.info "Worker terminated"
+        @log.info "Caught TERM signal"
         @log.info "Post-execution cleanup"
-        post_script(job, job_paths, script)
+        post_script(@job, @job_paths, @script)
 
         # Upload results
-        job_paths.finalise_results_directory
-        upload_files(job, job_paths.results_path, job_paths.logs_path)
-        job.error('Worker killed')
+        @job_paths.finalise_results_directory
+        upload_files(@job, @job_paths.results_path, @job_paths.logs_path)
+        @job.error('Worker killed')
+        @log.info "Worker terminated"
         exit
       end
 
       @log.info('Job starting')
-      job.prepare(@device_id)
+      @job.prepare(@device_id)
       
       exception = nil
       begin
         @log.info "Setting job paths"
-        job_paths = Hive::JobPaths.new(job.job_id, Hive.config.logging.home, @log)
+        @job_paths = Hive::JobPaths.new(@job.job_id, Hive.config.logging.home, @log)
 
-        if ! job.repository.to_s.empty?
+        if ! @job.repository.to_s.empty?
           @log.info "Checking out the repository"
-          checkout_code(job.repository, job_paths.testbed_path)
+          checkout_code(@job.repository, @job_paths.testbed_path)
         end
 
         @log.info "Initialising execution script"
-        script = Hive::ExecutionScript.new(job_paths, @log)
+        @script = Hive::ExecutionScript.new(@job_paths, @log)
 
         @log.info "Setting the execution variables in the environment"
-        script.set_env 'HIVE_RESULTS', job_paths.results_path
-        job.execution_variables.to_h.each_pair do |var, val|
-          script.set_env "HIVE_#{var.to_s}".upcase, val if ! val.kind_of?(Array)
+        @script.set_env 'HIVE_RESULTS', @job_paths.results_path
+        @job.execution_variables.to_h.each_pair do |var, val|
+          @script.set_env "HIVE_#{var.to_s}".upcase, val if ! val.kind_of?(Array)
         end
 
         @log.info "Appending test script to execution script"
-        script.append_bash_cmd job.command
+        @script.append_bash_cmd @job.command
         
 
-        job.start
+        @job.start
 
         @log.info "Pre-execution setup"
-        pre_script(job, job_paths, script)
+        pre_script(@job, @job_paths, @script)
 
         @log.info "Running execution script"
-        exit_value = script.run
-        job.end(exit_value)
+        exit_value = @script.run
+        @job.end(exit_value)
       rescue => e
         exception = e
       end
@@ -151,26 +152,26 @@ module Hive
 
       begin
         @log.info "Post-execution cleanup"
-        post_script(job, job_paths, script)
+        post_script(@job, @job_paths, @script)
 
         # Upload results
-        job_paths.finalise_results_directory
-        upload_files(job, job_paths.results_path, job_paths.logs_path)
-        results = gather_results(job_paths)
+        @job_paths.finalise_results_directory
+        upload_files(@job, @job_paths.results_path, @job_paths.logs_path)
+        results = gather_results(@job_paths)
         if results
           @log.info("The results are ...")
           @log.info(results.inspect)
-          job.update_results(results)
+          @job.update_results(results)
         end
       rescue => e
         @log.info( "Post execution failed " + e.message  + " " + e.backtrace)
       end
 
       if exception
-        job.error( exception.message )
+        @job.error( exception.message )
         raise exception
       else
-        job.complete
+        @job.complete
       end
 
       Signal.trap('TERM') do

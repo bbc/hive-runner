@@ -12,6 +12,7 @@ gem 'chamber'
 gem 'macaddr'
 gem 'activerecord'
 gem 'sqlite3'
+gem 'mono_logger'
 
 gem 'daemons', git: 'https://github.com/jrmhaig/daemons.git'
 gem 'hive-messages', git: 'git@github.com:bbc-test/hive-messages.git', branch: 'better-results'
