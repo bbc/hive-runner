@@ -111,7 +111,7 @@ module Hive
       end
 
       @log.info('Job starting')
-      job.prepare( 123 ) # TODO: Device ID
+      job.prepare(@device_id)
       
       exception = nil
       begin
@@ -136,7 +136,7 @@ module Hive
         script.append_bash_cmd job.command
         
 
-        job.start(@devicedb_id)
+        job.start
 
         @log.info "Pre-execution setup"
         pre_script(job, job_paths, script)
