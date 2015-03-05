@@ -126,6 +126,8 @@ module Hive
 
         @log.info "Initialising execution script"
         @script = Hive::ExecutionScript.new(@job_paths, @log)
+        @script.append_bash_cmd "mkdir -p #{@job_paths.testbed_path}/#{@job.execution_directory}"
+        @script.append_bash_cmd "cd #{@job_paths.testbed_path}/#{@job.execution_directory}"
 
         @log.info "Setting the execution variables in the environment"
         @script.set_env 'HIVE_RESULTS', @job_paths.results_path
