@@ -19,6 +19,8 @@ default: &shared
   
   logging:
     directory: 'spec/tmp'
+    home: 'spec/tmp/home'
+    homes_to_keep: 5
   
   timings:
     worker_loop_interval: 5
