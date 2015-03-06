@@ -98,15 +98,12 @@ module Hive
         }.sort_by{ |f|
           File.mtime(f)
         }.reverse
-      if candidates.length > Hive.config.logging.homes_to_keep
+      if candidates && candidates.length > Hive.config.logging.homes_to_keep
         candidates[Hive.config.logging.homes_to_keep..-1].each do |dir|
           Hive.logger.info("Found (and deleting) #{dir}")
           FileUtils.rm_rf(dir)
         end
       end
-    end
-
-    def instantiate_controllers(controller_details = Hive.config.controllers)
     end
   end
 end

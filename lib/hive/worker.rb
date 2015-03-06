@@ -106,6 +106,9 @@ module Hive
         # Upload results
         @job_paths.finalise_results_directory
         upload_files(@job, @job_paths.results_path, @job_paths.logs_path)
+        File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
+          f.puts "completed"
+        end
         @job.error('Worker killed')
         @log.info "Worker terminated"
         exit
@@ -118,6 +121,9 @@ module Hive
       begin
         @log.info "Setting job paths"
         @job_paths = Hive::JobPaths.new(@job.job_id, Hive.config.logging.home, @log)
+        File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
+          f.puts "running"
+        end
 
         if ! @job.repository.to_s.empty?
           @log.info "Checking out the repository"
@@ -137,7 +143,6 @@ module Hive
 
         @log.info "Appending test script to execution script"
         @script.append_bash_cmd @job.command
-        
 
         @job.start
 
@@ -181,6 +186,9 @@ module Hive
         exit
       end
 
+      File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
+        f.puts "completed"
+      end
       exit_value == 0
     end
 

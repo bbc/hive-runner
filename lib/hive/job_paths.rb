@@ -7,10 +7,10 @@ module Hive
       @home_directory = home_directory
       @log = log
       @log.debug "Creating job paths with id=#{@job_id} and home=#{@home_directory}"
-        make_directory(home_path)
-        make_directory(results_path)
-        make_directory(logs_path)
-        make_directory(testbed_path)
+      make_directory(home_path)
+      make_directory(results_path)
+      make_directory(logs_path)
+      make_directory(testbed_path)
     end
 
     def home_path
