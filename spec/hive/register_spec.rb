@@ -103,4 +103,31 @@ describe Hive::Register do
       expect(Dir.entries(@dir).select {|entry| File.directory? File.join(@dir, entry) and !(entry =='.' || entry == '..') }.length).to be 6
     end
   end
+
+  describe '#worker_pids' do
+    before(:each) do
+    end
+
+    after(:each) do
+    end
+
+    it 'returns an empty array for no workers' do
+      expect(register.worker_pids).to eq []
+    end
+
+    it 'returns a list of 5 pids for the workers of 5 devices' do
+      ENV['HIVE_ENVIRONMENT'] = 'test_daemon_helper_single_controller'
+      load File.expand_path('../../../lib/hive.rb', __FILE__)
+      register.instantiate_controllers
+      p = register.workers_pids
+      expect(p).to be_an Array
+      expect(p.length).to be 5
+    end
+
+    #it 'leaves the required number of completed workspaces' do
+    #end
+
+    #it 'does not remove workspaces for running jobs' do
+    #end
+  end
 end

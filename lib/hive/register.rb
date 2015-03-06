@@ -19,6 +19,10 @@ module Hive
       list
     end
 
+    def worker_pids
+      []
+    end
+
     def instantiate_controllers(controller_details = Hive.config.controllers)
       controller_details.each do |type, opts|
         Hive.logger.info("Adding controller for '#{type}'")
