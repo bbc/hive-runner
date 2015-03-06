@@ -12,7 +12,10 @@ test:
     directory: /log/directory
     pids: /pid/directory
     main_filename: hive.log
+    main_level: DEBUG
+    worker_level: DEBUG
     home: /path/to/test/home
+    homes_to_keep: 5
   
   timings:
     worker_loop_interval: 5
@@ -20,5 +23,9 @@ test:
   
   network:
     scheduler: https://example.com/scheduler
+    devicedb: https://example.com/devicedb
     cert: /path/to/certificate.pem
     cafile: /path/to/certificate-authorities.pem
+
+  datastore:
+    filename: /path/to/datastore.db

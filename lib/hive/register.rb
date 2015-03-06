@@ -33,6 +33,7 @@ module Hive
     def run
       loop do
         Hive.poll
+        housekeeping
         check_controllers
         sleep Hive.config.timings.controller_loop_interval
       end
@@ -82,6 +83,27 @@ module Hive
         end
       end
       Hive.logger.debug("Devices after update: #{@devices.inspect}")
+    end
+
+    def housekeeping
+      clear_workspaces
+    end
+
+    def clear_workspaces
+      candidates = Dir.glob("#{Hive.config.logging.home}/*")
+        .select{ |f|
+          File.directory?(f) \
+          && File.exists?("#{f}/job_info") \
+          && File.read("#{f}/job_info").chomp.to_s == 'completed'
+        }.sort_by{ |f|
+          File.mtime(f)
+        }.reverse
+      if candidates && candidates.length > Hive.config.logging.homes_to_keep
+        candidates[Hive.config.logging.homes_to_keep..-1].each do |dir|
+          Hive.logger.info("Found (and deleting) #{dir}")
+          FileUtils.rm_rf(dir)
+        end
+      end
     end
   end
 end
