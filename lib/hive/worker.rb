@@ -108,7 +108,7 @@ module Hive
         @job_paths.finalise_results_directory
         upload_files(@job, @job_paths.results_path, @job_paths.logs_path)
         File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
-          f.puts "completed"
+          f.puts "#{Process.pid} completed"
         end
         @job.error('Worker killed')
         @log.info "Worker terminated"
@@ -123,7 +123,7 @@ module Hive
         @log.info "Setting job paths"
         @job_paths = Hive::JobPaths.new(@job.job_id, Hive.config.logging.home, @log)
         File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
-          f.puts "running"
+          f.puts "#{Process.pid} running"
         end
 
         if ! @job.repository.to_s.empty?
@@ -188,7 +188,7 @@ module Hive
       end
 
       File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
-        f.puts "completed"
+        f.puts "#{Process.pid} completed"
       end
       exit_value == 0
     end

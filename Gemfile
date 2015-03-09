@@ -14,6 +14,7 @@ gem 'activerecord'
 gem 'sqlite3'
 gem 'mono_logger'
 gem 'daemons', '>= 1.2.0'
+gem 'terminal-table'
 
 gem 'hive-messages', git: 'git@github.com:bbc-test/hive-messages.git', branch: 'better-results'
 gem 'code_cache', git: 'git@github.com:bbc-test/code_cache.git'
