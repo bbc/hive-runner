@@ -38,6 +38,14 @@ describe Hive::DataStore do
       expect(Hive::DataStore::Port.last.worker).to eq 'Worker-2'
     end
 
+    it 'allocates 12 ports to 12 worker' do
+      ports = []
+      (1..12).each do |i|
+        ports << Hive::DataStore::Port.assign("Worker-#{i}")
+      end
+      expect(ports.uniq.length).to be 12
+    end
+
     it 'releases a port' do
       port = Hive::DataStore::Port.assign('Worker')
 
