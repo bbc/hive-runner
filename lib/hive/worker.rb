@@ -28,6 +28,7 @@ module Hive
         "#{LOG_DIRECTORY}/#{pid}.log",
         Hive.config.logging.worker_level || 'INFO'
       )
+      @devicedb_register = true if @devicedb_register.nil?
 
       @queues = @options['queues'].class == Array ? @options['queues'] : []
 
@@ -205,19 +206,21 @@ module Hive
     end
 
     def update_queues
-      details = Hive.devicedb('Device').find(@options['id'])
-      @log.debug("Device details: #{details.inspect}")
+      if @devicedb_register
+        details = Hive.devicedb('Device').find(@options['id'])
+        @log.debug("Device details: #{details.inspect}")
 
-      if details['device_queues']
-        new_queues = details['device_queues'].collect do |queue_details|
-          queue_details['name']
+        if details['device_queues']
+          new_queues = details['device_queues'].collect do |queue_details|
+            queue_details['name']
+          end
+          if @queues.sort != new_queues.sort
+            @log.info("Updated queue list: #{new_queues.join(', ')}")
+            @queues = new_queues
+          end
+        else
+          @log.warn("Queue list missing from DeviceDB response")
         end
-        if @queues.sort != new_queues.sort
-          @log.info("Updated queue list: #{new_queues.join(', ')}")
-          @queues = new_queues
-        end
-      else
-        @log.warn("Queue list missing from DeviceDB response")
       end
     end
 
