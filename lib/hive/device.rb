@@ -4,7 +4,6 @@ module Hive
   # The generic device class
   class Device
     attr_reader :type
-    attr_reader :worker_pid
     attr_accessor :status
 
     # Initialise the device
@@ -50,6 +49,12 @@ module Hive
       else
         false
       end
+    end
+
+    # Return the worker pid, checking to see if it is running first
+    def worker_pid
+      @worker_pid = nil if ! self.running?
+      @worker_pid
     end
 
     # Return true if the device is claimed

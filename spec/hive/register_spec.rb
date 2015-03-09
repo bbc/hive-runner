@@ -123,6 +123,7 @@ describe Hive::Register do
       load File.expand_path('../../../lib/hive.rb', __FILE__)
       register.instantiate_controllers
       Process.kill 'TERM', register.worker_pids[0]
+      sleep 2
       p = register.worker_pids
       expect(p).to be_an Array
       expect(p.length).to be 4
@@ -162,7 +163,16 @@ describe Hive::Register do
     end
 
     it 'identifies correct ports to remove' do
-      skip 'To do'
+      p1 = @pids[0]
+      port1 = Hive.data_store.port.assign(p1)
+      p2 = @pids[1]
+      port2 = Hive.data_store.port.assign(p2)
+      Process.kill 'TERM', p1
+      sleep 2
+      register.clear_ports
+      list = Hive.data_store.port.all
+      expect(list.length).to be 1
+      expect(list.first.port).to be port2
     end
   end
 end

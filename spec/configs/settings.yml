@@ -30,6 +30,9 @@ default: &shared
     scheduler: http://example.co.uk
     cert: cert.pem
 
+  datastore:
+    filename: /path/to/datastore.db
+
 test:
   <<: *shared
 

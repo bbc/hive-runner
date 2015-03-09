@@ -20,7 +20,7 @@ module Hive
     end
 
     def worker_pids
-      self.devices.collect{ |d| d.worker_pid }
+      self.devices.collect{ |d| d.worker_pid }.compact
     end
 
     def instantiate_controllers(controller_details = Hive.config.controllers)
@@ -112,9 +112,7 @@ module Hive
 
     def clear_ports
       pids = self.worker_pids
-      puts ">> #{pids.inspect}<<"
       Hive.data_store.port.all.each do |p|
-        puts "XX #{p.inspect}"
         p.delete if ! pids.include?(p.worker.to_i)
       end
     end
