@@ -24,12 +24,6 @@ GIT
       roar
       virtus
 
-GIT
-  remote: https://github.com/jrmhaig/daemons.git
-  revision: cee17be908b893d0c84dae9046175cb79d44fc1d
-  specs:
-    daemons (1.1.10)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -69,6 +63,7 @@ GEM
       gherkin (~> 2.12)
       multi_json (>= 1.7.5, < 2.0)
       multi_test (>= 0.1.2)
+    daemons (1.2.0)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     diff-lcs (1.2.5)
@@ -151,7 +146,7 @@ DEPENDENCIES
   chamber
   code_cache!
   cucumber
-  daemons!
+  daemons (>= 1.2.0)
   devicedb_comms!
   hive-messages!
   macaddr
