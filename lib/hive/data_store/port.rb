@@ -18,6 +18,7 @@ module Hive
         @next_port ||= MINIMUM_PORT
         has_looped = false
         while self.find_by(port: @next_port)
+          Hive.logger.debug "#{@next_port} in use"
           @next_port += 1
           if @next_port > MAXIMUM_PORT
             raise NoPortsAvailable if has_looped
@@ -26,7 +27,9 @@ module Hive
           end
         end
 
+        Hive.logger.debug "Allocated #{@next_port} to worker #{worker}"
         p = self.new(port: @next_port, worker: worker)
+        @next_port += 1
         p.save
         p.port
       end
