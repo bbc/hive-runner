@@ -19,8 +19,10 @@ Stop the Hive:
 By default, the Hive will use the configuration in `config/hive-runner.yml`. To
 use a different file set the environment variable `HIVE_CONFIG`:
 
-    export HIVE_CONFIG=/path/to/hive-config-file.yml
+    export HIVE_CONFIG=/path/to/hive-config-directory
     ./bin/hived start
+
+The configuration file must be called `settings.yml`.
 
 ## Configuration file
 
@@ -96,7 +98,7 @@ Configure the hive, either by editing the default configuration file,
 file in a separate location (recommended) and ensuring that the `HIVE_CONFIG`
 environment variable is set correctly:
 
-    echo HIVE_CONFIG=/path/to/hive-runner.yml >> ~/.bashrc
+    echo export HIVE_CONFIG=/path/to/hive-config-directory >> ~/.bashrc
 
 See the "Configuration file" above for details.
 

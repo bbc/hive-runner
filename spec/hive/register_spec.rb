@@ -71,7 +71,7 @@ describe Hive::Register do
       (1..5).each do |i|
         Dir.mkdir("#{@dir}/#{i}")
         File.open("#{@dir}/#{i}/job_info", 'w') do |f|
-          f.puts 'completed'
+          f.puts '12345 completed'
         end
       end
 
@@ -83,7 +83,7 @@ describe Hive::Register do
       (1..6).each do |i|
         Dir.mkdir("#{@dir}/#{i}")
         File.open("#{@dir}/#{i}/job_info", 'w') do |f|
-          f.puts 'completed'
+          f.puts '12345 completed'
         end
       end
 
@@ -95,12 +95,84 @@ describe Hive::Register do
       (1..6).each do |i|
         Dir.mkdir("#{@dir}/#{i}")
         File.open("#{@dir}/#{i}/job_info", 'w') do |f|
-          f.puts 'running'
+          f.puts '12345 running'
         end
       end
 
       register.clear_workspaces
       expect(Dir.entries(@dir).select {|entry| File.directory? File.join(@dir, entry) and !(entry =='.' || entry == '..') }.length).to be 6
+    end
+  end
+
+  describe '#worker_pids' do
+    it 'returns an empty array for no workers' do
+      expect(register.worker_pids).to eq []
+    end
+
+    it 'returns a list of 5 pids for the workers of 5 devices' do
+      ENV['HIVE_ENVIRONMENT'] = 'test_daemon_helper_single_controller'
+      load File.expand_path('../../../lib/hive.rb', __FILE__)
+      register.instantiate_controllers
+      p = register.worker_pids
+      expect(p).to be_an Array
+      expect(p.length).to be 5
+    end
+
+    it 'updates the pid list after a worker terminates' do
+      ENV['HIVE_ENVIRONMENT'] = 'test_daemon_helper_single_controller'
+      load File.expand_path('../../../lib/hive.rb', __FILE__)
+      register.instantiate_controllers
+      Process.kill 'TERM', register.worker_pids[0]
+      sleep 2
+      p = register.worker_pids
+      expect(p).to be_an Array
+      expect(p.length).to be 4
+    end
+  end
+
+  describe '#clear_ports' do
+    before(:each) do
+      ENV['HIVE_ENVIRONMENT'] = 'test_daemon_helper_single_controller'
+      load File.expand_path('../../../lib/hive.rb', __FILE__)
+      register.instantiate_controllers
+      @pids = register.worker_pids
+
+      @file = Tempfile.new('ports')
+      Hive.config.datastore.filename = @file.path
+    end
+
+    after(:all) do
+      @file.unlink
+      Hive.instance_variable_set(@data_store, nil)
+    end
+
+    it 'removes a port after the worker has terminated' do
+      p = @pids[0]
+      Hive.data_store.port.assign(p)
+      Process.kill 'TERM', p
+      sleep 2
+      register.clear_ports
+      expect(Hive.data_store.port.where(worker: p).length).to be 0
+    end
+
+    it 'does not remove a port from a worker that has not terminated' do
+      p = @pids[0]
+      port = Hive.data_store.port.assign(p)
+      register.clear_ports
+      expect(Hive.data_store.port.where(worker: p).first.port).to be port
+    end
+
+    it 'identifies correct ports to remove' do
+      p1 = @pids[0]
+      port1 = Hive.data_store.port.assign(p1)
+      p2 = @pids[1]
+      port2 = Hive.data_store.port.assign(p2)
+      Process.kill 'TERM', p1
+      sleep 2
+      register.clear_ports
+      list = Hive.data_store.port.all
+      expect(list.length).to be 1
+      expect(list.first.port).to be port2
     end
   end
 end

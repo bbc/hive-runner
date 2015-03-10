@@ -9,6 +9,7 @@ ENV['BUNDLE_GEMFILE'] ||= File.expand_path(
 $LOAD_PATH << File.expand_path('../../lib', __FILE__)
 
 require 'socket'
+require 'terminal-table'
 require 'hive'
 
 $PROGRAM_NAME = Hive::DAEMON_NAME
@@ -18,21 +19,65 @@ comm_port = ENV.fetch('HIVE_COMM_PORT', 9999).to_i
 comm = TCPServer.open(comm_port)
 Signal.trap('USR1') do
   client = comm.accept
+  client.puts "  Controllers in use:"
   Hive.register.controllers.each do |c|
-    client.puts "Using #{c.class.name.split('::').last.downcase} controller"
+    client.puts "    * #{c.class.name.split('::').last.downcase}"
   end
   devices = Hive.register.devices
-  client.puts "Number of devices: #{devices.length}"
+  device_details = {}
+  client.puts "  Total number of devices: #{devices.length}"
   if devices.length > 0
-    client.puts 'Devices:'
     devices.each do |d|
-      if d.claimed?
-        client.puts " - #{d.identity} [Claimed]"
-      else
-        client.puts " - #{d.identity} [worker pid #{d.worker_pid}]"
+      device_details[d.identity] = { worker: d.claimed? ? 'Claimed' : d.worker_pid }
+    end
+  end
+  client.puts ''
+
+  workspaces_list = {}
+  Dir["#{Hive.config.logging.home}/*"].each do |d|
+    if File.directory?(d)
+      if File.exists?("#{d}/job_info")
+        File.open("#{d}/job_info") do |f|
+          if f.read =~ /^(\d*)\s*(\S*)$/
+            worker = $1 || '?'
+            state = $2 || '?'
+            if workspaces_list.has_key?(worker)
+              workspaces_list[worker][File.basename(d)] = state
+            else
+              workspaces_list[worker] = {File.basename(d) => state}
+            end
+          end
+        end
       end
     end
   end
+
+  table = Terminal::Table.new headings: ['Device', 'Worker', 'Job', 'Status']
+  device_details.each do |d, details|
+    table.add_separator
+    if workspaces_list.has_key?(details[:worker].to_s)
+      col1 = d
+      col2 = details[:worker]
+      workspaces_list[details[:worker].to_s].each do |job, state|
+        table.add_row [col1, col2, job, state]
+        col1 = col2 = ''
+      end
+      workspaces_list.delete(details[:worker].to_s)
+    else
+      table.add_row [d, details[:worker], '', '']
+    end
+  end
+  workspaces_list.each do |worker, list|
+    table.add_separator
+    col1 = '---'
+    col2 = worker
+    list.each do |job, state|
+      table.add_row [col1, col2, job, state]
+      col1 = col2 = ''
+    end
+  end
+  client.puts table
+
   client.close
 end
 

@@ -21,11 +21,12 @@ module Hive
       @options = options
       @parent_pid = @options['parent_pid']
       @device_id = @options['id']
+      @device_identity = @options['device_identity'] || 'unknown-device'
       pid = Process.pid
       $PROGRAM_NAME = "#{@options['name_stub'] || 'WORKER'}.#{pid}"
       @log = Hive::Log.new
       @log.add_logger(
-        "#{LOG_DIRECTORY}/#{pid}.log",
+        "#{LOG_DIRECTORY}/#{pid}.#{@device_identity}.log",
         Hive.config.logging.worker_level || 'INFO'
       )
       @devicedb_register = true if @devicedb_register.nil?
@@ -108,7 +109,7 @@ module Hive
         @job_paths.finalise_results_directory
         upload_files(@job, @job_paths.results_path, @job_paths.logs_path)
         File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
-          f.puts "completed"
+          f.puts "#{Process.pid} completed"
         end
         @job.error('Worker killed')
         @log.info "Worker terminated"
@@ -123,7 +124,7 @@ module Hive
         @log.info "Setting job paths"
         @job_paths = Hive::JobPaths.new(@job.job_id, Hive.config.logging.home, @log)
         File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
-          f.puts "running"
+          f.puts "#{Process.pid} running"
         end
 
         if ! @job.repository.to_s.empty?
@@ -188,7 +189,7 @@ module Hive
       end
 
       File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
-        f.puts "completed"
+        f.puts "#{Process.pid} completed"
       end
       exit_value == 0
     end

@@ -19,6 +19,10 @@ module Hive
       list
     end
 
+    def worker_pids
+      self.devices.collect{ |d| d.worker_pid }.compact
+    end
+
     def instantiate_controllers(controller_details = Hive.config.controllers)
       controller_details.each do |type, opts|
         Hive.logger.info("Adding controller for '#{type}'")
@@ -94,7 +98,7 @@ module Hive
         .select{ |f|
           File.directory?(f) \
           && File.exists?("#{f}/job_info") \
-          && File.read("#{f}/job_info").chomp.to_s == 'completed'
+          && File.read("#{f}/job_info").chomp.to_s =~ /completed/
         }.sort_by{ |f|
           File.mtime(f)
         }.reverse
@@ -103,6 +107,13 @@ module Hive
           Hive.logger.info("Found (and deleting) #{dir}")
           FileUtils.rm_rf(dir)
         end
+      end
+    end
+
+    def clear_ports
+      pids = self.worker_pids
+      Hive.data_store.port.all.each do |p|
+        p.delete if ! pids.include?(p.worker.to_i)
       end
     end
   end
