@@ -20,7 +20,7 @@ module Hive
     def start
       parent_pid = Process.pid
       @worker_pid = Process.fork do
-        worker = Object.const_get(@worker_class).new(@options.merge('parent_pid' => parent_pid))
+        worker = Object.const_get(@worker_class).new(@options.merge('parent_pid' => parent_pid, 'device_identity' => self.identity))
       end
       Process.detach @worker_pid
 
@@ -70,7 +70,7 @@ module Hive
 
     # Return the unique identity of the device
     def identity
-      "#{self.class}-#{@identity}"
+      "#{self.class.to_s.split('::').last}-#{@identity}"
     end
   end
 end

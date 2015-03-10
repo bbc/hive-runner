@@ -21,11 +21,12 @@ module Hive
       @options = options
       @parent_pid = @options['parent_pid']
       @device_id = @options['id']
+      @device_identity = @options['device_identity'] || 'unknown-device'
       pid = Process.pid
       $PROGRAM_NAME = "#{@options['name_stub'] || 'WORKER'}.#{pid}"
       @log = Hive::Log.new
       @log.add_logger(
-        "#{LOG_DIRECTORY}/#{pid}.log",
+        "#{LOG_DIRECTORY}/#{pid}.#{@device_identity}.log",
         Hive.config.logging.worker_level || 'INFO'
       )
       @devicedb_register = true if @devicedb_register.nil?

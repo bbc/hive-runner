@@ -19,19 +19,19 @@ comm_port = ENV.fetch('HIVE_COMM_PORT', 9999).to_i
 comm = TCPServer.open(comm_port)
 Signal.trap('USR1') do
   client = comm.accept
+  client.puts "  Controllers in use:"
   Hive.register.controllers.each do |c|
-    client.puts "Using #{c.class.name.split('::').last.downcase} controller"
+    client.puts "    * #{c.class.name.split('::').last.downcase}"
   end
   devices = Hive.register.devices
   device_details = {}
-  client.puts "Number of devices: #{devices.length}"
+  client.puts "  Total number of devices: #{devices.length}"
   if devices.length > 0
-    client.puts 'Devices:'
     devices.each do |d|
       device_details[d.identity] = { worker: d.claimed? ? 'Claimed' : d.worker_pid }
     end
-    client.puts ''
   end
+  client.puts ''
 
   workspaces_list = {}
   Dir["#{Hive.config.logging.home}/*"].each do |d|
@@ -51,7 +51,6 @@ Signal.trap('USR1') do
       end
     end
   end
-  client.puts workspaces_list.inspect
 
   table = Terminal::Table.new headings: ['Device', 'Worker', 'Job', 'Status']
   device_details.each do |d, details|

@@ -16,6 +16,7 @@ $LOAD_PATH << File.expand_path('../../lib', __FILE__)
 require 'hive'
 
 def test(app)
+  puts ''
   app.default_show_status
 
   Process.kill('USR1', app.pid.pid)
