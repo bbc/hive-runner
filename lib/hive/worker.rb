@@ -173,7 +173,8 @@ module Hive
           @job.update_results(results)
         end
       rescue => e
-        @log.info( "Post execution failed " + e.message  + " " + e.backtrace)
+        @log.error( "Post execution failed: " + e.message)
+        @log.error("  : #{e.backtrace.join("\n  : ")}")
       end
 
       if exception
