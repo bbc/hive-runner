@@ -19,3 +19,7 @@ gem 'terminal-table'
 gem 'hive-messages', git: 'git@github.com:bbc-test/hive-messages.git', branch: 'better-results'
 gem 'code_cache', git: 'git@github.com:bbc-test/code_cache.git'
 gem 'devicedb_comms', git: 'git@github.com:bbc-test/devicedb_comms.git'
+
+Dir.glob("plugins/Gemfile.*").each do |gemfile|
+  eval File.read(gemfile), nil, gemfile
+end
