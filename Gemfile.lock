@@ -1,18 +1,18 @@
 GIT
-  remote: git@github.com:bbc-test/code_cache.git
+  remote: git@github.com:bbc/code_cache.git
   revision: 6f73971b4d17c2b6b0ecc3949479ebf5d37d2b7d
   specs:
     code_cache (0.1.2)
 
 GIT
-  remote: git@github.com:bbc-test/devicedb_comms.git
+  remote: git@github.com:bbc/devicedb_comms.git
   revision: ffcddc8ef2e5283bc248075b33954b9ff1ad77db
   specs:
     devicedb_comms (0.0.14)
       activesupport
 
 GIT
-  remote: git@github.com:bbc-test/hive-messages.git
+  remote: git@github.com:bbc/hive-messages.git
   revision: 16e5ed107bb7373ef79b1bb4f2f84aec2d0d8308
   branch: better-results
   specs:
@@ -63,7 +63,7 @@ GEM
       gherkin (~> 2.12)
       multi_json (>= 1.7.5, < 2.0)
       multi_test (>= 0.1.2)
-    daemons (1.2.0)
+    daemons (1.2.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     diff-lcs (1.2.5)
@@ -126,7 +126,7 @@ GEM
     systemu (2.6.4)
     terminal-table (1.4.5)
     thor (0.19.1)
-    thread_safe (0.3.4)
+    thread_safe (0.3.5)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
     uber (0.0.13)
