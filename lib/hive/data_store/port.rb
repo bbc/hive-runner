@@ -37,6 +37,32 @@ module Hive
       def self.release(port)
         self.find_by(port: port).delete
       end
+
+      # Operations with retry
+      # This is to counter locking problems with the SQLite database
+      # If SQLite is replaced in favour of, eg, MySQL then this can go
+      def save
+        with_retry { super }
+      end
+
+      def delete
+        with_retry { super }
+      end
+
+      def with_retry(&block)
+        e = nil
+        10.times do
+          begin
+            yield block
+            e = nil
+            break
+          rescue => e
+            Hive.logger.debug "Failed to access database"
+            sleep 1
+          end
+        end
+        raise e if e
+      end
     end
   end
 end
