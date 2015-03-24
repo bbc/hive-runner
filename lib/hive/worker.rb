@@ -198,13 +198,20 @@ module Hive
     # Diagnostics function to be extended in child class, as required
     def diagnostics
       status = device_status
+      status = set_device_status('idle') if status == 'busy'
       raise DeviceNotReady.new("Current device status: '#{status}'") if status != 'idle'
     end
 
     # Current state of the device
     # This method should be replaced in child classes, as appropriate
     def device_status
-      'idle'
+      @device_status ||= 'idle'
+    end
+
+    # Set the status of a device
+    # This method should be replaced in child classes, as appropriate
+    def set_device_status(status)
+      @device_status = status
     end
 
     def update_queues
