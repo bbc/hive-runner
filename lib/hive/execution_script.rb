@@ -27,6 +27,11 @@ module Hive
       @script_lines = []
     end
 
+    def prepend_bash_cmd(shell_command)
+      @log.debug "bash.rb - Prepending bash command to #{@path} script: " + shell_command
+      @script_lines = ([] << shell_command << @script_lines).flatten
+    end
+
     def append_bash_cmd(shell_command)
       @log.debug "bash.rb - Appending bash command to #{@path} script: " + shell_command
       @script_lines << shell_command
