@@ -101,9 +101,10 @@ module Hive
     def execute_job
       # Ensure that a killed worker cleans up correctly
       Signal.trap('TERM') do |s|
+        Signal.trap('TERM') {} # Prevent retry signals
         @log.info "Caught TERM signal"
         @log.info "Post-execution cleanup"
-        post_script(@job, @job_paths, @script)
+        signal_safe_post_script(@job, @job_paths, @script)
 
         # Upload results
         @job_paths.finalise_results_directory
@@ -133,7 +134,11 @@ module Hive
         end
 
         @log.info "Initialising execution script"
-        @script = Hive::ExecutionScript.new(@job_paths, @log)
+        @script = Hive::ExecutionScript.new(
+          job_paths: @job_paths,
+          log: @log,
+          keep_running: ->() { self.keep_running? }
+        )
         @script.append_bash_cmd "mkdir -p #{@job_paths.testbed_path}/#{@job.execution_directory}"
         @script.append_bash_cmd "cd #{@job_paths.testbed_path}/#{@job.execution_directory}"
 
@@ -157,7 +162,6 @@ module Hive
       rescue => e
         exception = e
       end
-
 
       begin
         @log.info "Post-execution cleanup"
@@ -297,6 +301,13 @@ module Hive
 
     # Any device specific steps immediately after the execution script
     def post_script(job, job_paths, script)
+      signal_safe_post_script(job, job_paths, script)
+    end
+
+    # Any device specific steps immediately after the execution script
+    # that can be safely run in the a Signal.trap
+    # This should be called by post_script
+    def signal_safe_post_script(job, job_paths, script)
     end
 
     # Do whatever device cleanup is required

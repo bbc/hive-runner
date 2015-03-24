@@ -2,15 +2,16 @@ require 'timeout'
 
 module Hive
   class ExecutionScript
-    def initialize(job_paths, log)
-      @path = job_paths.executed_script_path
-      @log_path = job_paths.logs_path
-      @log = log
+    def initialize(config)
+      @path = config[:job_paths].executed_script_path
+      @log_path = config[:job_paths].logs_path
+      @log = config[:log]
+      @keep_running = config[:keep_running]
       @log.debug "Creating execution script with path=#{@path}"
       @env = {
         'HIVE_SCHEDULER' => Hive.config.network.scheduler,
-        'HIVE_WORKING_DIRECTORY' => job_paths.testbed_path,
-        'RESULTS_FILE' => job_paths.results_file
+        'HIVE_WORKING_DIRECTORY' => config[:job_paths].testbed_path,
+        'RESULTS_FILE' => config[:job_paths].results_file
       }
       @env_unset = [
         'BUNDLE_GEMFILE',
@@ -73,12 +74,13 @@ module Hive
       running = true
       while running
         begin
-          Timeout.timeout(5) do
+          Timeout.timeout(30) do
             Process.wait pid
             exit_value = $?.exitstatus
             running = false
           end
         rescue Timeout::Error
+          Process.kill(-8, pgid) if ! ( @keep_running.nil? || @keep_running.call )
           # Do something. Eg, upload log files.
         end
       end
