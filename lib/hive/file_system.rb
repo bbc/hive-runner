@@ -1,7 +1,7 @@
 require "fileutils"
 
 module Hive
-  class JobPaths
+  class FileSystem
     def initialize(job_id, home_directory, log)
       @job_id = job_id
       @home_directory = home_directory
@@ -41,6 +41,47 @@ module Hive
       copy_file(executed_script_path, "#{results_path}/executed_script.sh")
       if File.file?(results_file)
         copy_file(results_file, "#{results_path}/results.yml")
+      end
+    end
+
+    def fetch_build(build_url, destination_path)
+      if !fetch_build_with_curl(build_url, destination_path)
+        @log.info( "Initial build fetch failed -- trying again shortly")
+        sleep 5
+        if !fetch_build_with_curl(build_url, destination_path)
+          raise "Build could not be downloaded"
+        end
+      end
+    end
+
+    def fetch_build_with_curl(build_url, destination_path)
+      cert_path     = Hive.config.network['cert']
+      cabundle_path = Hive.config.network['cafile']
+      base_url      = Hive.config.network['scheduler']
+      apk_url       = base_url + '/' + build_url
+      curl_line     = "curl -L -m 60 #{apk_url} --cert #{cert_path} --cacert #{cabundle_path} --retry 3 -o #{destination_path}"
+
+      @log.info("Fetching build from hive-scheduler: #{curl_line}")
+      @log.debug("CURL line: #{curl_line}")
+      response = `#{curl_line}`
+      if $? != 0
+        @log.info("Curl error #{$?}: #{response.to_s}")
+        false
+        Hive::Messages
+      else
+        @log.info("Curl seems happy, checking integrity of downloaded file")
+        check_build_integrity( destination_path )
+      end
+    end
+
+    def check_build_integrity( destination_path )
+      output = `file #{destination_path}`
+      if output =~ /zip/
+        result = `zip -T #{destination_path}`
+        @log.info(result)
+        $? == 0
+      else
+        true
       end
     end
 
