@@ -30,7 +30,7 @@ module Hive
     # Terminate the worker process
     def stop
       begin
-        Process.kill 'TERM', @worker_pid
+        Process.kill 'TERM', Process.getpgid(@worker_pid)
       rescue
         Hive.logger.info("Process had already terminated")
       end
