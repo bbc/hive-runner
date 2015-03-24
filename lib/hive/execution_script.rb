@@ -2,15 +2,15 @@ require 'timeout'
 
 module Hive
   class ExecutionScript
-    def initialize(job_paths, log)
-      @path = job_paths.executed_script_path
-      @log_path = job_paths.logs_path
+    def initialize(file_system, log)
+      @path = file_system.executed_script_path
+      @log_path = file_system.logs_path
       @log = log
       @log.debug "Creating execution script with path=#{@path}"
       @env = {
         'HIVE_SCHEDULER' => Hive.config.network.scheduler,
-        'HIVE_WORKING_DIRECTORY' => job_paths.testbed_path,
-        'RESULTS_FILE' => job_paths.results_file
+        'HIVE_WORKING_DIRECTORY' => file_system.testbed_path,
+        'RESULTS_FILE' => file_system.results_file
       }
       @env_unset = [
         'BUNDLE_GEMFILE',
@@ -52,48 +52,6 @@ module Hive
     def unset_env(var)
       @env.delete(var)
       @env_unset << var
-    end
-
-
-    def fetch_build(build_url, destination_path)
-      if !fetch_build_with_curl(build_url, destination_path)
-        @log.info( "Initial build fetch failed -- trying again shortly")
-        sleep 5
-        if !fetch_build_with_curl(build_url, destination_path)
-          raise "Build could not be downloaded"
-        end
-      end
-    end
-
-    def fetch_build_with_curl(build_url, destination_path)
-      cert_path     = Hive.config.network['cert']
-      cabundle_path = Hive.config.network['cafile']
-      base_url      = Hive.config.network['scheduler']
-      apk_url       = base_url + '/' + build_url
-      curl_line     = "curl -L -m 60 #{apk_url} --cert #{cert_path} --cacert #{cabundle_path} --retry 3 -o #{destination_path}"
-
-      @log.info("Fetching build from hive-scheduler: #{curl_line}")
-      @log.debug("CURL line: #{curl_line}")
-      response = `#{curl_line}`
-      if $? != 0
-        @log.info("Curl error #{$?}: #{response.to_s}")
-        false
-        Hive::Messages
-      else
-        @log.info("Curl seems happy, checking integrity of downloaded file")
-        check_build_integrity( destination_path )
-      end
-    end
-
-    def check_build_integrity( destination_path )
-      output = `file #{destination_path}`
-      if output =~ /zip/
-        result = `zip -T #{destination_path}`
-        @log.info(result)
-        $? == 0
-      else
-        true
-      end
     end
 
     def run
