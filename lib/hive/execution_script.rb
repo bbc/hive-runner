@@ -80,7 +80,7 @@ module Hive
             running = false
           end
         rescue Timeout::Error
-          Process.kill(-8, pgid) if ! ( @keep_running.nil? || @keep_running.call )
+          Process.kill(-9, pgid) if ! ( @keep_running.nil? || @keep_running.call )
           # Do something. Eg, upload log files.
         end
       end
