@@ -1,7 +1,7 @@
 require 'yaml'
 
 require 'hive'
-require 'hive/job_paths'
+require 'hive/file_system'
 require 'hive/execution_script'
 
 require 'hive/messages'
@@ -104,12 +104,12 @@ module Hive
         Signal.trap('TERM') {} # Prevent retry signals
         @log.info "Caught TERM signal"
         @log.info "Post-execution cleanup"
-        signal_safe_post_script(@job, @job_paths, @script)
+        signal_safe_post_script(@job, @file_system, @script)
 
         # Upload results
-        @job_paths.finalise_results_directory
-        upload_files(@job, @job_paths.results_path, @job_paths.logs_path)
-        File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
+        @file_system.finalise_results_directory
+        upload_files(@job, @file_system.results_path, @file_system.logs_path)
+        File.open("#{@file_system.home_path}/job_info", 'w') do |f|
           f.puts "#{Process.pid} completed"
         end
         @job.error('Worker killed')
@@ -123,27 +123,27 @@ module Hive
       exception = nil
       begin
         @log.info "Setting job paths"
-        @job_paths = Hive::JobPaths.new(@job.job_id, Hive.config.logging.home, @log)
-        File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
+        @file_system = Hive::FileSystem.new(@job.job_id, Hive.config.logging.home, @log)
+        File.open("#{@file_system.home_path}/job_info", 'w') do |f|
           f.puts "#{Process.pid} running"
         end
 
         if ! @job.repository.to_s.empty?
           @log.info "Checking out the repository"
-          checkout_code(@job.repository, @job_paths.testbed_path)
+          checkout_code(@job.repository, @file_system.testbed_path)
         end
 
         @log.info "Initialising execution script"
         @script = Hive::ExecutionScript.new(
-          job_paths: @job_paths,
+          file_system: @file_system,
           log: @log,
           keep_running: ->() { self.keep_running? }
         )
-        @script.append_bash_cmd "mkdir -p #{@job_paths.testbed_path}/#{@job.execution_directory}"
-        @script.append_bash_cmd "cd #{@job_paths.testbed_path}/#{@job.execution_directory}"
+        @script.append_bash_cmd "mkdir -p #{@file_system.testbed_path}/#{@job.execution_directory}"
+        @script.append_bash_cmd "cd #{@file_system.testbed_path}/#{@job.execution_directory}"
 
         @log.info "Setting the execution variables in the environment"
-        @script.set_env 'HIVE_RESULTS', @job_paths.results_path
+        @script.set_env 'HIVE_RESULTS', @file_system.results_path
         @job.execution_variables.to_h.each_pair do |var, val|
           @script.set_env "HIVE_#{var.to_s}".upcase, val if ! val.kind_of?(Array)
         end
@@ -154,7 +154,7 @@ module Hive
         @job.start
 
         @log.info "Pre-execution setup"
-        pre_script(@job, @job_paths, @script)
+        pre_script(@job, @file_system, @script)
 
         @log.info "Running execution script"
         exit_value = @script.run
@@ -165,12 +165,12 @@ module Hive
 
       begin
         @log.info "Post-execution cleanup"
-        post_script(@job, @job_paths, @script)
+        post_script(@job, @file_system, @script)
 
         # Upload results
-        @job_paths.finalise_results_directory
-        upload_files(@job, @job_paths.results_path, @job_paths.logs_path)
-        results = gather_results(@job_paths)
+        @file_system.finalise_results_directory
+        upload_files(@job, @file_system.results_path, @file_system.logs_path)
+        results = gather_results(@file_system)
         if results
           @log.info("The results are ...")
           @log.info(results.inspect)
@@ -193,7 +193,7 @@ module Hive
         exit
       end
 
-      File.open("#{@job_paths.home_path}/job_info", 'w') do |f|
+      File.open("#{@file_system.home_path}/job_info", 'w') do |f|
         f.puts "#{Process.pid} completed"
       end
       exit_value == 0
@@ -296,18 +296,18 @@ module Hive
     end
 
     # Any setup required before the execution script
-    def pre_script(job, job_paths, script)
+    def pre_script(job, file_system, script)
     end
 
     # Any device specific steps immediately after the execution script
-    def post_script(job, job_paths, script)
-      signal_safe_post_script(job, job_paths, script)
+    def post_script(job, file_system, script)
+      signal_safe_post_script(job, file_system, script)
     end
 
     # Any device specific steps immediately after the execution script
     # that can be safely run in the a Signal.trap
     # This should be called by post_script
-    def signal_safe_post_script(job, job_paths, script)
+    def signal_safe_post_script(job, file_system, script)
     end
 
     # Do whatever device cleanup is required

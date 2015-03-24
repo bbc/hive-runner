@@ -3,15 +3,15 @@ require 'timeout'
 module Hive
   class ExecutionScript
     def initialize(config)
-      @path = config[:job_paths].executed_script_path
-      @log_path = config[:job_paths].logs_path
+      @path = config[:file_system].executed_script_path
+      @log_path = config[:file_system].logs_path
       @log = config[:log]
       @keep_running = config[:keep_running]
       @log.debug "Creating execution script with path=#{@path}"
       @env = {
         'HIVE_SCHEDULER' => Hive.config.network.scheduler,
-        'HIVE_WORKING_DIRECTORY' => config[:job_paths].testbed_path,
-        'RESULTS_FILE' => config[:job_paths].results_file
+        'HIVE_WORKING_DIRECTORY' => config[:file_system].testbed_path,
+        'RESULTS_FILE' => config[:file_system].results_file
       }
       @env_unset = [
         'BUNDLE_GEMFILE',
@@ -26,6 +26,11 @@ module Hive
         'HIVE_CERT' => Hive.config.network.cert
       }
       @script_lines = []
+    end
+
+    def prepend_bash_cmd(shell_command)
+      @log.debug "bash.rb - Prepending bash command to #{@path} script: " + shell_command
+      @script_lines = ([] << shell_command << @script_lines).flatten
     end
 
     def append_bash_cmd(shell_command)
