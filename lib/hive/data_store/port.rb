@@ -35,7 +35,7 @@ module Hive
       end
 
       def self.release(port)
-        self.find_by(port: port).delete
+        self.find_by(port: port).delete if self.exists?(port: port)
       end
 
       # Operations with retry
