@@ -35,7 +35,7 @@ module Hive
           count += 1
           Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{count}]")
           Process.kill 'TERM', @worker_pid
-          sleep 5
+          sleep 30
         end
         Process.kill 'KILL', @worker_pid if self.running?
       rescue => e
