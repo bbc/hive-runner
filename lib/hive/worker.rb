@@ -103,6 +103,8 @@ module Hive
       Signal.trap('TERM') do |s|
         Signal.trap('TERM') {} # Prevent retry signals
         @log.info "Caught TERM signal"
+        @log.info "Terminating script, if running"
+        @script.terminate if @script
         @log.info "Post-execution cleanup"
         signal_safe_post_script(@job, @file_system, @script)
 
