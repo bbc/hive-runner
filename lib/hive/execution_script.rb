@@ -73,7 +73,7 @@ module Hive
       File.chmod(0700, @path)
 
       pid = Process.spawn @env_secure, "#{@path} > #{@log_path}/stdout.log 2> #{@log_path}/stderr.log", pgroup: true
-      pgid = Process.getpgid(pid)
+      @pgid = Process.getpgid(pid)
 
       exit_value = nil
       running = true
@@ -85,20 +85,27 @@ module Hive
             running = false
           end
         rescue Timeout::Error
-          Process.kill(-9, pgid) if ! ( @keep_running.nil? || @keep_running.call )
+          Process.kill(-9, @pgid) if ! ( @keep_running.nil? || @keep_running.call )
           # Do something. Eg, upload log files.
         end
       end
 
       # Kill off anything that is still running
-      begin
-        Process.kill(-9, pgid)
-      rescue => e
-        @log.warn e
-      end
+      terminate
 
       # Return exit value of the script
       exit_value
+    end
+
+    def terminate
+      if @pgid
+        begin
+          Process.kill(-9, @pgid)
+        rescue => e
+          @log.warn e
+        end
+        @pgid = nil
+      end
     end
   end
 end
