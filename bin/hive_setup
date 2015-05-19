@@ -1,0 +1,163 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'fileutils'
+require 'terminal-table'
+
+if ARGV.length < 1
+  puts "Usage:"
+  puts
+  puts "  hive_setup <directory>"
+  exit 1
+end
+
+def yn question
+  yn = 'x'
+  while yn !~ /^[yYnN]/
+    print "#{question}(y/n) "
+    yn = STDIN.gets.chomp
+  end
+  yn =~ /^[yY]/
+end
+
+# Choose options
+opt = ''
+mods = []
+while opt.upcase != 'X'
+  table = Terminal::Table.new headings: ['Device', 'Module', 'Source']
+  mods.each do |mod|
+    table.add_row [
+      mod[:device],
+      mod[:name],
+      mod.has_key?(:git_account) ?
+        "git@github.com:#{mod[:git_account]}/#{mod[:name]}" :
+        "https://rubygems.org/gems/#{mod[:name]}"
+    ]
+  end
+
+  puts ''
+  puts table
+  puts ''
+  puts '1) Add module'
+  puts 'X) Continue'
+  puts ''
+  print "> "
+  opt = STDIN.gets.chomp
+
+  case opt
+  when '1'
+    mod = {}
+    puts ''
+    print "Module name: "
+    mod[:device] = STDIN.gets.chomp
+    mod[:name] = "hive-runner-#{mod[:device]}"
+    puts ''
+    if yn "Get '#{mod[:name]}' from Github? "
+      print "Enter GIT account name: "
+      mod[:git_account] = STDIN.gets.chomp
+    end
+
+    puts ''
+    puts "Module '#{mod[:name]}'"
+    if mod.has_key?(:git_account)
+      puts "  from git@github.com:#{mod[:git_account]}/#{mod[:name]}"
+    else
+      puts "  from https://rubygems.org/gems/#{mod[:name]}"
+    end
+    puts ''
+
+    if yn "Correct? "
+      mods << mod
+    end
+  end
+end
+
+dir = File.expand_path('', ARGV[0])
+if Dir.exists?(dir)
+  if ! Dir["#{dir}/*"].empty?
+    puts "Directory '#{dir}' exists and is not empty"
+    exit 1
+  end
+else
+  if File.exists?(dir)
+    puts "'#{dir}' exists and is not a directory"
+    exit 1
+  end
+  FileUtils.mkdir_p(dir)
+end
+
+FileUtils.mkdir_p("#{dir}/config")
+FileUtils.mkdir_p("#{dir}/log")
+FileUtils.mkdir_p("#{dir}/pids")
+FileUtils.mkdir_p("#{dir}/workspaces")
+
+File.open("#{dir}/config/settings.yml", 'w') do |f|
+  f.puts "#{ENV['HIVE_ENVIRONMENT'] || 'test'}:"
+  f.puts '  daemon_name: HIVE'
+  f.puts ''
+  f.puts '  controllers:'
+  f.puts '    shell:'
+  f.puts '      maximum: 5'
+  f.puts '      name_stub: SHELL_WORKER'
+  mods.each do |m|
+    f.puts "    #{m[:device]}:"
+    f.puts "      name_stub: #{m[:device].upcase}_WORKER"
+  end
+  f.puts ''
+  f.puts '  logging:'
+  f.puts "    directory: #{dir}/log"
+  f.puts "    pids: #{dir}/pids"
+  f.puts '    main_filename: hive.log'
+  f.puts '    main_level: INFO'
+  f.puts '    worker_leve: INFO'
+  f.puts "    home: #{dir}/workspaces"
+  f.puts '    homes_to_keep: 5'
+  f.puts ''
+  f.puts '  timings:'
+  f.puts '    worker_loop_interval: 5'
+  f.puts '    controller_loop_interval: 5'
+  f.puts ''
+  f.puts '  network:'
+  f.puts '    scheduler: https://scheduler'
+  f.puts '    devicedb: https://devicedb'
+  f.puts '    cert: /path/to/certificate.pem'
+  f.puts '    cafile: /path/to/certificate-authorities.pem'
+  f.puts ''
+  f.puts '  datastore:'
+  f.puts "    filename: #{dir}/datastore.db"
+end
+
+File.open("#{dir}/Gemfile", 'w') do |f|
+  f.puts "source 'https://rubygems.org/'"
+  f.puts ""
+  f.puts "gem 'hive-runner'"
+
+  # These gems need to be put on rubygems so that they can be added to the
+  # dependency list for hive-runner
+  f.puts "gem 'hive-messages', git: 'git@github.com:bbc/hive-messages.git', branch: 'better-results'"
+  f.puts "gem 'code_cache', git: 'git@github.com:bbc/code_cache.git'"
+  f.puts "gem 'devicedb_comms', git: 'git@github.com:bbc/devicedb_comms.git'"
+
+  mods.each do |m|
+    source = m.has_key?(:git_account) ? ", git: 'git@github.com:#{m[:git_account]}/#{m[:name]}'" : ''
+    f.puts "gem '#{m[:name]}'#{source}"
+  end
+end
+
+puts ''
+puts 'Configuration required:'
+puts
+puts "  * Run 'bundle install' inside #{dir}"
+puts '  * Add to config/settings.yml'
+puts '      - scheduler'
+puts '      - devicedb'
+puts '      - cert'
+puts '      - cafile'
+if mods.length > 0
+  puts '  * Configure these modules in config/settings.yml'
+  mods.each do |m|
+    puts "      - #{m[:device]}"
+  end
+end
+puts '  * Add to ~/.bashrc'
+puts "      - export HIVE_CONFIG=#{dir}/config"
