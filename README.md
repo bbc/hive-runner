@@ -4,25 +4,25 @@ Run automated jobs on devices
 
 ## Quick start
 
+Install the hive-runner gem and set up your hive:
+
+    gem install hive-runner
+    hive_setup my_hive
+
+Follow the configuration instructions and, in particular, ensure that the
+`HIVE_CONFIG` variable is set.
+
 Start the Hive daemom:
 
-    ./bin/hived start
+    hived start
 
 Determine the status of the Hive:
 
-    ./bin/hived status
+    hived status
 
 Stop the Hive:
 
-    ./bin/hived stop
-
-By default, the Hive will use the configuration in `config/hive-runner.yml`. To
-use a different file set the environment variable `HIVE_CONFIG`:
-
-    export HIVE_CONFIG=/path/to/hive-config-directory
-    ./bin/hived start
-
-The configuration file must be called `settings.yml`.
+    hived stop
 
 ## Configuration file
 
