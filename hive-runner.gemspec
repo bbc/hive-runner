@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'hive-runner'
   s.version     = '1.0.0'
-  s.date        = '2015-05-18'
+  s.date        = Time.now.strftime("%Y-%m-%d")
   s.summary     = 'Hive Runner'
   s.description = 'Core component of the Hive CI runner'
   s.authors     = ['Joe Haig']
