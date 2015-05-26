@@ -32,6 +32,12 @@ module Hive
     fail 'Missing logging section in configuration file'
   end
 
+  DeviceDBComms.configure do |config|
+    config.url = Chamber.env.network.devicedb
+    config.pem_file = Chamber.env.network.cert
+    config.ssl_verify_mode = OpenSSL::SSL::VERIFY_NONE
+  end
+
   def self.config
     Chamber.env
   end
@@ -52,10 +58,7 @@ module Hive
 
   def self.devicedb(section)
     @devicedb = {} if ! @devicedb.kind_of?(Hash)
-    @devicedb[section] ||= Object.const_get('DeviceDBComms').const_get(section).new(
-      Hive.config.network.devicedb,
-      Hive.config.network.cert
-    )
+    @devicedb[section] ||= Object.const_get('DeviceDBComms').const_get(section).new()
   end
 
   def self.register
@@ -66,11 +69,7 @@ module Hive
   def self.id
     if ! @devicedb_id
       Hive.logger.info "Attempting to register the hive as #{Hive.hostname}"
-      @devicedb_hive ||= DeviceDBComms::Hive.new(
-        Hive.config.network.devicedb,
-        Hive.config.network.cert
-      )
-      register_response = @devicedb_hive.register(Hive.hostname, Hive.mac_address, Hive.ip_address)
+      register_response = self.devicedb('Hive').register(Hive.hostname, Hive.mac_address, Hive.ip_address)
       if register_response['error'].present?
         Hive.logger.warn 'Hive failed to register'
         Hive.logger.warn "  - #{register_response['error']}"
