@@ -22,5 +22,5 @@ Gem::Specification.new do |s|
   # rubygems
   #s.add_runtime_dependency 'hive-messages', ['~> 0.4']
   #s.add_runtime_dependency 'code_cache', ['~> 0.1']
-  #s.add_runtime_dependency 'devicedb_comms', ['~> 0.0']
+  #s.add_runtime_dependency 'devicedb_comms', ['>= 0.15']
 end
