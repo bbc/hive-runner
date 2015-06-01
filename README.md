@@ -12,7 +12,7 @@ Install the hive-runner gem and set up your hive:
 Follow the configuration instructions and, in particular, ensure that the
 `HIVE_CONFIG` variable is set.
 
-Start the Hive daemom:
+Start the Hive daemon:
 
     hived start
 
