@@ -28,6 +28,8 @@ module Hive
         Hive.logger.info("Adding controller for '#{type}'")
         require "hive/controller/#{type}"
         controller = Object.const_get('Hive').const_get('Controller').const_get(type.capitalize).new(opts.to_hash)
+        # require 'pry'
+        # binding.pry
         @controllers << controller
       end
       check_controllers
@@ -73,7 +75,6 @@ module Hive
           (new_device_list[c.class] - @devices[c.class]).each do |d|
             @devices[c.class] << d
           end
-
           # Check that all known devices have running workers
           @devices[c.class].each do |d|
             if d.claimed?
