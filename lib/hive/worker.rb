@@ -203,6 +203,11 @@ module Hive
 
     # Diagnostics function to be extended in child class, as required
     def diagnostics
+      diagnostic_type = Hive.config.diagnostic.keys.to_s.gsub(/"|\[|\]/,'') # For either android/ios
+      require 'hive/diagnostic_runner'
+      Hive::Diagnostic_Runner.new(@options, diagnostic_type)
+      #should return pass/fail status
+      
       status = device_status
       status = set_device_status('idle') if status == 'busy'
       raise DeviceNotReady.new("Current device status: '#{status}'") if status != 'idle'
