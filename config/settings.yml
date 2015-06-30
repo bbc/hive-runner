@@ -33,8 +33,10 @@ test:
 
   diagnostic:
     android:
-      wifi: true
+      wifi: Connected
       memory: {
           min: 1042,
           max: 1000000,
       }
+    ios:
+      bluetooth: true
