@@ -6,7 +6,7 @@ module Hive
 			@options = options
 			@diagnostic_type = diagnostic_type
 			@diagnostic_array = Hive.config.diagnostic[@diagnostic_type].keys 
-       end
+    	end
 
     	def initialize_diagnostic(diagnostic_details)
       		@diagnostic_array.each { |component|
@@ -16,10 +16,10 @@ module Hive
         	}
     	end 
 
-    	def run	
-        	@diagnostics.each{ |diagnostic|
-        		diagnostic.run(@options) unless !diagnostic.should_run?
-           }
+		def run	
+			@diagnostics.each{ |diagnostic|
+				diagnostic.run(@options) unless !diagnostic.should_run?
+			}
 		end
 
 		def repair
