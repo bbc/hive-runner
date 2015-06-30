@@ -30,7 +30,7 @@ test:
   datastore:
     filename: /path/to/datastore.db
 
-  diagnostic:
+  diagnostics:
     android:
       parameter : criteria 
     ios:
