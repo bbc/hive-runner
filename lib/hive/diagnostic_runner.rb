@@ -1,17 +1,17 @@
 module Hive
 	class DiagnosticRunner		
-		def initialize(options, diagnostic_type)
+		def initialize(options, diagnostics_type)
 			@diagnostics = []
 			@options = options
-			@diagnostic_type = diagnostic_type
-			@diagnostic_array = Hive.config.diagnostic[@diagnostic_type].keys 
+			@diagnostics_type = diagnostics_type
+			@diagnostic_array = Hive.config.diagnostics[@diagnostics_type].keys 
 		end
 
-		def initialize_diagnostic(diagnostic_details)
+		def initialize_diagnostic(diagnostics_details)
 			@diagnostic_array.each { |component|
-				Hive.logger.info("Initializing #{component.capitalize} component for #{@diagnostic_type.capitalize} diagnostic")
-				require "hive/diagnostic/#{@diagnostic_type}/#{component}"
-				@diagnostics << Object.const_get('Hive').const_get('Diagnostic').const_get(@diagnostic_type.capitalize).const_get(component.capitalize).new(diagnostic_details[@diagnostic_type][component])
+				Hive.logger.info("Initializing #{component.capitalize} component for #{@diagnostics_type.capitalize} diagnostic")
+				require "hive/diagnostic/#{@diagnostics_type}/#{component}"
+				@diagnostics << Object.const_get('Hive').const_get('Diagnostic').const_get(@diagnostics_type.capitalize).const_get(component.capitalize).new(diagnostics_details[@diagnostics_type][component])
 			}
 		end 
 
