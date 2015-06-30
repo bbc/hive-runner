@@ -20,10 +20,10 @@ module Hive
       	def run(options)
       		@options = options
       		Hive.logger.info("Trying to run diagnostic '#{self.class}'")
-      		component = self.class.to_s.scan(/[^:][^:]*/)[3].downcase	# should get it from @options
+      		component = self.class.to_s.scan(/[^:][^:]*/)[3].downcase	
       		diagnostic_method = "check_"+"#{component}"
-      		#return {component => self.send(diagnostic_method)}
       		self.send(diagnostic_method) 
+      		#return {component => self.send(diagnostic_method)}
 		end
 
       	def record_result(component, status, message)
