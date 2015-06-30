@@ -2,20 +2,19 @@ test:
   daemon_name: HIVE
 
   controllers:
-#    shell:
-     android:
+    shell:
       max_workers: 5
-      name_stub: ANDROID #SHELL_WORKER
+      name_stub: SHELL_WORKER
       queues:
         - bash
   
   logging:
-    directory: /Users/khana46/opt/logs
-    pids: /Users/khana46/opt/pids
+    directory: /log/directory
+    pids: /pid/directory
     main_filename: hive.log
     main_level: DEBUG
     worker_level: DEBUG
-    home: /Users/khana46/opt/home
+    home: /path/to/test/home
     homes_to_keep: 5
   
   timings:
@@ -23,20 +22,16 @@ test:
     controller_loop_interval: 5
   
   network:
-    scheduler: https://hive.test.cloud.bbc.co.uk/
-    devicedb: https://devicedb.test.cloud.bbc.co.uk/
-    cert: /opt/certs/user.pem
-    cafile: /opt/certs/ca-bundle.pem
+    scheduler: https://example.com/scheduler
+    devicedb: https://example.com/devicedb
+    cert: /path/to/certificate.pem
+    cafile: /path/to/certificate-authorities.pem
 
   datastore:
-    filename: /Users/khana46/opt/datastore.db
+    filename: /path/to/datastore.db
 
   diagnostic:
     android:
-      wifi: Connected
-      memory: {
-          min: 1042,
-          max: 1000000,
-      }
+      parameter : criteria 
     ios:
-      bluetooth: true
+      parameter : criteria 
