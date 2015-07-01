@@ -5,43 +5,36 @@ module Hive
 		class DiagnosticFailed < StandardError
 		end
 
-		attr_accessor :options 
-		attr_accessor :timestamp
-		attr_accessor :device
-		attr_accessor :component
+		attr_accessor :config 
+		attr_accessor :last_run # => last Result object
 		attr_accessor :status
 		attr_accessor :message
 
-	 	def initialize(diagnose_criteria)
-			@criteria = diagnose_criteria
+	 	def initialize(config)
+			@config = config
 		end
 	
-		def run(options)
-			@options = options
+		def run
 			Hive.logger.info("Trying to run diagnostic '#{self.class}'")
-			component = self.class.to_s.scan(/[^:][^:]*/)[3].downcase	
-			diagnostic_method = "check_"+"#{component}"
-			self.send(diagnostic_method) 
-			#return {component => self.send(diagnostic_method)}
-		end
+			if should_run?
+		    result = diagnose
+		    result = repair(result) if result.failed?
+		    last_run = result
+		  end
+		  last_run
+	  end
+	  
+	  def should_run?
+	    true
+	  end
+	  
+	  def diagnose
+	    Diagnostic::Result.new
+	  end
+	  
+	  def repair(result)
+	    result
+	  end
 
-		def should_run?
-			true
-		end
-
-		def record_result(component, status, message)
-			@component = component
-			@status = status
-			@message = message
-			@timestamp = Time.now.getutc
-		end
-
-		def as_json
-			{ @name.to_sym => [ :timestamp => @timestamp, \
-				:device => @options['serial'], \
-				:component => @component, \
-				:status => @status, \
-				:message => @message] }.as_json
-		end
 	end
 end 
