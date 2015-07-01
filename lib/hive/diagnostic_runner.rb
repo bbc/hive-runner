@@ -2,8 +2,8 @@ module Hive
 	class DiagnosticRunner
 	  attr_accessor :diagnostics
 	  
-		def initialize(options, diagnostics_config)
-			@diagnostics = self.initalize_diagnostics(diagnostics_config)
+		def initialize(options, diagnostics_config, device)
+			@diagnostics = self.initalize_diagnostics(diagnostics_config, device)
 		end
 
 		def initialize_diagnostic(diagnostics_config)
