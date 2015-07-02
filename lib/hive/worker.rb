@@ -6,7 +6,7 @@ require 'hive/execution_script'
 
 require 'hive/messages'
 require 'code_cache'
-
+require 'hive/diagnostic_runner'
 module Hive
   # The generic worker class
   class Worker
@@ -22,6 +22,7 @@ module Hive
       @parent_pid = @options['parent_pid']
       @device_id = @options['id']
       @device_identity = @options['device_identity'] || 'unknown-device'
+      @diagnostic_type = self.class.to_s.scan(/[^:][^:]*/)[2].downcase
       pid = Process.pid
       $PROGRAM_NAME = "#{@options['name_stub'] || 'WORKER'}.#{pid}"
       @log = Hive::Log.new
@@ -32,6 +33,10 @@ module Hive
       @devicedb_register = true if @devicedb_register.nil?
 
       @queues = @options['queues'].class == Array ? @options['queues'] : []
+
+      @diagnostic_runner = Hive::DiagnosticRunner.new(@options, @diagnostic_type)
+      @diagnostic_runner.initialize_diagnostic(Hive.config.diagnostic)
+      @diagnostic_runner.run
 
       Hive::Messages.configure do |config|
         config.base_path = Hive.config.network.scheduler
