@@ -1,6 +1,7 @@
 require 'hive'
 require 'device_api/android'
-
+require 'hive/results'
+			
 module Hive
 	class Diagnostic
 		attr_accessor :config, :last_run, :message, :device
@@ -8,7 +9,6 @@ module Hive
 		def initialize(config, serial)
 			@config = config
 			@serial = serial
-			@device = self.device
 		end
 
 		def should_run?
@@ -27,13 +27,11 @@ module Hive
 
 		def pass(message= {}, data = {})
 			Hive.logger.info(message)
-			require 'hive/results'
 			Hive::Results.new("pass", message, data )
 		end
 
 		def fail(message ={}, data = {})
 			Hive.logger.info(message)
-			require 'hive/results'
 			Hive::Results.new("fail", message, data)
 		end
 	end
