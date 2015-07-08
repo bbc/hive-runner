@@ -16,6 +16,9 @@ module Hive
     class DeviceNotReady < StandardError
     end
 
+    # Device API Object for device associated with this worker
+    attr_accessor :device_api 
+
     # The main worker process loop
     def initialize(options)
       @options = options
