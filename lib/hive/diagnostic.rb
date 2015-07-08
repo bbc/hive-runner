@@ -4,15 +4,25 @@ require 'hive/results'
 			
 module Hive
 	class Diagnostic
-		attr_accessor :config, :last_run, :message, :device
+		attr_accessor :config, :last_run, :device_api
 
-		def initialize(config, serial)
+		def initialize(config, options)
+			@options = options
 			@config = config
-			@serial = serial
+			@serial = @options['serial']
+			@device_api = @options['device_api']
 		end
 
 		def should_run?
-			true
+			return true if @last_run == nil
+			time_now = Time.new.getutc
+			last_run_time = @last_run.timestamp
+			diff = ((time_now - last_run_time)/5.minutes).round
+			if (diff > 2 && @last_run.passed?) || diff > 1
+				true
+			else
+				false
+			end
 		end
 
 		def run
