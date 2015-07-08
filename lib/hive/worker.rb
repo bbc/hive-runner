@@ -33,8 +33,8 @@ module Hive
 
       @queues = @options['queues'].class == Array ? @options['queues'] : []
       
-      device_type = self.class.to_s.scan(/[^:][^:]*/)[2].downcase
-      @diagnostic_runner = Hive::DiagnosticRunner.new(@options, Hive.config.diagnostics, device_type) # @options has device information
+      platform = self.class.to_s.scan(/[^:][^:]*/)[2].downcase
+      @diagnostic_runner = Hive::DiagnosticRunner.new(@options, Hive.config.diagnostics, platform)
 
       Hive::Messages.configure do |config|
         config.base_path = Hive.config.network.scheduler
