@@ -4,6 +4,10 @@ require 'hive/results'
 			
 module Hive
 	class Diagnostic
+		
+		class InvalidParameterError < StandardError
+    	end
+
 		attr_accessor :config, :last_run, :device_api
 
 		def initialize(config, options)
@@ -29,6 +33,8 @@ module Hive
 			Hive.logger.info("Trying to run diagnostic '#{self.class}'")
 			if should_run?	
 				result = diagnose 
+				require 'pry'
+				binding.pry
 				result = repair(result) if result.failed?
 				@last_run = result
 			end
