@@ -134,7 +134,7 @@ File.open("#{dir}/Gemfile", 'w') do |f|
 
   # These gems need to be put on rubygems so that they can be added to the
   # dependency list for hive-runner
-  f.puts "gem 'hive-messages', git: 'git@github.com:bbc/hive-messages.git', branch: 'better-results'"
+  f.puts "gem 'hive-messages', git: 'git@github.com:bbc/hive-messages.git'"
   f.puts "gem 'code_cache', git: 'git@github.com:bbc/code_cache.git'"
   f.puts "gem 'devicedb_comms', git: 'git@github.com:bbc/devicedb_comms.git'"
 
