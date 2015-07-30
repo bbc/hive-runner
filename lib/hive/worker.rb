@@ -268,9 +268,6 @@ module Hive
           Res.submit_results(
             reporter: :hive,
             ir: file,
-            url: Hive.config.network.scheduler,
-            cert: Hive.config.network.cert,
-            ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE,
             job_id: job.job_id
           )
         end
