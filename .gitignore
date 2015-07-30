@@ -38,4 +38,5 @@ build/
 .chamber.pem.enc
 
 # Daemon output files
+bin/*.pid
 bin/*.output
