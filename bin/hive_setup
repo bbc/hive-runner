@@ -137,6 +137,7 @@ File.open("#{dir}/Gemfile", 'w') do |f|
   f.puts "gem 'hive-messages', git: 'git@github.com:bbc/hive-messages.git'"
   f.puts "gem 'code_cache', git: 'git@github.com:bbc/code_cache.git'"
   f.puts "gem 'devicedb_comms', git: 'git@github.com:bbc/devicedb_comms.git'"
+  f.puts "gem 'res', git: 'git@github.com:bbc/res.git'"
 
   mods.each do |m|
     source = m.has_key?(:git_account) ? ", git: 'git@github.com:#{m[:git_account]}/#{m[:name]}'" : ''

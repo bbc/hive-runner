@@ -6,6 +6,7 @@ require 'hive/execution_script'
 
 require 'hive/messages'
 require 'code_cache'
+require 'res'
 
 module Hive
   # The generic worker class
@@ -135,6 +136,8 @@ module Hive
 
         if ! @job.repository.to_s.empty?
           @log.info "Checking out the repository"
+          @log.debug "  #{@job.repository}"
+          @log.debug "  #{@file_system.testbed_path}"
           checkout_code(@job.repository, @file_system.testbed_path)
         end
 
@@ -175,12 +178,7 @@ module Hive
         # Upload results
         @file_system.finalise_results_directory
         upload_files(@job, @file_system.results_path, @file_system.logs_path)
-        results = gather_results(@file_system)
-        if results
-          @log.info("The results are ...")
-          @log.info(results.inspect)
-          @job.update_results(results)
-        end
+        upload_results(@job, @file_system.results_path)
       rescue => e
         @log.error( "Post execution failed: " + e.message)
         @log.error("  : #{e.backtrace.join("\n  : ")}")
@@ -261,32 +259,24 @@ module Hive
       end
     end
 
+    # Update results
+    def upload_results(job, *paths)
+      paths.each do |path|
+        @log.info("Looking for results files in #{path}")
+        Dir["#{path}/**/*.res"].each do |file|
+          @log.info("File: #{file}")
+          Res.submit_results(
+            reporter: :hive,
+            ir: file,
+            job_id: job.job_id
+          )
+        end
+      end
+    end
+
     # Get a checkout of the repository
     def checkout_code(repository, checkout_directory)
       CodeCache.repo(repository).checkout(:head, checkout_directory) or raise "Unable to checkout repository #{repository}"
-    end
-
-    # Gather the results from the tests
-    # This is the simplest case where the results are written to a file
-    # Child classes will probably replace this function
-    def gather_results(paths)
-      file = "#{paths.results_path}/results.yml"
-      @log.debug "Gathering data from #{file}"
-      # Default values
-      results = {
-        running_count: 0,
-        passed_count: 0,
-        failed_count: 0,
-        errored_count: 0
-      }
-      data = {}
-      if File.file?(file)
-        @log.debug "#{file} exists"
-        results.merge(YAML.load_file(file).symbolize_keys)
-      else
-        @log.debug "#{file} does not exist"
-        nil
-      end
     end
 
     # Determine whether to keep the worker running
