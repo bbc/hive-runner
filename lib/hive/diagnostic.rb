@@ -50,4 +50,3 @@ module Hive
 		end
 	end
 end
-
