@@ -72,7 +72,7 @@ module Hive
       end
       File.chmod(0700, @path)
 
-      pid = Process.spawn @env_secure, "#{@path} > #{@log_path}/stdout.log 2> #{@log_path}/stderr.log", pgroup: true
+      pid = Process.spawn @env_secure, "#{@path}", pgroup: true, in: '/dev/null', out: "#{@log_path}/stdout.log", err: "#{@log_path}/stderr.log"
       @pgid = Process.getpgid(pid)
 
       exit_value = nil
