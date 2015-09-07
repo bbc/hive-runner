@@ -1,5 +1,4 @@
 require 'hive'
-require 'device_api/android'
 require 'hive/results'
       
 module Hive
@@ -21,7 +20,7 @@ module Hive
       return true if @last_run == nil
       time_now = Time.new.getutc
       last_run_time = @last_run.timestamp
-      diff = ((time_now - last_run_time)/5.minutes).round
+      diff = ((time_now - last_run_time)/60*60*60*60*60).round
       if (diff > 2 && @last_run.passed?) || diff > 1
         true
       else
