@@ -1,5 +1,4 @@
 require 'hive'
-# require 'device_api/android'
 require 'hive/results'
       
 module Hive
@@ -52,4 +51,3 @@ module Hive
     end
   end
 end
-
