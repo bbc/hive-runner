@@ -5,7 +5,7 @@ module Hive
     def initialize(options, diagnostics_config, platform)
       @options = options
       @platform = platform
-      @diagnostics = self.initialize_diagnostics(diagnostics_config[@platform])
+      @diagnostics = self.initialize_diagnostics(diagnostics_config[@platform]) if diagnostics_config.has_key?(@platform)
     end
 
     def initialize_diagnostics(diagnostics_config)
@@ -20,7 +20,7 @@ module Hive
       results = @diagnostics.collect do |diagnostic|
         diagnostic.run
       end
-      
+     
       failures = results.select { |r| r.failed? }
       failures.count == 0
     end
