@@ -7,7 +7,8 @@ module Hive
     class InvalidParameterError < StandardError
       end
 
-    attr_accessor :config, :last_run, :device_api
+    attr_accessor :last_run
+    attr_reader :config, :device_api
 
     def initialize(config, options)
       @options = options
