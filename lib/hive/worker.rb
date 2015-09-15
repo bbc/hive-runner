@@ -3,7 +3,7 @@ require 'yaml'
 require 'hive'
 require 'hive/file_system'
 require 'hive/execution_script'
-
+require 'hive/diagnostic_runner'
 require 'hive/messages'
 require 'code_cache'
 require 'res'
@@ -36,6 +36,9 @@ module Hive
       @devicedb_register = true if @devicedb_register.nil?
 
       @queues = @options['queues'].class == Array ? @options['queues'] : []
+      
+      platform = self.class.to_s.scan(/[^:][^:]*/)[2].downcase
+      @diagnostic_runner = Hive::DiagnosticRunner.new(@options, Hive.config.diagnostics, platform)
 
       Hive::Messages.configure do |config|
         config.base_path = Hive.config.network.scheduler
@@ -204,6 +207,7 @@ module Hive
 
     # Diagnostics function to be extended in child class, as required
     def diagnostics
+      @diagnostic_runner.run
       status = device_status
       status = set_device_status('idle') if status == 'busy'
       raise DeviceNotReady.new("Current device status: '#{status}'") if status != 'idle'

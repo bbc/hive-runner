@@ -29,3 +29,9 @@ test:
 
   datastore:
     filename: /path/to/datastore.db
+
+  diagnostics:
+    android:
+      parameter : criteria 
+    ios:
+      parameter : criteria 

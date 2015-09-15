@@ -73,7 +73,6 @@ module Hive
           (new_device_list[c.class] - @devices[c.class]).each do |d|
             @devices[c.class] << d
           end
-
           # Check that all known devices have running workers
           @devices[c.class].each do |d|
             if d.claimed?
