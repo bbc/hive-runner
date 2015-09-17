@@ -109,7 +109,7 @@ File.open("#{dir}/config/settings.yml", 'w') do |f|
   f.puts "    pids: #{dir}/pids"
   f.puts '    main_filename: hive.log'
   f.puts '    main_level: INFO'
-  f.puts '    worker_leve: INFO'
+  f.puts '    worker_level: INFO'
   f.puts "    home: #{dir}/workspaces"
   f.puts '    homes_to_keep: 5'
   f.puts ''
