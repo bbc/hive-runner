@@ -125,6 +125,12 @@ File.open("#{dir}/config/settings.yml", 'w') do |f|
   f.puts ''
   f.puts '  datastore:'
   f.puts "    filename: #{dir}/datastore.db"
+  f.puts ''
+  f.puts '  diagnostics:'
+  f.puts '    android:'
+  f.puts '      uptime: {'
+  f.puts '        reboot_timeout: 3000,'
+  f.puts '              }' 
 end
 
 File.open("#{dir}/Gemfile", 'w') do |f|
