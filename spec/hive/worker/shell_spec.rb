@@ -9,7 +9,11 @@ module Hive
 
     class Port
       def self.assign(worker)
-        @p += 1
+        if @p.nil?
+          @p = 4000
+        else
+          @p += 1
+        end
       end
     end
   end

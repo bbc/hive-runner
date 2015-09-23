@@ -49,6 +49,14 @@ module Hive
         with_retry { super }
       end
 
+      def find_by(options)
+        with_retry { super(options) }
+      end
+
+      def all
+        with_retry { super }
+      end
+
       def with_retry(&block)
         e = nil
         10.times do

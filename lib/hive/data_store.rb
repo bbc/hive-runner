@@ -13,14 +13,25 @@ module Hive
       )
 
       # Create tables if they do not already exist
-      if ! ActiveRecord::Base.connection.table_exists? 'ports'
-        Hive.logger.info("Creating 'ports' table in database")
-        ActiveRecord::Schema.define do
-          create_table :ports do |table|
-            table.column :port, :integer
-            table.column :worker, :string, default: nil
+      tries = 5
+      begin
+        if ! ActiveRecord::Base.connection.table_exists? 'ports'
+          Hive.logger.info("Creating 'ports' table in database")
+          ActiveRecord::Schema.define do
+            create_table :ports do |table|
+              table.column :port, :integer
+              table.column :worker, :string, default: nil
+            end
           end
         end
+      rescue SQLite3::BusyException => e
+        if tried > 0
+          Hive.logger.warn("Database locked. Retrying.")
+          sleep 1
+          tries -= 1
+          retry
+        end
+        Hive.logger.warn("Unable to initialise Ports database")
       end
     end
 
