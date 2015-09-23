@@ -141,7 +141,7 @@ describe Hive::Register do
       Hive.config.datastore.filename = @file.path
     end
 
-    after(:all) do
+    after(:each) do
       @file.unlink
       Hive.instance_variable_set(@data_store, nil)
     end
