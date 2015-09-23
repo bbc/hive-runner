@@ -100,8 +100,7 @@ module Hive
     end
 
     def reservation_details
-      # TODO: Get hive id
-      { hive_id: 1, worker_pid: Process.pid }
+      { hive_id: Hive.id, worker_pid: Process.pid }
     end
 
     # Execute a job
