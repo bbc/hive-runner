@@ -108,12 +108,5 @@ module Hive
         end
       end
     end
-
-    def clear_ports
-      pids = self.worker_pids
-      Hive.data_store.port.all.each do |p|
-        p.delete if ! pids.include?(p.worker.to_i)
-      end
-    end
   end
 end
