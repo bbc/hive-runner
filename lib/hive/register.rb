@@ -65,6 +65,7 @@ module Hive
 
           # Remove any devices that have not been rediscovered
           (@devices[c.class] - new_device_list[c.class]).each do |d|
+            c.release_ports(d.ports)
             d.stop
             @devices[c.class].delete(d)
           end

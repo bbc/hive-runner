@@ -5,11 +5,13 @@ module Hive
   class Device
     attr_reader :type
     attr_accessor :status
+    attr_accessor :ports
 
     # Initialise the device
     def initialize(options)
       @worker_pid = nil
       @options = options
+      @ports = options['ports'] or []
       @status = @options.has_key?('status') ? @options['status'] : 'none'
       @worker_class = self.class.to_s.sub('Device', 'Worker')
       require @worker_class.downcase.gsub(/::/, '/')

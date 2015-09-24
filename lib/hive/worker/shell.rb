@@ -6,14 +6,6 @@ module Hive
     class Shell < Worker
       def initialize(options = {})
         @devicedb_register = false
-
-        #@ports = {}
-        #if options.has_key?('ports')
-        #  options['ports'].each do |p|
-        #    @ports[p] = Hive.data_store.port.assign(Process.pid)
-        #  end
-        #end
-
         super
       end
 
