@@ -15,7 +15,7 @@ module Hive
         Hive.logger.info('Creating shell devices')
         (1..@maximum).collect do |i|
           Hive.logger.info("  Shell device #{i}")
-          Object.const_get(@device_class).new(@config.merge('id' => i))
+          self.create_device('id' => i)
         end
       end
     end

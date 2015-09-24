@@ -17,6 +17,9 @@ module Hive
     class DeviceNotReady < StandardError
     end
 
+    class NoPortsAvailable < StandardError
+    end
+
     # Device API Object for device associated with this worker
     attr_accessor :device_api 
 
@@ -36,6 +39,10 @@ module Hive
       @devicedb_register = true if @devicedb_register.nil?
 
       @queues = @options['queues'].class == Array ? @options['queues'] : []
+
+      # Use '.clone' as @ports will be modified
+      @ports = @options.has_key?('ports') ? @options['ports'].clone : []
+      @ports_allocated = []
       
       platform = self.class.to_s.scan(/[^:][^:]*/)[2].downcase
       @diagnostic_runner = Hive::DiagnosticRunner.new(@options, Hive.config.diagnostics, platform) if !Hive.config["diagnostics"].nil?
@@ -310,6 +317,36 @@ module Hive
 
     # Do whatever device cleanup is required
     def cleanup
+    end
+
+    # Allocate a port
+    def allocate_port
+      if @ports.length > 0
+        p = @ports.shift
+        @ports_allocated.append(p)
+        Hive.logger.info("Allocating port #{p}")
+        p
+      else
+        raise NoPortsAvailable
+      end
+    end
+
+    # Release a port
+    def release_port(p)
+      if @ports_allocated.include?(p)
+        Hive.logger.info("Releasing port #{p}")
+        @ports.append(p)
+        @ports_allocated.delete(p)
+      else
+        Hive.logger.warn("Attempting to release port #{p} but not in correct pool")
+      end
+    end
+
+    # Release all ports
+    def release_all_ports
+      Hive.logger.info("Releasing all ports")
+      @ports.concat(@ports_allocated)
+      @ports_allocated = []
     end
   end
 end
