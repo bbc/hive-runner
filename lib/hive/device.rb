@@ -22,7 +22,7 @@ module Hive
     def start
       parent_pid = Process.pid
       @worker_pid = Process.fork do
-        worker = Object.const_get(@worker_class).new(@options.merge('parent_pid' => parent_pid, 'device_identity' => self.identity))
+        worker = Object.const_get(@worker_class).new(@options.merge('parent_pid' => parent_pid, 'device_identity' => self.identity, 'ports' => self.ports))
       end
       Process.detach @worker_pid
 
