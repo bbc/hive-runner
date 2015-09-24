@@ -30,10 +30,12 @@ module Hive
           @ports = @ports.drop(@config['ports_allocate'])
         end
       end
+      Hive.logger.debug("Allocating ports: #{ps.inspect}")
       ps
     end
 
     def release_ports(ps)
+      Hive.logger.debug("Releasing ports: #{ps}")
       ps.each do |p|
         @ports << p if @allocated_ports.delete(p)
       end

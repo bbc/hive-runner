@@ -324,6 +324,7 @@ module Hive
       if @ports.length > 0
         p = @ports.shift
         @ports_allocated.append(p)
+        Hive.logger.info("Allocating port #{p}")
         p
       else
         raise NoPortsAvailable
@@ -333,13 +334,17 @@ module Hive
     # Release a port
     def release_port(p)
       if @ports_allocated.include?(p)
+        Hive.logger.info("Releasing port #{p}")
         @ports.append(p)
         @ports_allocated.delete(p)
+      else
+        Hive.logger.warn("Attempting to release port #{p} but not in correct pool")
       end
     end
 
     # Release all ports
     def release_all_ports
+      Hive.logger.info("Releasing all ports")
       @ports.concat(@ports_allocated)
       @ports_allocated = []
     end
