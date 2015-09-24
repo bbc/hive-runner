@@ -58,6 +58,7 @@ module Hive
               @devices[c.class][i].status = device.status
               new_device_list[c.class] << @devices[c.class][i]
             else
+              device.ports = c.allocate_ports
               new_device_list[c.class] << device
             end
           end

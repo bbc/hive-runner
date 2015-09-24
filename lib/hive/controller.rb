@@ -42,7 +42,7 @@ module Hive
     end
 
     def create_device(extra_options = {})
-      Object.const_get(@device_class).new(@config.merge(extra_options).merge('ports' => allocate_ports))
+      Object.const_get(@device_class).new(@config.merge(extra_options))
     end
 
     def detect
