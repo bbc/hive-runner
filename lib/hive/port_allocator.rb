@@ -3,6 +3,14 @@ module Hive
     class NoPortsAvailable < StandardError
     end
 
+    # Create a port allocator
+    #
+    # For ports in the range 4000-5000
+    #   Hive::PortAllocator.new(minimum: 4000, maximum: 5000)
+    #
+    # For ports 6000, 6050 and 7433
+    #   Hive::PortAllocator.new(ports: [6000, 6050, 7433])
+    #
     def initialize(config)
       @allocated_ports = []
       if config.has_key?(:minimum) and config.has_key?(:maximum) and config[:minimum] > 0 and config[:minimum] <= config[:maximum]
@@ -17,6 +25,7 @@ module Hive
       end
     end
 
+    # Allocate a single port in the range
     def allocate_port
       if p = @free_ports.pop
         @allocated_ports << p
@@ -26,10 +35,13 @@ module Hive
       end
     end
 
+    # Relase a single port in the range
     def release_port(p)
       @free_ports << p if @allocated_ports.delete(p)
     end
 
+    # Create a new Hive::PortAllocator instance with a number of ports from
+    # the range
     def allocate_port_range(n)
       if n <= @free_ports.length
         ps = @free_ports.take(n)
@@ -41,6 +53,11 @@ module Hive
       end
     end
 
+    # Release ports that were previously allocated to another
+    # Hive::PortAllocator
+    #
+    # Note, this will fail silently if 'range' contains ports that are not
+    # allocated in the current instance
     def release_port_range(range)
       if range.ports - @allocated_ports == []
         @free_ports.concat(range.ports)
@@ -48,6 +65,7 @@ module Hive
       end
     end
 
+    # Full list of all ports, either free or allocated
     def ports
       [@free_ports, @allocated_ports].flatten
     end
