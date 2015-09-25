@@ -8,12 +8,11 @@ require 'socket'
 # The Hive automated testing framework
 module Hive
   Chamber.load(
-    basepath: ENV['HIVE_CONFIG'] || File.expand_path('../../config', __FILE__),
+    basepath: ENV['HIVE_CONFIG'] || './config/',
     namespaces: {
       environment: ENV['HIVE_ENVIRONMENT'] || 'test'
     }
   )
-
   DAEMON_NAME = Chamber.env.daemon_name? ? Chamber.env.daemon_name : 'HIVE'
 
   if Chamber.env.logging?
