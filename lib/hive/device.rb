@@ -1,17 +1,18 @@
 require 'hive'
+require 'hive/port_allocator'
 
 module Hive
   # The generic device class
   class Device
     attr_reader :type
     attr_accessor :status
-    attr_accessor :ports
+    attr_accessor :port_allocator
 
     # Initialise the device
     def initialize(options)
       @worker_pid = nil
       @options = options
-      @ports = options['ports'] or []
+      @port_allocator = options['port_allocator'] or Hive::PortAllocator.new(ports: [])
       @status = @options.has_key?('status') ? @options['status'] : 'none'
       @worker_class = self.class.to_s.sub('Device', 'Worker')
       require @worker_class.downcase.gsub(/::/, '/')
@@ -22,7 +23,7 @@ module Hive
     def start
       parent_pid = Process.pid
       @worker_pid = Process.fork do
-        worker = Object.const_get(@worker_class).new(@options.merge('parent_pid' => parent_pid, 'device_identity' => self.identity, 'ports' => self.ports))
+        worker = Object.const_get(@worker_class).new(@options.merge('parent_pid' => parent_pid, 'device_identity' => self.identity, 'port_allocator' => self.port_allocator))
       end
       Process.detach @worker_pid
 
