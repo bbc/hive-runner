@@ -10,8 +10,7 @@ module Hive
       @log.debug "Creating execution script with path=#{@path}"
       @env = {
         'HIVE_SCHEDULER' => Hive.config.network.scheduler,
-        'HIVE_WORKING_DIRECTORY' => config[:file_system].testbed_path,
-        'RESULTS_FILE' => config[:file_system].results_file
+        'HIVE_WORKING_DIRECTORY' => config[:file_system].testbed_path
       }
       @env_unset = [
         'BUNDLE_GEMFILE',
