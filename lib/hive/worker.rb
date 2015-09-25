@@ -187,7 +187,7 @@ module Hive
         # Upload results
         @file_system.finalise_results_directory
         upload_files(@job, @file_system.results_path, @file_system.logs_path)
-        upload_results(@job, @file_system.results_path)
+        upload_results(@job, @file_system.testbed_path, @file_system.results_path)
       rescue => e
         @log.error( "Post execution failed: " + e.message)
         @log.error("  : #{e.backtrace.join("\n  : ")}")
@@ -275,18 +275,54 @@ module Hive
     end
 
     # Update results
-    def upload_results(job, *paths)
-      paths.each do |path|
-        @log.info("Looking for results files in #{path}")
-        Dir["#{path}/**/*.res"].each do |file|
-          @log.info("File: #{file}")
+    def upload_results(job, checkout, results_dir)
+
+      res_file = detect_res_file(results_dir) || process_xunit_results(results_dir)
+      
+      if res_file
+        @log.info("Res file found")
+      
+        begin
           Res.submit_results(
             reporter: :hive,
-            ir: file,
+            ir: res_file,
             job_id: job.job_id
           )
+        rescue => e
+          @log.warn("Res Hive upload failed #{e.message}")
         end
+      
+        begin
+          if conf_file = testmine_config(checkout)
+            Res.submit_results(
+              reporter: :testmine,
+              ir: res_file,
+              config_file: conf_file,
+              hive_job_id: job.job_id,
+              version: job.execution_variables.version,
+              target: job.execution_variables.queue_name
+            )
+          end
+        rescue => e
+          @log.warn("Res Testmine upload failed #{e.message}")
+        end
+        
+        # TODO Add in Testrail upload
+      
       end
+      
+    end
+
+    def detect_res_file(results_dir)
+      Dir.glob( "#{results_dir}/*.res" ).first
+    end
+    
+    def process_xunit_results(results_dir)
+      #TODO Turn xml file into a res file with res parser
+    end
+    
+    def testmine_config(checkout)
+      Dir.glob( "#{checkout}/.testmi{n,t}e.yml" ).first
     end
 
     # Get a checkout of the repository

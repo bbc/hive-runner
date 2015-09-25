@@ -33,10 +33,6 @@ module Hive
       @bash_script_path ||= "#{testbed_path}/executed_script.sh"
     end
 
-    def results_file
-      @results_file ||= "#{testbed_path}/results.yml"
-    end
-
     # Copy useful stuff into the results directory
     def finalise_results_directory
       copy_file(executed_script_path, "#{results_path}/executed_script.sh")

@@ -10,10 +10,6 @@ module Hive
       end
 
       def pre_script(job, file_system, script)
-        @ports.each do |label, port|
-          @log.debug("Add port #{label} (#{port}) as environment variable")
-          script.set_env "HIVE_PORT_#{label.upcase}", port
-        end
       end
     end
   end
