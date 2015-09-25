@@ -37,11 +37,9 @@ module Hive
       @results_file ||= "#{testbed_path}/results.yml"
     end
 
+    # Copy useful stuff into the results directory
     def finalise_results_directory
       copy_file(executed_script_path, "#{results_path}/executed_script.sh")
-      if File.file?(results_file)
-        copy_file(results_file, "#{results_path}/results.yml")
-      end
     end
 
     def fetch_build(build_url, destination_path)
