@@ -75,6 +75,7 @@ Signal.trap('USR1') do
     if workspaces_list.has_key?(details[:worker].to_s)
       jobs = workspaces_list[details[:worker].to_s].keys
       states = jobs.map { |key| workspaces_list[details[:worker].to_s][key] }
+      workspaces_list.delete(details[:worker].to_s)
     end
     table.add_row [d, details[:worker], jobs.join("\n"), states.join("\n"), details[:queues].join("\n")]
   end
