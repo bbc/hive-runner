@@ -18,7 +18,7 @@ module Hive
     end
 
     # Device API Object for device associated with this worker
-    attr_accessor :device_api 
+    attr_accessor :device_api, :queues 
 
     # The main worker process loop
     def initialize(options)
@@ -36,6 +36,7 @@ module Hive
       @devicedb_register = true if @devicedb_register.nil?
 
       @queues = @options['queues'].class == Array ? @options['queues'] : []
+      self.update_queue_log
       
       platform = self.class.to_s.scan(/[^:][^:]*/)[2].downcase
       @diagnostic_runner = Hive::DiagnosticRunner.new(@options, Hive.config.diagnostics, platform) if !Hive.config["diagnostics"].nil?
@@ -237,10 +238,15 @@ module Hive
             @log.info("Updated queue list: #{new_queues.join(', ')}")
             @queues = new_queues
           end
+          update_queue_log
         else
           @log.warn("Queue list missing from DeviceDB response")
         end
       end
+    end
+    
+    def update_queue_log
+      File.open("#{LOG_DIRECTORY}/#{Process.pid}.queues.yml",'w') { |f| f.write @queues.to_yaml}
     end
 
     # Upload any files from the test
