@@ -58,6 +58,7 @@ module Hive
               @devices[c.class][i].status = device.status
               new_device_list[c.class] << @devices[c.class][i]
             else
+              device.ports = c.allocate_ports
               new_device_list[c.class] << device
             end
           end
@@ -65,6 +66,7 @@ module Hive
 
           # Remove any devices that have not been rediscovered
           (@devices[c.class] - new_device_list[c.class]).each do |d|
+            c.release_ports(d.ports)
             d.stop
             @devices[c.class].delete(d)
           end
@@ -106,13 +108,6 @@ module Hive
           Hive.logger.info("Found (and deleting) #{dir}")
           FileUtils.rm_rf(dir)
         end
-      end
-    end
-
-    def clear_ports
-      pids = self.worker_pids
-      Hive.data_store.port.all.each do |p|
-        p.delete if ! pids.include?(p.worker.to_i)
       end
     end
   end

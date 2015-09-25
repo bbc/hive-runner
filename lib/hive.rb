@@ -1,7 +1,6 @@
 require 'chamber'
 require 'hive/log'
 require 'hive/register'
-require 'hive/data_store'
 require 'devicedb_comms'
 require 'macaddr'
 require 'socket'
@@ -115,10 +114,5 @@ module Hive
   # Get the hostname of the Hive
   def self.hostname
     Socket.gethostname.split('.').first
-  end
-
-  # The local datastore
-  def self.data_store
-    @data_store ||= Hive::DataStore.new(self.config.datastore.filename)
   end
 end
