@@ -99,28 +99,21 @@ File.open("#{dir}/config/settings.yml", 'w') do |f|
   f.puts '    shell:'
   f.puts '      # Number of shell workers to allocate'
   f.puts '      maximum: 5'
-  f.puts '      # Range of ports to use for #{m[:device]} workers'
-  f.puts '      minimum_port: 9995'
-  f.puts '      maximum_port: 10000'
   f.puts '      # Number of ports to allocate to each shell worker'
-  f.puts '      ports_allocate: 1'
+  f.puts '      port_range_size: 50'
   f.puts '      name_stub: SHELL_WORKER'
   min_port = 10001
   port_range_step = 10000
   mods.each do |m|
     f.puts "    #{m[:device]}:"
-    if min_port > 60000
-      f.puts "      # No more port ranges available"
-    else
-      f.puts "      # Range of ports to use for #{m[:device]} workers"
-      f.puts "      minimum_port: #{min_port}"
-      min_port += port_range_step
-      f.puts "      maximum_port: #{min_port - 1}"
-      f.puts "      # Number of ports to allocate to each #{m[:device]} worker"
-      f.puts '      ports_allocate: 50'
-    end
+    f.puts '      # Number of ports to allocate to each #{m[:device]} worker'
+    f.puts '      port_range_size: 50'
     f.puts "      name_stub: #{m[:device].upcase}_WORKER"
   end
+  f.puts ''
+  f.puts '  ports:'
+  f.puts '    minimum: 4000'
+  f.puts '    maximum: 5000'
   f.puts ''
   f.puts '  logging:'
   f.puts "    directory: #{dir}/log"

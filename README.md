@@ -53,10 +53,18 @@ of the fields in each controllers section is common to all controller types
 
 Fields for all controller types are:
 
-| Field         | Content                             |
-|---------------|-------------------------------------|
-| `max_workers` | Maximum number of workers to use    |
-| `name_stub`   | Stub for name of the worker process |
+| Field             | Content                                   |
+|-------------------|-------------------------------------------|
+| `max_workers`     | Maximum number of workers to use          |
+| `port_range_size` | Number of ports to allocate to the device |
+| `name_stub`       | Stub for name of the worker process       |
+
+### Ports
+
+| Field     | Content             |
+|-----------|---------------------|
+| `minimum` | Minimum port number |
+| `maximum` | Maximum port number |
 
 ### Logging
 

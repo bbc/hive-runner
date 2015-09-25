@@ -1,4 +1,5 @@
 require 'hive'
+require 'hive/port_allocator'
 
 module Hive
   # Central register of devices and workers in the hive
@@ -9,6 +10,11 @@ module Hive
       @controllers = []
       @devices = {}
       @max_devices = 5 # TODO Add to configuration file
+      if Hive.config.ports?
+        @port_allocator = Hive::PortAllocator.new(minimum: Hive.config.ports.minimum, maximum: Hive.config.ports.maximum)
+      else
+        @port_allocator = Hive::PortAllocator.new(ports: [])
+      end
     end
 
     def devices
@@ -58,7 +64,7 @@ module Hive
               @devices[c.class][i].status = device.status
               new_device_list[c.class] << @devices[c.class][i]
             else
-              device.ports = c.allocate_ports
+              device.port_allocator = @port_allocator.allocate_port_range(c.port_range_size)
               new_device_list[c.class] << device
             end
           end
@@ -66,7 +72,7 @@ module Hive
 
           # Remove any devices that have not been rediscovered
           (@devices[c.class] - new_device_list[c.class]).each do |d|
-            c.release_ports(d.ports)
+            @port_allocator.release_port_range(d.port_allocator)
             d.stop
             @devices[c.class].delete(d)
           end
