@@ -1,39 +1,5 @@
-GIT
-  remote: git@github.com:bbc/code_cache.git
-  revision: 6f73971b4d17c2b6b0ecc3949479ebf5d37d2b7d
-  specs:
-    code_cache (0.1.2)
-
-GIT
-  remote: git@github.com:bbc/devicedb_comms.git
-  revision: 4f8ce261d49c340fcddc9a41109b4220f8985bda
-  specs:
-    devicedb_comms (0.0.14)
-      activesupport
-      virtus
-
-GIT
-  remote: git@github.com:bbc/hive-messages.git
-  revision: 899c0512864e77d5db1a0377efcfff48d8fb3f0e
-  specs:
-    hive-messages (1.0.1)
-      activemodel
-      activesupport
-      mimemagic
-      multi_json
-      multipart-post
-      roar (>= 1.0.0)
-      virtus
-
-GIT
-  remote: git@github.com:bbc/res.git
-  revision: 0dafbaa9310f0d0a88d81d48ee7d703ae65bf77f
-  specs:
-    res (0.1.0)
-      json
-
 PATH
-  remote: ../
+  remote: .
   specs:
     hive-runner (1.2.0)
       activerecord (~> 4.2)
@@ -128,21 +94,17 @@ GEM
     thread_safe (0.3.5)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
-    uber (0.0.15)
-    virtus (1.0.5)
-      axiom-types (~> 0.1)
-      coercible (~> 1.0)
-      descendants_tracker (~> 0.0, >= 0.0.3)
-      equalizer (~> 0.0, >= 0.0.9)
+    webmock (1.21.0)
+      addressable (>= 2.3.6)
+      crack (>= 0.3.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  code_cache!
-  devicedb_comms!
-  hive-messages!
+  cucumber
   hive-runner!
-  res!
   rspec
+  rubocop
   simplecov
+  webmock
