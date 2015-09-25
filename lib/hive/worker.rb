@@ -5,6 +5,7 @@ require 'hive/file_system'
 require 'hive/execution_script'
 require 'hive/diagnostic_runner'
 require 'hive/messages'
+require 'hive/port_allocator'
 require 'code_cache'
 require 'res'
 
@@ -40,9 +41,7 @@ module Hive
 
       @queues = @options['queues'].class == Array ? @options['queues'] : []
 
-      # Use '.clone' as @ports will be modified
-      @ports = @options.has_key?('ports') ? @options['ports'].clone : []
-      @ports_allocated = []
+      @port_allocator = (@options.has_key?('port_allocator') ? @options['port_allocator'] : Hive::PortAllocator.new(ports: []))
       
       platform = self.class.to_s.scan(/[^:][^:]*/)[2].downcase
       @diagnostic_runner = Hive::DiagnosticRunner.new(@options, Hive.config.diagnostics, platform) if !Hive.config["diagnostics"].nil?
@@ -321,32 +320,23 @@ module Hive
 
     # Allocate a port
     def allocate_port
-      if @ports.length > 0
-        p = @ports.shift
-        @ports_allocated.append(p)
-        Hive.logger.info("Allocating port #{p}")
-        p
-      else
-        raise NoPortsAvailable
-      end
+      @log.warn("Using deprecated 'Hive::Worker.allocate_port' method")
+      @log.warn("Use @port_allocator.allocate_port instead")
+      @port_allocator.allocate_port
     end
 
     # Release a port
     def release_port(p)
-      if @ports_allocated.include?(p)
-        Hive.logger.info("Releasing port #{p}")
-        @ports.append(p)
-        @ports_allocated.delete(p)
-      else
-        Hive.logger.warn("Attempting to release port #{p} but not in correct pool")
-      end
+      @log.warn("Using deprecated 'Hive::Worker.release_port' method")
+      @log.warn("Use @port_allocator.release_port instead")
+      @port_allocator.release_port(p)
     end
 
     # Release all ports
     def release_all_ports
-      Hive.logger.info("Releasing all ports")
-      @ports.concat(@ports_allocated)
-      @ports_allocated = []
+      @log.warn("Using deprecated 'Hive::Worker.release_all_ports' method")
+      @log.warn("Use @port_allocator.release_all_ports instead")
+      @port_allocator.release_all_ports
     end
   end
 end

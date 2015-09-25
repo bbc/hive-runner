@@ -181,4 +181,20 @@ RSpec.describe Hive::PortAllocator do
       end
     end
   end
+
+  describe 'empty allocators' do
+    it 'creates an empty allocator' do
+      expect(Hive::PortAllocator.new(ports: [])).to be_a Hive::PortAllocator
+    end
+
+    it 'allocates an empty subrange' do
+      pa = Hive::PortAllocator.new(minimum: 500, maximum: 600)
+      expect(pa.allocate_port_range(0)).to be_a Hive::PortAllocator
+    end
+
+    it 'allocates an empty subrange of an empty allocator' do
+      pa = Hive::PortAllocator.new(ports: [])
+      expect(pa.allocate_port_range(0)).to be_a Hive::PortAllocator
+    end
+  end
 end

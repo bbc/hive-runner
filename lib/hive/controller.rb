@@ -3,6 +3,8 @@ require 'hive'
 module Hive
   # Generic hive controller class
   class Controller
+    attr_reader :port_range_size
+
     class DeviceDetectionFailed < StandardError
     end
 
@@ -14,31 +16,7 @@ module Hive
       @device_class = self.class.to_s.sub('Controller', 'Device')
       require @device_class.downcase.gsub(/::/, '/')
       Hive.logger.info("Controller '#{self.class}' created")
-
-      @ports = (@config['minimum_port'].nil? or @config['maximum_port'].nil? ? [] : Array(@config['minimum_port']..@config['maximum_port']))
-      @allocated_ports = []
-    end
-
-    def allocate_ports
-      ps = []
-      if ! @config['ports_allocate'].nil?
-        if @config['ports_allocate'] > @ports.length
-          raise NoPortsAvailable
-        else
-          ps = @ports.take(@config['ports_allocate'])
-          @allocated_ports.concat(ps)
-          @ports = @ports.drop(@config['ports_allocate'])
-        end
-      end
-      Hive.logger.debug("Allocating ports: #{ps.inspect}")
-      ps
-    end
-
-    def release_ports(ps)
-      Hive.logger.debug("Releasing ports: #{ps}")
-      ps.each do |p|
-        @ports << p if @allocated_ports.delete(p)
-      end
+      @port_range_size = (@config.has_key?('port_range_size') ? @config['port_range_size'] : 0)
     end
 
     def create_device(extra_options = {})
