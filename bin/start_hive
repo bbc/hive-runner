@@ -71,8 +71,11 @@ Signal.trap('USR1') do
   table = Terminal::Table.new headings: ['Device', 'Worker', 'Job', 'Status', 'Queues']
   device_details.each do |d, details|
     table.add_separator
-    jobs = workspaces_list[details[:worker].to_s].keys
-    states = jobs.map { |key| workspaces_list[details[:worker].to_s][key] }
+    jobs = states = '---'
+    if workspaces_list.has_key?(details[:worker].to_s)
+      jobs = workspaces_list[details[:worker].to_s].keys
+      states = jobs.map { |key| workspaces_list[details[:worker].to_s][key] }
+    end
     table.add_row [d, details[:worker], jobs.join("\n"), states.join("\n"), details[:queues].join("\n")]
   end
   workspaces_list.each do |worker, list|
