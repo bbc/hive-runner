@@ -65,6 +65,12 @@ module Hive
       end
     end
 
+    # Release all ports
+    def release_all_ports
+      @free_ports.concat(@allocated_ports)
+      @allocated_ports = []
+    end
+
     # Full list of all ports, either free or allocated
     def ports
       [@free_ports, @allocated_ports].flatten

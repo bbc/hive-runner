@@ -144,4 +144,41 @@ RSpec.describe Hive::PortAllocator do
       end
     end
   end
+
+  describe '#release_all_ports' do
+    let(:fifty_ports) { Hive::PortAllocator.new(minimum: 501, maximum: 550) }
+
+    it 'releases all individually allocated ports' do
+      fifty_ports.allocate_port
+      fifty_ports.allocate_port
+      fifty_ports.allocate_port
+      fifty_ports.release_all_ports
+
+      50.times do
+        expect(fifty_ports.allocate_port).to be_between(501, 550)
+      end
+    end
+
+    it 'releases all allocated port ranges' do
+      fifty_ports.allocate_port_range(5)
+      fifty_ports.allocate_port_range(10)
+      fifty_ports.allocate_port_range(15)
+      fifty_ports.release_all_ports
+
+      50.times do
+        expect(fifty_ports.allocate_port).to be_between(501, 550)
+      end
+    end
+
+    it 'releases all ports allocated individually or as ranges' do
+      fifty_ports.allocate_port_range(5)
+      fifty_ports.allocate_port
+      fifty_ports.allocate_port_range(15)
+      fifty_ports.release_all_ports
+
+      50.times do
+        expect(fifty_ports.allocate_port).to be_between(501, 550)
+      end
+    end
+  end
 end
