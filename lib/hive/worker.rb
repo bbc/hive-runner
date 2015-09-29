@@ -8,7 +8,7 @@ require 'hive/messages'
 require 'hive/port_allocator'
 require 'code_cache'
 require 'res'
-require 'pry'
+
 module Hive
   # The generic worker class
   class Worker
@@ -133,8 +133,7 @@ module Hive
       end
 
       @log.info('Job starting')
-      @job.prepare(@device_id)
-   
+      @job.prepare(@device_id)  
       exception = nil
       begin
         @log.info "Setting job paths"
@@ -276,7 +275,6 @@ module Hive
 
     # Update results
     def upload_results(job, checkout, results_dir)
-
       res_file = detect_res_file(results_dir) || process_xunit_results(results_dir)
 
       if res_file
