@@ -8,7 +8,7 @@ require 'hive/messages'
 require 'hive/port_allocator'
 require 'code_cache'
 require 'res'
-
+require 'pry'
 module Hive
   # The generic worker class
   class Worker
@@ -134,7 +134,7 @@ module Hive
 
       @log.info('Job starting')
       @job.prepare(@device_id)
-      
+   
       exception = nil
       begin
         @log.info "Setting job paths"
@@ -278,10 +278,10 @@ module Hive
     def upload_results(job, checkout, results_dir)
 
       res_file = detect_res_file(results_dir) || process_xunit_results(results_dir)
-      
+
       if res_file
         @log.info("Res file found")
-      
+     
         begin
           Res.submit_results(
             reporter: :hive,
@@ -318,7 +318,14 @@ module Hive
     end
     
     def process_xunit_results(results_dir)
-      #TODO Turn xml file into a res file with res parser
+      xunit_output = Res.format_results(formatter: :junit,:file =>  Dir.glob( "#{results_dir}/*.xml" ).first)
+      res_output = File.open(xunit_output.io, "rb")
+      contents = res_output.read
+      res_output.close
+      res = File.open("#{results_dir}/xunit.res", "w+")
+      res.puts contents   
+      res.close   
+      res
     end
     
     def testmine_config(checkout)

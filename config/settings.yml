@@ -1,20 +1,25 @@
 test:
   daemon_name: HIVE
 
-  controllers:
-    shell:
-      max_workers: 5
-      name_stub: SHELL_WORKER
+  controllers: 
+    android:
+      name_stub: ANDROID #SHELL_WORKER
+      port_range_size: 10
       queues:
         - bash
   
+  ports:
+    minimum: 4000
+    maximum: 5000
+
   logging:
-    directory: /log/directory
-    pids: /pid/directory
+    directory: /Users/khana46/opt/logs
+    pids: /Users/khana46/opt/pids
+    console_level: DEBUG
     main_filename: hive.log
     main_level: DEBUG
     worker_level: DEBUG
-    home: /path/to/test/home
+    home: /Users/khana46/opt/home
     homes_to_keep: 5
   
   timings:
@@ -22,16 +27,29 @@ test:
     controller_loop_interval: 5
   
   network:
-    scheduler: https://example.com/scheduler
-    devicedb: https://example.com/devicedb
-    cert: /path/to/certificate.pem
-    cafile: /path/to/certificate-authorities.pem
+    scheduler: https://hive.test.cloud.bbc.co.uk/
+    devicedb: https://devicedb.test.cloud.bbc.co.uk/
+    cert: /opt/certs/user.pem
+    cafile: /opt/certs/ca-bundle.pem
 
   datastore:
-    filename: /path/to/datastore.db
+    filename: /Users/khana46/opt/datastore.db
 
-  diagnostics:
-    android:
-      parameter : criteria 
-    ios:
-      parameter : criteria 
+  # diagnostics:
+  #   android: 
+  #         uptime:
+  #           reboot_timeout: 3000
+              
+    #     wifi: {
+    #         status: Connected,
+    #         access_point: TVMP-DevNet,
+    #     }
+    #     battery: {
+
+    #     }
+    #     memory: {
+    #       free: 1042,
+    #       used: 1000000,
+    #     }
+    # ios:
+    #   parameter : criteria 
