@@ -276,11 +276,12 @@ module Hive
 
     # Update results
     def upload_results(job, checkout, results_dir)
-      res_file = detect_res_file(results_dir) || process_xunit_results(results_dir)
 
+      res_file = detect_res_file(results_dir) || process_xunit_results(results_dir)
+      
       if res_file
         @log.info("Res file found")
-     
+      
         begin
           Res.submit_results(
             reporter: :hive,
