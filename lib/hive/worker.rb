@@ -133,7 +133,8 @@ module Hive
       end
 
       @log.info('Job starting')
-      @job.prepare(@device_id)  
+      @job.prepare(@device_id)
+      
       exception = nil
       begin
         @log.info "Setting job paths"
