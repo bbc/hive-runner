@@ -34,4 +34,4 @@ test:
     android:
       parameter : criteria 
     ios:
-      parameter : criteria      
+      parameter : criteria 

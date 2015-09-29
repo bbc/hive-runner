@@ -9,4 +9,3 @@ group :test do
   gem 'rubocop'
   gem 'webmock'
 end
-
