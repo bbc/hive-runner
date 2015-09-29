@@ -108,4 +108,3 @@ DEPENDENCIES
   rubocop
   simplecov
   webmock
-
