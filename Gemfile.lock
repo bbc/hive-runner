@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hive-runner (1.2.1)
+    hive-runner (1.2.0)
       activerecord (~> 4.2)
       chamber (~> 2.7)
       daemons (~> 1.2)
@@ -109,5 +109,3 @@ DEPENDENCIES
   simplecov
   webmock
 
-BUNDLED WITH
-   1.10.4
