@@ -317,15 +317,15 @@ module Hive
       Dir.glob( "#{results_dir}/*.res" ).first
     end
     
-    def process_xunit_results(results_dir)
-      xunit_output = Res.format_results(formatter: :junit,:file =>  Dir.glob( "#{results_dir}/*.xml" ).first)
+    def process_xunit_results(results_dir)  
+      xunit_output = Res.parse_results(parser: :junit,:file =>  Dir.glob( "#{results_dir}/*.xml" ).first)
       res_output = File.open(xunit_output.io, "rb")
       contents = res_output.read
       res_output.close
       res = File.open("#{results_dir}/xunit.res", "w+")
       res.puts contents   
       res.close   
-      res
+      res 
     end
     
     def testmine_config(checkout)
