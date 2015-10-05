@@ -164,6 +164,9 @@ module Hive
         @job.execution_variables.to_h.each_pair do |var, val|
           @script.set_env "HIVE_#{var.to_s}".upcase, val if ! val.kind_of?(Array)
         end
+        if @job.execution_variables.retry_urns && !@job.execution_variables.retry_urns.empty?
+          @script.set_env "RETRY_ARGS", "'" + @job.execution_variables.retry_urns.join(' ') + "'"
+        end
 
         @log.info "Appending test script to execution script"
         @script.append_bash_cmd @job.command
