@@ -85,9 +85,10 @@ poll of the job queue in the worker loop.
 
 The shell controller section contains the following additional field:
 
-| Field    | Content                                   |
-|----------|-------------------------------------------|
-| `queues` | Array of job queues for the shell workers |
+| Field     | Content                                   |
+|-----------|-------------------------------------------|
+| `queues`  | Array of job queues for the shell workers |
+| `workers` | Number of shell workers to run            |
 
 ## Setting up a new Hive Runner
 

@@ -47,12 +47,12 @@ test_daemon_helper_single_controller:
   <<: *shared
   controllers:
     shell:
-      maximum: 5
+      workers: 5
 
 test_daemon_helper_two_controllers:
   <<: *shared
   controllers:
     test:
-      maximum: 5
+      workers: 5
     shell:
-      maximum: 5
+      workers: 5

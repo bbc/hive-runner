@@ -47,7 +47,7 @@ describe Hive::Register do
         controller_list[c.class] = c
       end
       controller_list[Hive::Controller::Test].detect_success = false
-      controller_list[Hive::Controller::Shell].instance_variable_set(:@maximum, 2)
+      controller_list[Hive::Controller::Shell].instance_variable_set(:@workers, 2)
       register.check_controllers
       expect(register.devices.length).to be 7
     end
