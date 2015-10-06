@@ -112,10 +112,12 @@ File.open("#{dir}/config/settings.yml", 'w') do |f|
     f.puts "      name_stub: #{m[:device].upcase}_WORKER"
   end
   f.puts ''
+  f.puts '  # Range of ports to be made available to workers'
   f.puts '  ports:'
   f.puts '    minimum: 4000'
   f.puts '    maximum: 5000'
   f.puts ''
+  f.puts '  # Logging configuration'
   f.puts '  logging:'
   f.puts "    directory: #{dir}/log"
   f.puts "    pids: #{dir}/pids"
@@ -125,21 +127,20 @@ File.open("#{dir}/config/settings.yml", 'w') do |f|
   f.puts "    home: #{dir}/workspaces"
   f.puts '    homes_to_keep: 5'
   f.puts ''
+  f.puts '  # Timing configuration'
   f.puts '  timings:'
   f.puts '    worker_loop_interval: 5'
   f.puts '    controller_loop_interval: 5'
   f.puts ''
+  f.puts '  # Configuration for various network options'
   f.puts '  network:'
   f.puts '    scheduler: https://scheduler'
   f.puts '    devicedb: https://devicedb'
   f.puts '    cert: /path/to/certificate.pem'
   f.puts '    cafile: /path/to/certificate-authorities.pem'
   f.puts ''
+  f.puts '  # Configuration for diagnostic plugins'
   f.puts '  diagnostics:'
-  f.puts '    android:'
-  f.puts '      uptime: {'
-  f.puts '        reboot_timeout: 3000,'
-  f.puts '              }' 
 end
 
 File.open("#{dir}/Gemfile", 'w') do |f|
