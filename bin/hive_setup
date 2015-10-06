@@ -99,11 +99,12 @@ File.open("#{dir}/config/settings.yml", 'w') do |f|
   f.puts '    shell:'
   f.puts '      # Number of shell workers to allocate'
   f.puts '      maximum: 5'
+  f.puts '      # Queue for each shell worker'
+  f.puts '      queues:'
+  f.puts '        - bash'
   f.puts '      # Number of ports to allocate to each shell worker'
   f.puts '      port_range_size: 50'
   f.puts '      name_stub: SHELL_WORKER'
-  min_port = 10001
-  port_range_step = 10000
   mods.each do |m|
     f.puts "    #{m[:device]}:"
     f.puts '      # Number of ports to allocate to each #{m[:device]} worker'
