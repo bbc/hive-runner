@@ -98,7 +98,7 @@ File.open("#{dir}/config/settings.yml", 'w') do |f|
   f.puts '  controllers:'
   f.puts '    shell:'
   f.puts '      # Number of shell workers to allocate'
-  f.puts '      maximum: 5'
+  f.puts '      workers: 5'
   f.puts '      # Number of ports to allocate to each shell worker'
   f.puts '      port_range_size: 50'
   f.puts '      name_stub: SHELL_WORKER'
