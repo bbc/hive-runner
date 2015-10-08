@@ -41,6 +41,13 @@ describe Hive::ExecutionScript do
       expect(File.read("#{fs.logs_path}/stdout.log")).to eq "test_variable_value\n"
     end
 
+    it 'sets an environment variable to a number' do
+      es.set_env('TEST_VAR', 99)
+      es.append_bash_cmd('echo $TEST_VAR')
+      es.run
+      expect(File.read("#{fs.logs_path}/stdout.log")).to eq "99\n"
+    end
+
     it 'sets an environment variable with spaces in it' do
       es.set_env('TEST_VAR', 'one two three')
       es.append_bash_cmd('echo $TEST_VAR')
