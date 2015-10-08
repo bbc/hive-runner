@@ -47,5 +47,12 @@ describe Hive::ExecutionScript do
       es.run
       expect(File.read("#{fs.logs_path}/stdout.log")).to eq "one two three\n"
     end
+
+    it 'sets an environment variable with a single quote character in it' do
+      es.set_env('TEST_VAR', "one'two'three")
+      es.append_bash_cmd('echo $TEST_VAR')
+      es.run
+      expect(File.read("#{fs.logs_path}/stdout.log")).to eq "one'two'three\n"
+    end
   end
 end
