@@ -60,7 +60,8 @@ module Hive
         f.write("#!/bin/bash --login\n")
         f.write("# Set environment\n")
         @env.each do |key, value|
-          f.write("export #{key}=#{value}\n")
+          # An escaped ' in a single quoted string in bash looks like '"'"'
+          f.write("export #{key}='#{value.to_s.gsub("'", '\'"\'"\'')}'\n")
         end
         @env_unset.each do |var|
           f.write("unset #{var}\n")
