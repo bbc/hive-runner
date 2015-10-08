@@ -60,7 +60,7 @@ module Hive
         f.write("#!/bin/bash --login\n")
         f.write("# Set environment\n")
         @env.each do |key, value|
-          f.write("export #{key}=#{value}\n")
+          f.write("export #{key}='#{value}'\n")
         end
         @env_unset.each do |var|
           f.write("unset #{var}\n")
