@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'hive-runner'
-  s.version     = '1.2.1'
+  s.version     = '1.2.2'
   s.date        = Time.now.strftime("%Y-%m-%d")
   s.summary     = 'Hive Runner'
   s.description = 'Core component of the Hive CI runner'
@@ -19,8 +19,8 @@ Gem::Specification.new do |s|
 
   # These will be added to the Gemfile by hive_setup until they are added to
   # rubygems
-  #s.add_runtime_dependency 'hive-messages', ['~> 0.4']
+  #s.add_runtime_dependency 'hive-messages', ['~> 1.0']
   #s.add_runtime_dependency 'code_cache', ['~> 0.1']
   #s.add_runtime_dependency 'devicedb_comms', ['>= 0.15']
-  #s.add_runtime_dependency 'res'
+  #s.add_runtime_dependency 'res', ['~> 0.3']
 end
