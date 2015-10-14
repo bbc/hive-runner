@@ -53,15 +53,25 @@ module Hive
       @env.delete(var)
       @env_unset << var
     end
+    
+    def helper_path
+      scripts_dir = File.expand_path(File.dirname(__FILE__) + "../../../scripts/")
+      File.join(scripts_dir, 'hive-script-helper.sh')
+    end
 
     def run
       @log.info 'bash.rb - Writing script out to file'
       File.open(@path, 'w') do |f|
         f.write("#!/bin/bash --login\n")
+        f.write(". #{helper_path}\n")
         f.write("# Set environment\n")
         @env.each do |key, value|
           # An escaped ' in a single quoted string in bash looks like '"'"'
-          f.write("export #{key}='#{value.to_s.gsub("'", '\'"\'"\'')}'\n")
+          if value.kind_of?(Array)
+            f.write("export #{key}=(" + value.collect { |v| "'#{v.to_s.gsub("'", '\'"\'"\'')}'" }.join(' ') + ")\n" )
+          else
+            f.write("export #{key}='#{value.to_s.gsub("'", '\'"\'"\'')}'\n")
+          end
         end
         @env_unset.each do |var|
           f.write("unset #{var}\n")

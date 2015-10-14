@@ -165,8 +165,12 @@ module Hive
           @script.set_env "HIVE_#{var.to_s}".upcase, val if ! val.kind_of?(Array)
         end
         if @job.execution_variables.retry_urns && !@job.execution_variables.retry_urns.empty?
-          @script.set_env "RETRY_ARGS", @job.execution_variables.retry_urns.join(' ')
+          @script.set_env "RETRY_URNS", @job.execution_variables.retry_urns
         end
+        if @job.execution_variables.tests && @job.execution_variables.tests != [""]
+          @script.set_env "TEST_NAMES", @job.execution_variables.tests
+        end
+        
 
         @log.info "Appending test script to execution script"
         @script.append_bash_cmd @job.command

@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.description = 'Core component of the Hive CI runner'
   s.authors     = ['Joe Haig']
   s.email       = 'joe.haig@bbc.co.uk'
-  s.files       = Dir['README.md', 'lib/**/*.rb']
+  s.files       = Dir['README.md', 'lib/**/*.rb', 'scripts/hive-script-helper.sh']
   s.executables = ['hived', 'start_hive', 'hive_setup']
   s.homepage    = 'https://github.com/bbc/hive-runner'
   s.license     = 'MIT'
