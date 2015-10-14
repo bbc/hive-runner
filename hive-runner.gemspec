@@ -10,17 +10,18 @@ Gem::Specification.new do |s|
   s.executables = ['hived', 'start_hive', 'hive_setup']
   s.homepage    = 'https://github.com/bbc/hive-runner'
   s.license     = 'MIT'
-  s.add_runtime_dependency 'chamber', ['~> 2.7']
-  s.add_runtime_dependency 'macaddr', ['~> 1.7']
-  s.add_runtime_dependency 'activerecord', ['~> 4.2']
-  s.add_runtime_dependency 'mono_logger', ['~> 1.1']
-  s.add_runtime_dependency 'daemons', ['~> 1.2']
-  s.add_runtime_dependency 'terminal-table', ['~> 1.4']
-
-  # These will be added to the Gemfile by hive_setup until they are added to
-  # rubygems
-  #s.add_runtime_dependency 'hive-messages', ['~> 1.0']
-  #s.add_runtime_dependency 'code_cache', ['~> 0.1']
-  #s.add_runtime_dependency 'devicedb_comms', ['>= 0.15']
-  #s.add_runtime_dependency 'res', ['~> 0.3']
+  s.add_runtime_dependency 'chamber', '~> 2.7'
+  s.add_runtime_dependency 'macaddr', '~> 1.7'
+  s.add_runtime_dependency 'activerecord', '~> 4.2'
+  s.add_runtime_dependency 'mono_logger', '~> 1.1'
+  s.add_runtime_dependency 'daemons', '~> 1.2'
+  s.add_runtime_dependency 'terminal-table', '~> 1.4'
+  s.add_runtime_dependency 'res', '~> 1.0'
+  s.add_runtime_dependency 'hive-messages', '~> 1.0'
+  s.add_runtime_dependency 'devicedb_comms', '~> 0.1'
+  s.add_runtime_dependency 'code_cache', '~> 0.2'
+  s.add_development_dependency 'simplecov', '~> 0.10'
+  s.add_development_dependency 'rspec', '~> 3.3'
+  s.add_development_dependency 'rubocop', '~> 0.34'
+  s.add_development_dependency 'webmock', '~> 1.21'
 end
