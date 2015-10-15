@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+puts "*** Starting Hive at #{Time.now} ***"
 require 'pathname'
 ENV['BUNDLE_GEMFILE'] ||= File.expand_path(
   '../../Gemfile',
@@ -14,6 +15,12 @@ require 'hive'
 
 $PROGRAM_NAME = Hive::DAEMON_NAME
 
+# Version information
+gems = {}
+Gem::Specification.find_all_by_name(/hive-*/).each do |g|
+  gems[g.name] = g.version
+end
+
 # Communication with daemon launcher
 comm_port = ENV.fetch('HIVE_COMM_PORT', 9999).to_i
 comm = TCPServer.open(comm_port)
@@ -23,7 +30,17 @@ Signal.trap('USR1') do
   Hive.register.controllers.each do |c|
     client.puts "    * #{c.class.name.split('::').last.downcase}"
   end
+
+  client.puts
+
+  client.puts "  Software versions:"
+  client.puts "    * hive-runner: #{gems['hive-runner']}"
+  gems.except('hive-runner').sort.each do |name, version|
+    client.puts "    * #{name}: #{version}"
+  end
   
+  client.puts
+
   # Create a hash of connected device details
   devices = Hive.register.devices
   device_details = {}
