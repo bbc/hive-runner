@@ -30,5 +30,6 @@ end
 
 Daemons.run(File.expand_path('..', __FILE__) + '/start_hive',
             show_status_callback: :test,
+            log_dir: Hive.config.logging.directory,
             log_output: true,
-            output_logfilename: '/tmp/hive.log')
+            output_logfilename: 'hived.out')
