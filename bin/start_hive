@@ -59,7 +59,7 @@ Signal.trap('USR1') do
         queue_file = "#{Hive.config.logging.directory}/#{pid}.queues.yml"
         details[:queues] = YAML.load( File.open(queue_file) )
       rescue
-        details[:queues] = "---"
+        details[:queues] = [ "---" ]
       end
     end
   end
