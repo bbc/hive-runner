@@ -20,7 +20,9 @@ module Hive
     end
 
     def create_device(extra_options = {})
-      Object.const_get(@device_class).new(@config.merge(extra_options))
+      object = Object
+      @device_class.split('::').each { |sub| object = object.const_get(sub) }
+      object.new(@config.merge(extra_options))
     end
 
     def detect
