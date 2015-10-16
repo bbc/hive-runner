@@ -11,6 +11,20 @@ if ARGV.length < 1
   exit 1
 end
 
+dir = File.expand_path('', ARGV[0])
+if Dir.exists?(dir)
+  if ! Dir["#{dir}/*"].empty?
+    puts "Directory '#{dir}' exists and is not empty"
+    exit 1
+  end
+else
+  if File.exists?(dir)
+    puts "'#{dir}' exists and is not a directory"
+    exit 1
+  end
+  FileUtils.mkdir_p(dir)
+end
+
 def yn question
   yn = 'x'
   while yn !~ /^[yYnN]/
@@ -70,20 +84,6 @@ while opt.upcase != 'X'
       mods << mod
     end
   end
-end
-
-dir = File.expand_path('', ARGV[0])
-if Dir.exists?(dir)
-  if ! Dir["#{dir}/*"].empty?
-    puts "Directory '#{dir}' exists and is not empty"
-    exit 1
-  end
-else
-  if File.exists?(dir)
-    puts "'#{dir}' exists and is not a directory"
-    exit 1
-  end
-  FileUtils.mkdir_p(dir)
 end
 
 FileUtils.mkdir_p("#{dir}/config")
@@ -153,10 +153,20 @@ File.open("#{dir}/Gemfile", 'w') do |f|
   end
 end
 
+print "Executing 'bundle install' ... "
+Dir.chdir dir
+if system("bundle install > bundle_install.out 2>&1")
+  print "SUCCESS\n"
+  File.delete('bundle_install.out')
+else
+  print "FAILED\n"
+  puts "See #{dir}/bundle_install.out for details"
+  exit
+end
+
 puts ''
 puts 'Configuration required:'
 puts
-puts "  * Run 'bundle install' inside #{dir}"
 puts '  * Add to config/settings.yml'
 puts '      - scheduler'
 puts '      - devicedb'
