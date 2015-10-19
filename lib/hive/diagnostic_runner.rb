@@ -9,10 +9,14 @@ module Hive
     end
 
     def initialize_diagnostics(diagnostics_config)
-      @diagnostics = diagnostics_config.collect do |component, config|
-        Hive.logger.info("Initializing #{component.capitalize} component for #{@platform.capitalize} diagnostic")
-        require "hive/diagnostic/#{@platform}/#{component}"
-        Object.const_get('Hive').const_get('Diagnostic').const_get(@platform.capitalize).const_get(component.capitalize).new(config, @options)
+      if diagnostics_config
+        @diagnostics = diagnostics_config.collect do |component, config|
+          Hive.logger.info("Initializing #{component.capitalize} component for #{@platform.capitalize} diagnostic")
+          require "hive/diagnostic/#{@platform}/#{component}"
+          Object.const_get('Hive').const_get('Diagnostic').const_get(@platform.capitalize).const_get(component.capitalize).new(config, @options)
+        end
+      else
+        Hive.logger.info("No diagnostic specified for #{@platform}")
       end
     end 
 
