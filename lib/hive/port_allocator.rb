@@ -38,7 +38,7 @@ module Hive
     # Relase a single port in the range
     def release_port(p)
       pid = `lsof -i | grep #{p} | awk '{print $2}'`.strip
-      Process.kill 0, process if !pid.empty?
+      Process.kill 0, pid if !pid.empty?
       @free_ports << p if @allocated_ports.delete(p)
     end
 
