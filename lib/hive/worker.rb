@@ -194,7 +194,7 @@ module Hive
         # Upload results
         @file_system.finalise_results_directory
         upload_files(@job, @file_system.results_path, @file_system.logs_path)
-        upload_results(@job, @file_system.testbed_path, @file_system.results_path)
+        upload_results(@job, "#{@file_system.testbed_path}/#{@job.execution_directory}", @file_system.results_path)
       rescue => e
         @log.error( "Post execution failed: " + e.message)
         @log.error("  : #{e.backtrace.join("\n  : ")}")
