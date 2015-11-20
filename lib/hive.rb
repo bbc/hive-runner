@@ -30,7 +30,7 @@ module Hive
     fail 'Missing logging section in configuration file'
   end
 
-  @hivemind = MindMeld.new(url: Hive.config.network.devicedb? ? Hive.config.network.devicedb : nil)
+  @hivemind = MindMeld.new(url: Chamber.env.network.devicedb? ? Chamber.env.network.devicedb : nil)
 
   def self.config
     Chamber.env
