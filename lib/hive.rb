@@ -32,7 +32,7 @@ module Hive
   end
 
   @hivemind = MindMeld.new(
-    url: Chamber.env.network.devicedb? ? Chamber.env.network.devicedb : nil
+    url: Chamber.env.network.hivemind? ? Chamber.env.network.hivemind : nil
   )
   DeviceDBComms.configure do |config|
     config.url = Chamber.env.network.devicedb
