@@ -1,11 +1,12 @@
 PATH
   remote: .
   specs:
-    hive-runner (2.0.1)
+    hive-runner (2.0.2)
       activerecord (~> 4.2)
       chamber (~> 2.7)
       code_cache (~> 0.2)
       daemons (~> 1.2)
+      devicedb_comms (~> 0.1)
       hive-messages (~> 1.0)
       macaddr (~> 1.7)
       mono_logger (~> 1.1)
@@ -49,6 +50,9 @@ GEM
     daemons (1.2.3)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
+    devicedb_comms (0.1.1)
+      activesupport (>= 4.0, < 4.3)
+      virtus (~> 1.0)
     diff-lcs (1.2.5)
     docile (1.1.5)
     equalizer (0.0.11)

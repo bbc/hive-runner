@@ -1,6 +1,7 @@
 require 'chamber'
 require 'hive/log'
 require 'hive/register'
+require 'devicedb_comms'
 require 'mind_meld'
 require 'macaddr'
 require 'socket'
@@ -30,7 +31,14 @@ module Hive
     fail 'Missing logging section in configuration file'
   end
 
-  @hivemind = MindMeld.new(url: Chamber.env.network.devicedb? ? Chamber.env.network.devicedb : nil)
+  @hivemind = MindMeld.new(
+    url: Chamber.env.network.devicedb? ? Chamber.env.network.devicedb : nil
+  )
+  DeviceDBComms.configure do |config|
+    config.url = Chamber.env.network.devicedb
+    config.pem_file = Chamber.env.network.cert
+    config.ssl_verify_mode = OpenSSL::SSL::VERIFY_NONE
+  end
 
   def self.config
     Chamber.env
@@ -50,13 +58,18 @@ module Hive
     @logger
   end
 
+  def self.devicedb(section)
+    @devicedb = {} if ! @devicedb.kind_of?(Hash)
+    @devicedb[section] ||= Object.const_get('DeviceDBComms').const_get(section).new()
+  end
+
   def self.register
     @register ||= Hive::Register.new
   end
 
   # Get the id of the hive from the device database
-  def self.id
-    if ! @id
+  def self.hive_mind_id
+    if ! @hive_mind_id
       Hive.logger.info "About to poll"
       reg = @hivemind.register(
         hostname: Hive.hostname,
@@ -64,16 +77,52 @@ module Hive
         ips: [Hive.ip_address],
         brand: Hive.config.brand? ? Hive.config.brand : 'BBC',
         model: Hive.config.model? ? Hive.config.model : 'Hive',
-        device_type: 'hive'
+        device_type: 'Hive'
        )
-      @id = reg['id']
+      @hive_mind_id = reg['id']
     end
-    @id || -1
+    @hive_mind_id || -1
+  end
+
+   # Get the id of the hive from the device database
+   def self.id
+    if ! @devicedb_id
+      Hive.logger.info "Attempting to register the hive as #{Hive.hostname}"
+      register_response = self.devicedb('Hive').register(Hive.hostname, Hive.mac_address, Hive.ip_address)
+      if register_response['error'].present?
+        Hive.logger.warn 'Hive failed to register'
+        Hive.logger.warn "  - #{register_response['error']}"
+      else
+        Hive.logger.info "Hive registered with id #{register_response['id']}"
+        @devicedb_id = register_response['id']
+      end
+    end
+    @devicedb_id || -1
   end
 
   # Poll the device database
   def self.poll
+    # DeviceDB
     id = self.id
+    if id and  id > 0
+      Hive.logger.debug "Polling hive: #{id}"
+      rtn = Hive.devicedb('Hive').poll(id)
+      Hive.logger.debug "Return data: #{rtn}"
+      if rtn['error'].present?
+        Hive.logger.warn "Hive polling failed: #{rtn['error']}"
+      else
+        Hive.logger.info "Successfully polled hive"
+      end
+    else
+      if id
+        Hive.logger.debug "Skipping polling of hive"
+      else
+        Hive.logger.warn "Unable to poll hive"
+      end
+    end
+
+    # Hive Mind
+    id = self.hive_mind_id
     if id and  id > 0
       Hive.logger.debug "Polling hive: #{id}"
 #      rtn = @hivemind.poll(id)
