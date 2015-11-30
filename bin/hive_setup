@@ -136,6 +136,7 @@ File.open("#{dir}/config/settings.yml", 'w') do |f|
   f.puts '  network:'
   f.puts '    scheduler: http://scheduler'
   f.puts '    devicedb: http://devicedb'
+  f.puts '    #hivemind: http://hivemind'
   f.puts '    # cert: /path/to/certificate.pem'
   f.puts '    # cafile: /path/to/certificate-authorities.pem'
   f.puts ''
