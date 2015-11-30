@@ -2,6 +2,7 @@ require 'chamber'
 require 'hive/log'
 require 'hive/register'
 require 'devicedb_comms'
+require 'mind_meld'
 require 'macaddr'
 require 'socket'
 
@@ -30,6 +31,9 @@ module Hive
     fail 'Missing logging section in configuration file'
   end
 
+  @hivemind = MindMeld.new(
+    url: Chamber.env.network.hivemind? ? Chamber.env.network.hivemind : nil
+  )
   DeviceDBComms.configure do |config|
     config.url = Chamber.env.network.devicedb
     config.pem_file = Chamber.env.network.cert
@@ -64,7 +68,24 @@ module Hive
   end
 
   # Get the id of the hive from the device database
-  def self.id
+  def self.hive_mind_id
+    if ! @hive_mind_id
+      Hive.logger.info "About to poll"
+      reg = @hivemind.register(
+        hostname: Hive.hostname,
+        macs: [Hive.mac_address],
+        ips: [Hive.ip_address],
+        brand: Hive.config.brand? ? Hive.config.brand : 'BBC',
+        model: Hive.config.model? ? Hive.config.model : 'Hive',
+        device_type: 'Hive'
+       )
+      @hive_mind_id = reg['id']
+    end
+    @hive_mind_id || -1
+  end
+
+   # Get the id of the hive from the device database
+   def self.id
     if ! @devicedb_id
       Hive.logger.info "Attempting to register the hive as #{Hive.hostname}"
       register_response = self.devicedb('Hive').register(Hive.hostname, Hive.mac_address, Hive.ip_address)
@@ -81,6 +102,7 @@ module Hive
 
   # Poll the device database
   def self.poll
+    # DeviceDB
     id = self.id
     if id and  id > 0
       Hive.logger.debug "Polling hive: #{id}"
@@ -91,6 +113,25 @@ module Hive
       else
         Hive.logger.info "Successfully polled hive"
       end
+    else
+      if id
+        Hive.logger.debug "Skipping polling of hive"
+      else
+        Hive.logger.warn "Unable to poll hive"
+      end
+    end
+
+    # Hive Mind
+    id = self.hive_mind_id
+    if id and  id > 0
+      Hive.logger.debug "Polling hive: #{id}"
+#      rtn = @hivemind.poll(id)
+#      Hive.logger.debug "Return data: #{rtn}"
+#      if rtn['error'].present?
+#        Hive.logger.warn "Hive polling failed: #{rtn['error']}"
+#      else
+#        Hive.logger.info "Successfully polled hive"
+#      end
     else
       if id
         Hive.logger.debug "Skipping polling of hive"
