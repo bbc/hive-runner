@@ -73,6 +73,7 @@ module Hive
       Hive.logger.info "About to poll"
       reg = @hivemind.register(
         hostname: Hive.hostname,
+        version: Gem::Specification.find_by_name('hive-runner').version.to_s,
         macs: [Hive.mac_address],
         ips: [Hive.ip_address],
         brand: Hive.config.brand? ? Hive.config.brand : 'BBC',
