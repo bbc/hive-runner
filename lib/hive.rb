@@ -63,6 +63,10 @@ module Hive
     @devicedb[section] ||= Object.const_get('DeviceDBComms').const_get(section).new()
   end
 
+  def self.hive_mind
+    @hivemind
+  end
+
   def self.register
     @register ||= Hive::Register.new
   end
