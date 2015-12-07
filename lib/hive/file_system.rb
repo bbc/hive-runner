@@ -49,11 +49,9 @@ module Hive
         File.open(tempfile.path,'w') do |f|
         f.write response.body
       end
-      
-      copy_file(tempfile.path, destination_path)
 
+      copy_file(tempfile.path, destination_path)
       check_build_integrity( destination_path )
-   
     end
 
     def check_build_integrity( destination_path )
