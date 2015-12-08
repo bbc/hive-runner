@@ -30,9 +30,8 @@ module Hive
   else
     fail 'Missing logging section in configuration file'
   end
-
-  @hivemind = MindMeld.new(
-    url: Chamber.env.network.hivemind? ? Chamber.env.network.hivemind : nil
+  @hive_mind = MindMeld.new(
+    url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil
   )
   DeviceDBComms.configure do |config|
     config.url = Chamber.env.network.devicedb
@@ -63,6 +62,10 @@ module Hive
     @devicedb[section] ||= Object.const_get('DeviceDBComms').const_get(section).new()
   end
 
+  def self.hive_mind
+    @hive_mind
+  end
+
   def self.register
     @register ||= Hive::Register.new
   end
@@ -71,7 +74,7 @@ module Hive
   def self.hive_mind_id
     if ! @hive_mind_id
       Hive.logger.info "About to poll"
-      reg = @hivemind.register(
+      reg = @hive_mind.register(
         hostname: Hive.hostname,
         version: Gem::Specification.find_by_name('hive-runner').version.to_s,
         macs: [Hive.mac_address],

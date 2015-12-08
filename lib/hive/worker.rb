@@ -124,9 +124,7 @@ module Hive
         # Upload results
         @file_system.finalise_results_directory
         upload_files(@job, @file_system.results_path, @file_system.logs_path)
-        File.open("#{@file_system.home_path}/job_info", 'w') do |f|
-          f.puts "#{Process.pid} completed"
-        end
+        set_job_state_to :completed
         @job.error('Worker killed')
         @log.info "Worker terminated"
         exit
@@ -139,9 +137,7 @@ module Hive
       begin
         @log.info "Setting job paths"
         @file_system = Hive::FileSystem.new(@job.job_id, Hive.config.logging.home, @log)
-        File.open("#{@file_system.home_path}/job_info", 'w') do |f|
-          f.puts "#{Process.pid} running"
-        end
+        set_job_state_to :preparing
 
         if ! @job.repository.to_s.empty?
           @log.info "Checking out the repository"
@@ -175,6 +171,7 @@ module Hive
         @log.info "Appending test script to execution script"
         @script.append_bash_cmd @job.command
 
+        set_job_state_to :running
         @job.start
 
         @log.info "Pre-execution setup"
@@ -189,6 +186,7 @@ module Hive
 
       begin
         @log.info "Post-execution cleanup"
+        set_job_state_to :uploading
         post_script(@job, @file_system, @script)
 
         # Upload results
@@ -202,6 +200,7 @@ module Hive
 
       if exception
         @job.error( exception.message )
+        set_job_state_to :completed
         raise exception
       else
         @job.complete
@@ -212,9 +211,7 @@ module Hive
         exit
       end
 
-      File.open("#{@file_system.home_path}/job_info", 'w') do |f|
-        f.puts "#{Process.pid} completed"
-      end
+      set_job_state_to :completed
       exit_value == 0
     end
 
@@ -395,6 +392,13 @@ module Hive
       @log.warn("Using deprecated 'Hive::Worker.release_all_ports' method")
       @log.warn("Use @port_allocator.release_all_ports instead")
       @port_allocator.release_all_ports
+    end
+
+    # Set job info file
+    def set_job_state_to state
+      File.open("#{@file_system.home_path}/job_info", 'w') do |f|
+        f.puts "#{Process.pid} #{state}"
+      end
     end
   end
 end
