@@ -77,6 +77,7 @@ module Hive
       reg = @hive_mind.register(
         hostname: Hive.hostname,
         version: Gem::Specification.find_by_name('hive-runner').version.to_s,
+        runner_plugins: Hash[Gem::Specification.find_all_by_name(/hive-runner-*/).map { |p| [p.name, p.version] }],
         macs: [Hive.mac_address],
         ips: [Hive.ip_address],
         brand: Hive.config.brand? ? Hive.config.brand : 'BBC',
