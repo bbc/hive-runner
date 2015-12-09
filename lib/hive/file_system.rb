@@ -39,33 +39,19 @@ module Hive
     end
 
     def fetch_build(build_url, destination_path)
-      if !fetch_build_with_curl(build_url, destination_path)
-        @log.info( "Initial build fetch failed -- trying again shortly")
-        sleep 5
-        if !fetch_build_with_curl(build_url, destination_path)
-          raise "Build could not be downloaded"
-        end
-      end
-    end
-
-    def fetch_build_with_curl(build_url, destination_path)
-      cert_path     = Hive.config.network['cert']
-      cabundle_path = Hive.config.network['cafile']
       base_url      = Hive.config.network['scheduler']
       apk_url       = base_url + '/' + build_url
-      curl_line     = "curl -L -m 60 #{apk_url} --cert #{cert_path} --cacert #{cabundle_path} --retry 3 -o #{destination_path}"
+      
+      job = Hive::Messages::Job.new
+      response = job.fetch(apk_url)
 
-      @log.info("Fetching build from hive-scheduler: #{curl_line}")
-      @log.debug("CURL line: #{curl_line}")
-      response = `#{curl_line}`
-      if $? != 0
-        @log.info("Curl error #{$?}: #{response.to_s}")
-        false
-        Hive::Messages
-      else
-        @log.info("Curl seems happy, checking integrity of downloaded file")
-        check_build_integrity( destination_path )
+      tempfile = Tempfile.new('build.apk')
+        File.open(tempfile.path,'w') do |f|
+        f.write response.body
       end
+
+      copy_file(tempfile.path, destination_path)
+      check_build_integrity( destination_path )
     end
 
     def check_build_integrity( destination_path )
