@@ -130,7 +130,7 @@ module Hive
     id = self.hive_mind_id
     if id and  id > 0
       Hive.logger.debug "Polling hive: #{id}"
-      rtn = @hivemind.poll(id: id)
+      rtn = @hive_mind.poll(id: id)
       Hive.logger.debug "Return data: #{rtn}"
       if rtn['error'].present?
         Hive.logger.warn "Hive polling failed: #{rtn['error']}"
