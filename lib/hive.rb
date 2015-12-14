@@ -130,13 +130,13 @@ module Hive
     id = self.hive_mind_id
     if id and  id > 0
       Hive.logger.debug "Polling hive: #{id}"
-#      rtn = @hivemind.poll(id)
-#      Hive.logger.debug "Return data: #{rtn}"
-#      if rtn['error'].present?
-#        Hive.logger.warn "Hive polling failed: #{rtn['error']}"
-#      else
-#        Hive.logger.info "Successfully polled hive"
-#      end
+      rtn = @hivemind.poll(id: id)
+      Hive.logger.debug "Return data: #{rtn}"
+      if rtn['error'].present?
+        Hive.logger.warn "Hive polling failed: #{rtn['error']}"
+      else
+        Hive.logger.info "Successfully polled hive"
+      end
     else
       if id
         Hive.logger.debug "Skipping polling of hive"
