@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'res', '~> 1.0'
   s.add_runtime_dependency 'hive-messages', '>= 1.0.3', '< 1.1'
   s.add_runtime_dependency 'devicedb_comms', '~> 0.1'
-  s.add_runtime_dependency 'mind_meld', '~> 0'
+  s.add_runtime_dependency 'mind_meld', '>= 0.0.2', '< 0.1'
   s.add_runtime_dependency 'code_cache', '~> 0.2'
   s.add_development_dependency 'simplecov', '~> 0.10'
   s.add_development_dependency 'rspec', '~> 3.3'

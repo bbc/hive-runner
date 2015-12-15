@@ -30,9 +30,7 @@ module Hive
   else
     fail 'Missing logging section in configuration file'
   end
-  @hive_mind = MindMeld.new(
-    url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil
-  )
+
   DeviceDBComms.configure do |config|
     config.url = Chamber.env.network.devicedb
     config.pem_file = Chamber.env.network.cert
@@ -63,7 +61,19 @@ module Hive
   end
 
   def self.hive_mind
-    @hive_mind
+    @hive_mind ||= MindMeld.new(
+      url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
+      device: {
+        hostname: Hive.hostname,
+        version: Gem::Specification.find_by_name('hive-runner').version.to_s,
+        runner_plugins: Hash[Gem::Specification.find_all_by_name(/hive-runner-/).map { |p| [p.name, p.version.to_s] }],
+        macs: [Hive.mac_address],
+        ips: [Hive.ip_address],
+        brand: Chamber.env.brand? ? Chamber.env.brand : 'BBC',
+        model: Chamber.env.model? ? Chamber.env.model : 'Hive',
+        device_type: 'Hive'
+      }
+    )
   end
 
   def self.register
@@ -71,26 +81,7 @@ module Hive
   end
 
   # Get the id of the hive from the device database
-  def self.hive_mind_id
-    if ! @hive_mind_id
-      Hive.logger.info "About to poll"
-      reg = @hive_mind.register(
-        hostname: Hive.hostname,
-        version: Gem::Specification.find_by_name('hive-runner').version.to_s,
-        runner_plugins: Hash[Gem::Specification.find_all_by_name(/hive-runner-/).map { |p| [p.name, p.version.to_s] }],
-        macs: [Hive.mac_address],
-        ips: [Hive.ip_address],
-        brand: Hive.config.brand? ? Hive.config.brand : 'BBC',
-        model: Hive.config.model? ? Hive.config.model : 'Hive',
-        device_type: 'Hive'
-       )
-      @hive_mind_id = reg['id']
-    end
-    @hive_mind_id || -1
-  end
-
-   # Get the id of the hive from the device database
-   def self.id
+  def self.id
     if ! @devicedb_id
       Hive.logger.info "Attempting to register the hive as #{Hive.hostname}"
       register_response = self.devicedb('Hive').register(Hive.hostname, Hive.mac_address, Hive.ip_address)
@@ -127,22 +118,13 @@ module Hive
     end
 
     # Hive Mind
-    id = self.hive_mind_id
-    if id and  id > 0
-      Hive.logger.debug "Polling hive: #{id}"
-      rtn = @hive_mind.poll(id: id)
-      Hive.logger.debug "Return data: #{rtn}"
-      if rtn['error'].present?
-        Hive.logger.warn "Hive polling failed: #{rtn['error']}"
-      else
-        Hive.logger.info "Successfully polled hive"
-      end
+    Hive.logger.debug "Polling hive: #{id}"
+    rtn = @hive_mind.poll
+    Hive.logger.debug "Return data: #{rtn}"
+    if rtn['error'].present?
+      Hive.logger.warn "Hive polling failed: #{rtn['error']}"
     else
-      if id
-        Hive.logger.debug "Skipping polling of hive"
-      else
-        Hive.logger.warn "Unable to poll hive"
-      end
+      Hive.logger.info "Successfully polled hive"
     end
   end
 
@@ -161,4 +143,5 @@ module Hive
   def self.hostname
     Socket.gethostname.split('.').first
   end
+
 end
