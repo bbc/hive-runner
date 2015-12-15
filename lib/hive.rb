@@ -69,8 +69,8 @@ module Hive
         runner_plugins: Hash[Gem::Specification.find_all_by_name(/hive-runner-/).map { |p| [p.name, p.version.to_s] }],
         macs: [Hive.mac_address],
         ips: [Hive.ip_address],
-        brand: Chamber.env.brand? ? Chamber.env.brand : 'BBC',
-        model: Chamber.env.model? ? Chamber.env.model : 'Hive',
+        brand: Hive.config.brand? ? Hive.config.brand : 'BBC',
+        model: Hive.config.model? ? Hive.config.model : 'Hive',
         device_type: 'Hive'
       }
     )
@@ -119,7 +119,7 @@ module Hive
 
     # Hive Mind
     Hive.logger.debug "Polling hive: #{id}"
-    rtn = @hive_mind.poll
+    rtn = Hive.hive_mind.poll
     Hive.logger.debug "Return data: #{rtn}"
     if rtn['error'].present?
       Hive.logger.warn "Hive polling failed: #{rtn['error']}"
