@@ -2,7 +2,7 @@ require 'chamber'
 require 'hive/log'
 require 'hive/register'
 require 'devicedb_comms'
-require 'mind_meld'
+require 'mind_meld/hive'
 require 'macaddr'
 require 'socket'
 
@@ -61,7 +61,7 @@ module Hive
   end
 
   def self.hive_mind
-    @hive_mind ||= MindMeld.new(
+    @hive_mind ||= MindMeld::Hive.new(
       url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
       device: {
         hostname: Hive.hostname,

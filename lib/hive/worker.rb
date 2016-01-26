@@ -29,6 +29,12 @@ module Hive
       @options = options
       @parent_pid = @options['parent_pid']
       @device_id = @options['id']
+      @hive_mind ||= MindMeld.new(
+        url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
+        device: {
+          id: @options['id']
+        }
+      )
       @device_identity = @options['device_identity'] || 'unknown-device'
       pid = Process.pid
       $PROGRAM_NAME = "#{@options['name_stub'] || 'WORKER'}.#{pid}"
