@@ -17,7 +17,7 @@ $PROGRAM_NAME = Hive::DAEMON_NAME
 
 # Version information
 gems = {}
-Gem::Specification.find_all_by_name(/hive-*/).each do |g|
+Gem::Specification.all.select{ |g| g.name =~ /hive-*/ }.each do |g|
   gems[g.name] = g.version
 end
 
