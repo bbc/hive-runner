@@ -61,7 +61,6 @@ module Hive
   end
 
   def self.hive_mind
-      puts Hash[Gem::Specification.all.select{ |g| g.name =~ /hive-runner-/ }.map { |p| [p.name, p.version.to_s] }]
     @hive_mind ||= MindMeld::Hive.new(
       url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
       device: {
