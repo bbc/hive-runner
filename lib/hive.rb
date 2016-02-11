@@ -66,7 +66,7 @@ module Hive
       device: {
         hostname: Hive.hostname,
         version: Gem::Specification.find_by_name('hive-runner').version.to_s,
-        runner_plugins: Hash[Gem::Specification.find_all_by_name(/hive-runner-/).map { |p| [p.name, p.version.to_s] }],
+        runner_plugins: Hash[Gem::Specification.all.select{ |g| g.name =~ /hive-runner-/ }.map { |p| [p.name, p.version.to_s] }],
         macs: [Hive.mac_address],
         ips: [Hive.ip_address],
         brand: Hive.config.brand? ? Hive.config.brand : 'BBC',
