@@ -77,8 +77,8 @@ module Hive
         device_type: 'Hive'
       }
     )
-    Hive.logger.info "Sysname: #{Sys::Uname.sysname}"
-    Hive.logger.info "Release: #{Sys::Uname.release}"
+    Hive.logger.debug "Sysname: #{Sys::Uname.sysname}"
+    Hive.logger.debug "Release: #{Sys::Uname.release}"
   end
 
   def self.register
