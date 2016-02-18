@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'hive-runner'
-  s.version     = '2.0.6'
+  s.version     = '2.0.7'
   s.date        = Time.now.strftime("%Y-%m-%d")
   s.summary     = 'Hive Runner'
   s.description = 'Core component of the Hive CI runner'
@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'devicedb_comms', '~> 0.1'
   s.add_runtime_dependency 'mind_meld', '>= 0.0.6', '< 0.1'
   s.add_runtime_dependency 'code_cache', '~> 0.2'
+  s.add_runtime_dependency 'sys-uname', '~> 1.0'
   s.add_development_dependency 'simplecov', '~> 0.10'
   s.add_development_dependency 'rspec', '~> 3.3'
   s.add_development_dependency 'rubocop', '~> 0.34'

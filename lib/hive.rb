@@ -5,6 +5,7 @@ require 'devicedb_comms'
 require 'mind_meld/hive'
 require 'macaddr'
 require 'socket'
+require 'sys/uname'
 
 # The Hive automated testing framework
 module Hive
@@ -71,9 +72,13 @@ module Hive
         ips: [Hive.ip_address],
         brand: Hive.config.brand? ? Hive.config.brand : 'BBC',
         model: Hive.config.model? ? Hive.config.model : 'Hive',
+        operating_system_name: Sys::Uname.sysname,
+        operating_system_version: Sys::Uname.release,
         device_type: 'Hive'
       }
     )
+    Hive.logger.info "Sysname: #{Sys::Uname.sysname}"
+    Hive.logger.info "Release: #{Sys::Uname.release}"
   end
 
   def self.register
