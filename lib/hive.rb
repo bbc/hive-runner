@@ -62,6 +62,8 @@ module Hive
   end
 
   def self.hive_mind
+    Hive.logger.debug "Sysname: #{Sys::Uname.sysname}"
+    Hive.logger.debug "Release: #{Sys::Uname.release}"
     @hive_mind ||= MindMeld::Hive.new(
       url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
       device: {
@@ -77,8 +79,6 @@ module Hive
         device_type: 'Hive'
       }
     )
-    Hive.logger.debug "Sysname: #{Sys::Uname.sysname}"
-    Hive.logger.debug "Release: #{Sys::Uname.release}"
   end
 
   def self.register
