@@ -62,4 +62,64 @@ describe Hive::ExecutionScript do
       expect(File.read("#{fs.logs_path}/stdout.log")).to eq "one'two'three\n"
     end
   end
+
+  describe '#prepend_script' do
+    let(:fs) { FileSystemMock.new }
+
+    let(:es) { Hive::ExecutionScript.new(
+      file_system: fs,
+      log: Hive::Log.new,
+      keep_running: nil
+    ) }
+
+    before(:each) do
+      es.instance_variable_set(:@script_lines, ['# line one', '# line two'])
+    end
+
+    after(:each) do
+      fs.cleanup
+    end
+
+    it 'adds a single line to the start of the execution script' do
+      es.prepend_bash_cmd('# extra line')
+      es.run
+      expect(File.read("#{fs.executed_script_path}")).to match /# extra line\n# line one\n# line two$/m
+    end
+
+    it 'adds multiple lines to the start of the execution script' do
+      es.prepend_bash_cmd('# extra line 1', '# extra line 2', '# extra line 3')
+      es.run
+      expect(File.read("#{fs.executed_script_path}")).to match /# extra line 1\n# extra line 2\n# extra line 3\n# line one\n# line two$/m
+    end
+  end
+
+  describe '#append_script' do
+    let(:fs) { FileSystemMock.new }
+
+    let(:es) { Hive::ExecutionScript.new(
+      file_system: fs,
+      log: Hive::Log.new,
+      keep_running: nil
+    ) }
+
+    before(:each) do
+      es.instance_variable_set(:@script_lines, ['# line one', '# line two'])
+    end
+
+    after(:each) do
+      fs.cleanup
+    end
+
+    it 'adds a single line to the start of the execution script' do
+      es.append_bash_cmd('# extra line')
+      es.run
+      expect(File.read("#{fs.executed_script_path}")).to match /# line one\n# line two\n# extra line$/m
+    end
+
+    it 'adds multiple lines to the start of the execution script' do
+      es.append_bash_cmd('# extra line 1', '# extra line 2', '# extra line 3')
+      es.run
+      expect(File.read("#{fs.executed_script_path}")).to match /# line one\n# line two\n# extra line 1\n# extra line 2\n# extra line 3$/m
+    end
+  end
 end
