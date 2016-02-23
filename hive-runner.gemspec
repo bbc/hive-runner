@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'hive-runner'
-  s.version     = '2.0.8'
+  s.version     = '2.0.9'
   s.date        = Time.now.strftime("%Y-%m-%d")
   s.summary     = 'Hive Runner'
   s.description = 'Core component of the Hive CI runner'
@@ -17,9 +17,9 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'daemons', '~> 1.2'
   s.add_runtime_dependency 'terminal-table', '~> 1.4'
   s.add_runtime_dependency 'res', '~> 1.0'
-  s.add_runtime_dependency 'hive-messages', '>= 1.0.3', '< 1.1'
+  s.add_runtime_dependency 'hive-messages', '~> 1.0.3'
   s.add_runtime_dependency 'devicedb_comms', '~> 0.1'
-  s.add_runtime_dependency 'mind_meld', '>= 0.0.6', '< 0.1'
+  s.add_runtime_dependency 'mind_meld', '~> 0.0.6'
   s.add_runtime_dependency 'code_cache', '~> 0.2'
   s.add_runtime_dependency 'sys-uname', '~> 1.0'
   s.add_development_dependency 'simplecov', '~> 0.10'
