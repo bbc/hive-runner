@@ -1,18 +1,18 @@
 PATH
   remote: .
   specs:
-    hive-runner (2.0.6)
+    hive-runner (2.0.9)
       activerecord (~> 4.2)
       chamber (~> 2.7)
       code_cache (~> 0.2)
       daemons (~> 1.2)
       devicedb_comms (~> 0.1)
-      hive-messages (>= 1.0.3, < 1.1)
+      hive-messages (~> 1.0.3)
       macaddr (~> 1.7)
-      mind_meld (>= 0.0.6, < 0.1)
+      mind_meld (~> 0.0.6)
       mono_logger (~> 1.1)
       res (~> 1.0)
-      sys-uname
+      sys-uname (~> 1.0)
       terminal-table (~> 1.4)
 
 GEM
@@ -74,7 +74,7 @@ GEM
     macaddr (1.7.1)
       systemu (~> 2.6.2)
     mimemagic (0.3.1)
-    mind_meld (0.0.6)
+    mind_meld (0.0.7)
       activesupport (~> 4)
     minitest (5.8.4)
     mono_logger (1.1.0)
