@@ -319,7 +319,26 @@ module Hive
         rescue => e
           @log.warn("Res Testmine upload failed #{e.message}")
         end
-        
+
+        begin
+          if conf_file = lion_config(checkout)
+            Res.submit_results(
+                reporter: :lion,
+                ir: res_file,
+                config_file: conf_file,
+                hive_job_id: job.job_id,
+                version: job.execution_variables.version,
+                target: job.execution_variables.queue_name
+            )
+          end
+        rescue => e
+          @log.warn("Res Lion upload failed #{e.message}")
+
+          end
+
+
+
+
         # TODO Add in Testrail upload
       
       end
@@ -345,6 +364,10 @@ module Hive
     
     def testmine_config(checkout)
       Dir.glob( "#{checkout}/.testmi{n,t}e.yml" ).first
+    end
+
+    def lion_config(checkout)
+      Dir.glob( "#{checkout}/.lion.yml" ).first
     end
 
     # Get a checkout of the repository
