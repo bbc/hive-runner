@@ -31,6 +31,9 @@ module Hive
       @device_id = @options['id']
       @hive_mind ||= MindMeld.new(
         url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
+        pem: Chamber.env.network.cert ? Chamber.env.network.cert : nil,
+        ca_file: Chamber.env.network.cafile ? Chamber.env.network.cafile : nil,
+        verify_mode: Chamber.env.network.verify_mode ? Chamber.env.network.verify_mode : nil,
         device: {
           id: @options['id']
         }

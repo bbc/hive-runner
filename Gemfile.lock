@@ -1,15 +1,15 @@
 PATH
   remote: .
   specs:
-    hive-runner (2.0.8)
+    hive-runner (2.0.9)
       activerecord (~> 4.2)
       chamber (~> 2.7)
       code_cache (~> 0.2)
       daemons (~> 1.2)
       devicedb_comms (~> 0.1)
-      hive-messages (>= 1.0.3, < 1.1)
+      hive-messages (~> 1.0.3)
       macaddr (~> 1.7)
-      mind_meld (>= 0.0.6, < 0.1)
+      mind_meld (~> 0.0.6)
       mono_logger (~> 1.1)
       res (~> 1.0)
       sys-uname (~> 1.0)
