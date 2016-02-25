@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hive-runner (2.0.6)
+    hive-runner (2.0.8)
       activerecord (~> 4.2)
       chamber (~> 2.7)
       code_cache (~> 0.2)
@@ -12,7 +12,7 @@ PATH
       mind_meld (>= 0.0.6, < 0.1)
       mono_logger (~> 1.1)
       res (~> 1.0)
-      sys-uname
+      sys-uname (~> 1.0)
       terminal-table (~> 1.4)
 
 GEM
@@ -74,13 +74,13 @@ GEM
     macaddr (1.7.1)
       systemu (~> 2.6.2)
     mimemagic (0.3.1)
-    mind_meld (0.0.6)
+    mind_meld (0.0.7)
       activesupport (~> 4)
     minitest (5.8.4)
     mono_logger (1.1.0)
     multi_json (1.11.2)
     multipart-post (2.0.0)
-    ox (2.2.4)
+    ox (2.3.0)
     parser (2.2.2.6)
       ast (>= 1.1, < 3.0)
     powerpack (0.1.1)
@@ -150,6 +150,3 @@ DEPENDENCIES
   rubocop (~> 0.34)
   simplecov (~> 0.10)
   webmock (~> 1.21)
-
-BUNDLED WITH
-   1.10.6
