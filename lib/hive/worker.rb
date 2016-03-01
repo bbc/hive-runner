@@ -29,7 +29,7 @@ module Hive
       @options = options
       @parent_pid = @options['parent_pid']
       @device_id = @options['id']
-      @hive_mind ||= MindMeld.new(
+      @hive_mind ||= mind_meld_klass.new(
         url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
         pem: Chamber.env.network.cert ? Chamber.env.network.cert : nil,
         ca_file: Chamber.env.network.cafile ? Chamber.env.network.cafile : nil,
@@ -113,6 +113,10 @@ module Hive
     def job_message_klass
       @log.info 'Generic job class'
       Hive::Messages::Job
+    end
+
+    def mind_meld_klass
+      MindMeld::Device
     end
 
     def reservation_details
