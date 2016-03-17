@@ -11,6 +11,8 @@ if ARGV.length < 1
   exit 1
 end
 
+headless = ARGV.include?("--ni")
+
 dir = File.expand_path('', ARGV[0])
 if Dir.exists?(dir)
   if ! Dir["#{dir}/*"].empty?
@@ -34,150 +36,160 @@ def yn question
   yn =~ /^[yY]/
 end
 
-# Choose options
-opt = ''
-mods = []
-while opt.upcase != 'X'
-  table = Terminal::Table.new headings: ['Device', 'Module', 'Source']
-  mods.each do |mod|
-    table.add_row [
-      mod[:device],
-      mod[:name],
-      mod.has_key?(:git_account) ?
-        "git@github.com:#{mod[:git_account]}/#{mod[:name]}" :
-        "https://rubygems.org/gems/#{mod[:name]}"
-    ]
+def add_modules
+  # Choose options
+  opt = ''
+  mods = []
+  while opt.upcase != 'X'
+    table = Terminal::Table.new headings: ['Device', 'Module', 'Source']
+    mods.each do |mod|
+      table.add_row [
+        mod[:device],
+        mod[:name],
+        mod.has_key?(:git_account) ?
+          "git@github.com:#{mod[:git_account]}/#{mod[:name]}" :
+          "https://rubygems.org/gems/#{mod[:name]}"
+      ]
+    end
+
+    puts ''
+    puts table
+    puts ''
+    puts '1) Add module'
+    puts 'X) Continue'
+    puts ''
+    print "> "
+    opt = STDIN.gets.chomp
+
+    case opt
+    when '1'
+      mod = {}
+      puts ''
+      print "Module name: "
+      mod[:device] = STDIN.gets.chomp
+      mod[:name] = "hive-runner-#{mod[:device]}"
+      puts ''
+      if yn "Get '#{mod[:name]}' from Github? "
+        print "Enter GIT account name: "
+        mod[:git_account] = STDIN.gets.chomp
+      end
+
+      puts ''
+      puts "Module '#{mod[:name]}'"
+      if mod.has_key?(:git_account)
+        puts "  from git@github.com:#{mod[:git_account]}/#{mod[:name]}"
+      else
+        puts "  from https://rubygems.org/gems/#{mod[:name]}"
+      end
+      puts ''
+
+      if yn "Correct? "
+        mods << mod
+      end
+    end
   end
 
-  puts ''
-  puts table
-  puts ''
-  puts '1) Add module'
-  puts 'X) Continue'
-  puts ''
-  print "> "
-  opt = STDIN.gets.chomp
-
-  case opt
-  when '1'
-    mod = {}
-    puts ''
-    print "Module name: "
-    mod[:device] = STDIN.gets.chomp
-    mod[:name] = "hive-runner-#{mod[:device]}"
-    puts ''
-    if yn "Get '#{mod[:name]}' from Github? "
-      print "Enter GIT account name: "
-      mod[:git_account] = STDIN.gets.chomp
-    end
-
-    puts ''
-    puts "Module '#{mod[:name]}'"
-    if mod.has_key?(:git_account)
-      puts "  from git@github.com:#{mod[:git_account]}/#{mod[:name]}"
-    else
-      puts "  from https://rubygems.org/gems/#{mod[:name]}"
-    end
-    puts ''
-
-    if yn "Correct? "
-      mods << mod
-    end
-  end
+  mods
 end
 
-FileUtils.mkdir_p("#{dir}/config")
-FileUtils.mkdir_p("#{dir}/log")
-FileUtils.mkdir_p("#{dir}/pids")
-FileUtils.mkdir_p("#{dir}/workspaces")
+def setup_hive(dir, mods)
+  FileUtils.mkdir_p("#{dir}/config")
+  FileUtils.mkdir_p("#{dir}/log")
+  FileUtils.mkdir_p("#{dir}/pids")
+  FileUtils.mkdir_p("#{dir}/workspaces")
 
-File.open("#{dir}/config/settings.yml", 'w') do |f|
-  f.puts "#{ENV['HIVE_ENVIRONMENT'] || 'test'}:"
-  f.puts '  daemon_name: HIVE'
-  f.puts ''
-  f.puts '  controllers:'
-  f.puts '    shell:'
-  f.puts '      # Number of shell workers to allocate'
-  f.puts '      workers: 5'
-  f.puts '      # Queue for each shell worker'
-  f.puts '      queues:'
-  f.puts '        - bash'
-  f.puts '      # Number of ports to allocate to each shell worker'
-  f.puts '      port_range_size: 50'
-  f.puts '      name_stub: SHELL_WORKER'
-  mods.each do |m|
-    f.puts "    #{m[:device]}:"
-    f.puts '      # Number of ports to allocate to each #{m[:device]} worker'
+  File.open("#{dir}/config/settings.yml", 'w') do |f|
+    f.puts "#{ENV['HIVE_ENVIRONMENT'] || 'test'}:"
+    f.puts '  daemon_name: HIVE'
+    f.puts ''
+    f.puts '  controllers:'
+    f.puts '    shell:'
+    f.puts '      # Number of shell workers to allocate'
+    f.puts '      workers: 5'
+    f.puts '      # Queue for each shell worker'
+    f.puts '      queues:'
+    f.puts '        - bash'
+    f.puts '      # Number of ports to allocate to each shell worker'
     f.puts '      port_range_size: 50'
-    f.puts "      name_stub: #{m[:device].upcase}_WORKER"
+    f.puts '      name_stub: SHELL_WORKER'
+    mods.each do |m|
+      f.puts "    #{m[:device]}:"
+      f.puts '      # Number of ports to allocate to each #{m[:device]} worker'
+      f.puts '      port_range_size: 50'
+      f.puts "      name_stub: #{m[:device].upcase}_WORKER"
+    end
+    f.puts ''
+    f.puts '  # Range of ports to be made available to workers'
+    f.puts '  ports:'
+    f.puts '    minimum: 4000'
+    f.puts '    maximum: 5000'
+    f.puts ''
+    f.puts '  # Logging configuration'
+    f.puts '  logging:'
+    f.puts "    directory: #{dir}/log"
+    f.puts "    pids: #{dir}/pids"
+    f.puts '    main_filename: hive.log'
+    f.puts '    main_level: INFO'
+    f.puts '    worker_level: INFO'
+    f.puts "    home: #{dir}/workspaces"
+    f.puts '    homes_to_keep: 5'
+    f.puts ''
+    f.puts '  # Timing configuration'
+    f.puts '  timings:'
+    f.puts '    worker_loop_interval: 5'
+    f.puts '    controller_loop_interval: 5'
+    f.puts ''
+    f.puts '  # Configuration for various network options'
+    f.puts '  network:'
+    f.puts '    scheduler: http://scheduler'
+    f.puts '    devicedb: http://devicedb'
+    f.puts '    #hive_mind: http://hive_mind'
+    f.puts '    # cert: /path/to/certificate.pem'
+    f.puts '    # cafile: /path/to/certificate-authorities.pem'
+    f.puts ''
+    f.puts '  # Configuration for diagnostic plugins'
+    f.puts '  diagnostics:'
   end
-  f.puts ''
-  f.puts '  # Range of ports to be made available to workers'
-  f.puts '  ports:'
-  f.puts '    minimum: 4000'
-  f.puts '    maximum: 5000'
-  f.puts ''
-  f.puts '  # Logging configuration'
-  f.puts '  logging:'
-  f.puts "    directory: #{dir}/log"
-  f.puts "    pids: #{dir}/pids"
-  f.puts '    main_filename: hive.log'
-  f.puts '    main_level: INFO'
-  f.puts '    worker_level: INFO'
-  f.puts "    home: #{dir}/workspaces"
-  f.puts '    homes_to_keep: 5'
-  f.puts ''
-  f.puts '  # Timing configuration'
-  f.puts '  timings:'
-  f.puts '    worker_loop_interval: 5'
-  f.puts '    controller_loop_interval: 5'
-  f.puts ''
-  f.puts '  # Configuration for various network options'
-  f.puts '  network:'
-  f.puts '    scheduler: http://scheduler'
-  f.puts '    devicedb: http://devicedb'
-  f.puts '    #hive_mind: http://hive_mind'
-  f.puts '    # cert: /path/to/certificate.pem'
-  f.puts '    # cafile: /path/to/certificate-authorities.pem'
-  f.puts ''
-  f.puts '  # Configuration for diagnostic plugins'
-  f.puts '  diagnostics:'
+
+  File.open("#{dir}/Gemfile", 'w') do |f|
+    f.puts "source 'https://rubygems.org/'"
+    f.puts ""
+    f.puts "gem 'hive-runner'"
+    mods.each do |m|
+      source = m.has_key?(:git_account) ? ", git: 'git@github.com:#{m[:git_account]}/#{m[:name]}'" : ''
+      f.puts "gem '#{m[:name]}'#{source}"
+    end
+  end
+
+  print "Executing 'bundle install' ... "
+  Dir.chdir dir
+  if system("bundle install > bundle_install.out 2>&1")
+    print "SUCCESS\n"
+    File.delete('bundle_install.out')
+  else
+    print "FAILED\n"
+    puts "See #{dir}/bundle_install.out for details"
+    exit
+  end
+
+  puts ''
+  puts 'Configuration required:'
+  puts
+  puts '  * Add to config/settings.yml'
+  puts '      - scheduler'
+  puts '      - devicedb'
+  puts '      - cert'
+  puts '      - cafile'
+  if mods.length > 0
+    puts '  * Configure these modules in config/settings.yml'
+    mods.each do |m|
+      puts "      - #{m[:device]}"
+    end
+  end
+  puts '  * Add to ~/.bashrc'
+  puts "      - export HIVE_CONFIG=#{dir}/config"
 end
 
-File.open("#{dir}/Gemfile", 'w') do |f|
-  f.puts "source 'https://rubygems.org/'"
-  f.puts ""
-  f.puts "gem 'hive-runner'"
-  mods.each do |m|
-    source = m.has_key?(:git_account) ? ", git: 'git@github.com:#{m[:git_account]}/#{m[:name]}'" : ''
-    f.puts "gem '#{m[:name]}'#{source}"
-  end
-end
-
-print "Executing 'bundle install' ... "
-Dir.chdir dir
-if system("bundle install > bundle_install.out 2>&1")
-  print "SUCCESS\n"
-  File.delete('bundle_install.out')
-else
-  print "FAILED\n"
-  puts "See #{dir}/bundle_install.out for details"
-  exit
-end
-
-puts ''
-puts 'Configuration required:'
-puts
-puts '  * Add to config/settings.yml'
-puts '      - scheduler'
-puts '      - devicedb'
-puts '      - cert'
-puts '      - cafile'
-if mods.length > 0
-  puts '  * Configure these modules in config/settings.yml'
-  mods.each do |m|
-    puts "      - #{m[:device]}"
-  end
-end
-puts '  * Add to ~/.bashrc'
-puts "      - export HIVE_CONFIG=#{dir}/config"
+mods = []
+mods = add_modules unless headless
+setup_hive(dir, mods)
