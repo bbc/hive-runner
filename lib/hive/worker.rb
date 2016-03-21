@@ -34,10 +34,7 @@ module Hive
         pem: Chamber.env.network.cert ? Chamber.env.network.cert : nil,
         ca_file: Chamber.env.network.cafile ? Chamber.env.network.cafile : nil,
         verify_mode: Chamber.env.network.verify_mode ? Chamber.env.network.verify_mode : nil,
-        device: {
-          serial: @options['id'],
-          device_type: 'Mobile'
-        }
+        device: hive_mind_device_identifiers
       )
       @device_identity = @options['device_identity'] || 'unknown-device'
       pid = Process.pid
@@ -451,6 +448,11 @@ module Hive
       File.open("#{@file_system.home_path}/job_info", 'w') do |f|
         f.puts "#{Process.pid} #{state}"
       end
+    end
+
+    # Parameters for uniquely identifying the device
+    def hive_mind_device_identifiers
+      { id: @device_id }
     end
   end
 end
