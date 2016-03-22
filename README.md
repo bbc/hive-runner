@@ -1,5 +1,7 @@
 # hive-runner
 
+[![Join the chat at https://gitter.im/bbc/hive-runner](https://badges.gitter.im/bbc/hive-runner.svg)](https://gitter.im/bbc/hive-runner?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Run automated jobs on devices
 
 ## Quick start
