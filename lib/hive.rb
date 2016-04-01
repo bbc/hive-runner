@@ -126,7 +126,7 @@ module Hive
     #end
 
     # Hive Mind
-    Hive.logger.debug "Polling hive: #{id}"
+    Hive.logger.debug "Polling hive"
     rtn = Hive.hive_mind.poll
     Hive.logger.debug "Return data: #{rtn}"
     if rtn['error'].present?
