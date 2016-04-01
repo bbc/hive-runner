@@ -5,7 +5,7 @@ module Hive
     # The Shell worker
     class Shell < Worker
       def initialize(options = {})
-        @devicedb_register = false
+        #@devicedb_register = false
         super
       end
 
