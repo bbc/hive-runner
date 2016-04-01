@@ -29,6 +29,7 @@ module Hive
       @options = options
       @parent_pid = @options['parent_pid']
       @device_id = @options['id']
+      @hive_id = @options['hive_id']
       @hive_mind ||= mind_meld_klass.new(
         url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
         pem: Chamber.env.network.cert ? Chamber.env.network.cert : nil,
@@ -121,7 +122,8 @@ module Hive
     end
 
     def reservation_details
-      { hive_id: Hive.id, worker_pid: Process.pid }
+      @log.debug "Reservations details: hive_id=#{@hive_id}, worker_pid=#{Process.pid}"
+      { hive_id: @hive_id, worker_pid: Process.pid }
     end
 
     # Execute a job
