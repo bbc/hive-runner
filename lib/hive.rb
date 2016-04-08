@@ -6,6 +6,7 @@ require 'mind_meld/hive'
 require 'macaddr'
 require 'socket'
 require 'sys/uname'
+require 'airbrake-ruby'
 
 # The Hive automated testing framework
 module Hive
@@ -37,6 +38,12 @@ module Hive
     config.pem_file = Chamber.env.network.cert
     config.ssl_verify_mode = OpenSSL::SSL::VERIFY_NONE
   end
+
+  Airbrake.configure do |config|
+     config.host = Chamber.env.errbit.host
+     config.project_id = Chamber.env.errbit.project_id
+     config.project_key = Chamber.env.errbit.project_key
+  end if Chamber.env.has_key?('errbit')
 
   def self.config
     Chamber.env
