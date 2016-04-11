@@ -69,22 +69,38 @@ def add_modules
       mod[:device] = STDIN.gets.chomp
       mod[:name] = "hive-runner-#{mod[:device]}"
       puts ''
-      if yn "Get '#{mod[:name]}' from Github? "
-        print "Enter GIT account name: "
-        mod[:git_account] = STDIN.gets.chomp
-      end
 
+      puts "Get '#{mod[:name]}' from:"
+      puts '  1) Ruby Gems'
+      puts '  2) Github'
+      puts '  X) Cancel'
       puts ''
-      puts "Module '#{mod[:name]}'"
-      if mod.has_key?(:git_account)
-        puts "  from git@github.com:#{mod[:git_account]}/#{mod[:name]}"
+      src = '0'
+      while src !~ /^[12Xx]/
+        print "> "
+        src = STDIN.gets.chomp
+      end
+      if src =~ /^[Xx]/
+        puts "Cancelled"
+        puts ''
       else
-        puts "  from https://rubygems.org/gems/#{mod[:name]}"
-      end
-      puts ''
+        if src == '2'
+          print "Enter GIT account name: "
+          mod[:git_account] = STDIN.gets.chomp
+        end
 
-      if yn "Correct? "
-        mods << mod
+        puts ''
+        puts "Module '#{mod[:name]}'"
+        if mod.has_key?(:git_account)
+          puts "  from git@github.com:#{mod[:git_account]}/#{mod[:name]}"
+        else
+          puts "  from https://rubygems.org/gems/#{mod[:name]}"
+        end
+        puts ''
+
+        if yn "Correct? "
+          mods << mod
+        end
       end
     end
   end
