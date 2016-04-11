@@ -26,4 +26,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 3.3'
   s.add_development_dependency 'rubocop', '~> 0.34'
   s.add_development_dependency 'webmock', '~> 1.21'
+  s.add_development_dependency 'airbrake-ruby', '~> 1.2.2'
 end
