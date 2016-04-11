@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'hive-runner'
-  s.version     = '2.0.12'
+  s.version     = '2.0.13'
   s.date        = Time.now.strftime("%Y-%m-%d")
   s.summary     = 'Hive Runner'
   s.description = 'Core component of the Hive CI runner'
@@ -26,4 +26,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 3.3'
   s.add_development_dependency 'rubocop', '~> 0.34'
   s.add_development_dependency 'webmock', '~> 1.21'
+  s.add_development_dependency 'airbrake-ruby', '~> 1.2.2'
 end

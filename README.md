@@ -9,8 +9,7 @@ Install the hive-runner gem and set up your hive:
     gem install hive-runner
     hive_setup my_hive
 
-Follow the configuration instructions and, in particular, ensure that the
-`HIVE_CONFIG` variable is set.
+Follow the configuration instructions.
 
 Start the Hive daemon:
 
@@ -89,32 +88,3 @@ The shell controller section contains the following additional field:
 |-----------|-------------------------------------------|
 | `queues`  | Array of job queues for the shell workers |
 | `workers` | Number of shell workers to run            |
-
-## Setting up a new Hive Runner
-
-Check out the Hive Runner from Github:
-
-    # Using HTTPS
-    git clone https://github.com/bbc-test/hive-runner
-    # ... or using SSH
-    git clone ssh@github.com:bbc-test/hive-runner
-    # Ensure ruby gems are installed
-    cd hive-runner
-    bundle install
-
-Configure the hive, either by editing the default configuration file,
-`hive-runner/config/hive-runner.yml`, or creating a separate configuration
-file in a separate location (recommended) and ensuring that the `HIVE_CONFIG`
-environment variable is set correctly:
-
-    echo export HIVE_CONFIG=/path/to/hive-config-directory >> ~/.bashrc
-
-See the "Configuration file" above for details.
-
-Start the Hive Runner:
-
-    ./bin/hived start
-
-Ensure that your Hive Runner is running and that your workers have started:
-
-    ./bin/hived status

@@ -30,6 +30,11 @@ test:
   datastore:
     filename: /path/to/datastore.db
 
+  errbit:
+    host: 'http://errbit_host.com:port'
+    project_id: true
+    project_key: 'project_key'
+  
   diagnostics:
     android:
       parameter : criteria 
