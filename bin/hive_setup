@@ -202,8 +202,6 @@ def setup_hive(dir, mods)
       puts "      - #{m[:device]}"
     end
   end
-  puts '  * Add to ~/.bashrc'
-  puts "      - export HIVE_CONFIG=#{dir}/config"
 end
 
 mods = []
