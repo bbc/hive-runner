@@ -22,9 +22,9 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'mind_meld', '~> 0.1.2'
   s.add_runtime_dependency 'code_cache', '~> 0.2'
   s.add_runtime_dependency 'sys-uname', '~> 1.0'
+  s.add_runtime_dependency 'airbrake-ruby', '~> 1.2.2'
   s.add_development_dependency 'simplecov', '~> 0.10'
   s.add_development_dependency 'rspec', '~> 3.3'
   s.add_development_dependency 'rubocop', '~> 0.34'
   s.add_development_dependency 'webmock', '~> 1.21'
-  s.add_development_dependency 'airbrake-ruby', '~> 1.2.2'
 end
