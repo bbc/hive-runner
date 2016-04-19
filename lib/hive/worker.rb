@@ -230,14 +230,14 @@ module Hive
     def diagnostics
       @diagnostic_runner.run if !@diagnostic_runner.nil?
       status = device_status
-      status = set_device_status('idle') if status == 'busy'
-      raise DeviceNotReady.new("Current device status: '#{status}'") if status != 'idle'
+      status = set_device_status('happy') if status == 'busy'
+      raise DeviceNotReady.new("Current device status: '#{status}'") if status != 'happy'
     end
 
     # Current state of the device
     # This method should be replaced in child classes, as appropriate
     def device_status
-      @device_status ||= 'idle'
+      @device_status ||= 'happy'
     end
 
     # Set the status of a device
