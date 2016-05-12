@@ -69,20 +69,8 @@ def add_modules
       mod[:device] = STDIN.gets.chomp
       mod[:name] = "hive-runner-#{mod[:device]}"
       puts ''
-      if yn "Get '#{mod[:name]}' from Github? "
-        print "Enter GIT account name: "
-        mod[:git_account] = STDIN.gets.chomp
-      end
 
-      puts ''
-      puts "Module '#{mod[:name]}'"
-      if mod.has_key?(:git_account)
-        puts "  from git@github.com:#{mod[:git_account]}/#{mod[:name]}"
-      else
-        puts "  from https://rubygems.org/gems/#{mod[:name]}"
-      end
-      puts ''
-
+      puts "Module '#{mod[:name]}' from https://rubygems.org/gems/#{mod[:name]}"
       if yn "Correct? "
         mods << mod
       end
@@ -186,8 +174,6 @@ def setup_hive(dir, mods)
       puts "      - #{m[:device]}"
     end
   end
-  puts '  * Add to ~/.bashrc'
-  puts "      - export HIVE_CONFIG=#{dir}/config"
 end
 
 mods = []
