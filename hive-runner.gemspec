@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'mono_logger', '~> 1.1'
   s.add_runtime_dependency 'daemons', '~> 1.2'
   s.add_runtime_dependency 'terminal-table', '~> 1.4'
-  s.add_runtime_dependency 'res', '~> 1.0'
+  s.add_runtime_dependency 'res', '~> 1.2.5'
   s.add_runtime_dependency 'hive-messages', '~> 1.0.3'
   s.add_runtime_dependency 'devicedb_comms', '~> 0.1'
   s.add_runtime_dependency 'mind_meld', '~> 0.1.2'
