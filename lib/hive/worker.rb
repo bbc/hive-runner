@@ -345,7 +345,10 @@ module Hive
                 config_file: conf_file,
                 hive_job_id: job.job_id,
                 version: job.execution_variables.version,
-                target: job.execution_variables.queue_name
+                target: job.execution_variables.queue_name,
+                cert: Chamber.env.network.cert,
+                cacert: Chamber.env.network.cafile,
+                ssl_verify_mode: Chamber.env.network.verify_mode
             )
           end
         rescue => e
