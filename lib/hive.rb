@@ -68,7 +68,7 @@ module Hive
         hostname: Hive.hostname,
         version: Gem::Specification.find_by_name('hive-runner').version.to_s,
         runner_plugins: Hash[Gem::Specification.all.select{ |g| g.name =~ /hive-runner-/ }.map { |p| [p.name, p.version.to_s] }],
-        macs: [Hive.mac_address],
+        macs: Mac.addrs,
         ips: [Hive.ip_address],
         brand: Hive.config.brand? ? Hive.config.brand : 'BBC',
         model: Hive.config.model? ? Hive.config.model : 'Hive',
@@ -99,11 +99,6 @@ module Hive
   def self.ip_address
     ip = Socket.ip_address_list.detect { |intf| intf.ipv4_private? }
     ip.ip_address
-  end
-
-  # Get the MAC address of the Hive
-  def self.mac_address
-    Mac.addr
   end
 
   # Get the hostname of the Hive
