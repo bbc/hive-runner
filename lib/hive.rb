@@ -5,6 +5,7 @@ require 'mind_meld/hive'
 require 'macaddr'
 require 'socket'
 require 'sys/uname'
+require 'sys/cpu'
 require 'airbrake-ruby'
 
 # The Hive automated testing framework
@@ -88,11 +89,21 @@ module Hive
     Hive.logger.debug "Polling hive"
     rtn = Hive.hive_mind.poll
     Hive.logger.debug "Return data: #{rtn}"
-    if rtn['error'].present?
+    if rtn.has_key? 'error'
       Hive.logger.warn "Hive polling failed: #{rtn['error']}"
     else
       Hive.logger.info "Successfully polled hive"
     end
+  end
+
+  # Gather and send statistics
+  def self.send_statistics
+    Hive.hive_mind.add_statistics(
+      label: 'Load average',
+      value: Sys::CPU.load_avg[0],
+      format: 'float'
+    )
+    Hive.hive_mind.flush_statistics
   end
 
   # Get the IP address of the Hive
