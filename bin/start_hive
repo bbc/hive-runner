@@ -35,7 +35,7 @@ Signal.trap('USR1') do
 
   client.puts "  Software versions:"
   client.puts "    * hive-runner: #{gems['hive-runner']}"
-  gems.except('hive-runner').sort.each do |name, version|
+  gems.select{|k, v| k != 'hive-runner'}.sort.each do |name, version|
     client.puts "    * #{name}: #{version}"
   end
   

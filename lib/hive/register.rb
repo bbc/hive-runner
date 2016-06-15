@@ -30,17 +30,20 @@ module Hive
     end
 
     def instantiate_controllers(controller_details = Hive.config.controllers)
-      controller_details.each do |type, opts|
-        Hive.logger.info("Adding controller for '#{type}'")
-        require "hive/controller/#{type}"
-        controller = Object.const_get('Hive').const_get('Controller').const_get(type.capitalize).new(opts.to_hash)
-        @controllers << controller
+      if controller_details
+        controller_details.each do |type, opts|
+          Hive.logger.info("Adding controller for '#{type}'")
+          require "hive/controller/#{type}"
+          controller = Object.const_get('Hive').const_get('Controller').const_get(type.capitalize).new(opts.to_hash)
+          @controllers << controller
+        end
       end
       check_controllers
       @controllers
     end
 
     def run
+      @next_stat_update = Time.now
       loop do
         Hive.poll
         housekeeping
@@ -98,6 +101,11 @@ module Hive
 
     def housekeeping
       clear_workspaces
+
+      if Hive.config.timings.stats_update_interval? && @next_stat_update < Time.now
+        Hive.send_statistics
+        @next_stat_update += Hive.config.timings.stats_update_interval
+      end
     end
 
     def clear_workspaces
