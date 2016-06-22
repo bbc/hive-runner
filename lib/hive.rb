@@ -7,6 +7,7 @@ require 'socket'
 require 'sys/uname'
 require 'sys/cpu'
 require 'airbrake-ruby'
+require 'etc'
 
 # The Hive automated testing framework
 module Hive
@@ -60,24 +61,35 @@ module Hive
   def self.hive_mind
     Hive.logger.debug "Sysname: #{Sys::Uname.sysname}"
     Hive.logger.debug "Release: #{Sys::Uname.release}"
-    @hive_mind ||= MindMeld::Hive.new(
-      url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
-      pem: Chamber.env.network.cert ? Chamber.env.network.cert : nil,
-      ca_file: Chamber.env.network.cafile ? Chamber.env.network.cafile : nil,
-      verify_mode: Chamber.env.network.verify_mode ? Chamber.env.network.verify_mode : nil,
-      device: {
-        hostname: Hive.hostname,
-        version: Gem::Specification.find_by_name('hive-runner').version.to_s,
-        runner_plugins: Hash[Gem::Specification.all.select{ |g| g.name =~ /hive-runner-/ }.map { |p| [p.name, p.version.to_s] }],
-        macs: Mac.addrs,
-        ips: [Hive.ip_address],
-        brand: Hive.config.brand? ? Hive.config.brand : 'BBC',
-        model: Hive.config.model? ? Hive.config.model : 'Hive',
-        operating_system_name: Sys::Uname.sysname,
-        operating_system_version: Sys::Uname.release,
-        device_type: 'Hive'
-      }
-    )
+    if ! @hive_mind
+      if @hive_mind = MindMeld::Hive.new(
+        url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
+        pem: Chamber.env.network.cert ? Chamber.env.network.cert : nil,
+        ca_file: Chamber.env.network.cafile ? Chamber.env.network.cafile : nil,
+        verify_mode: Chamber.env.network.verify_mode ? Chamber.env.network.verify_mode : nil,
+        device: {
+          hostname: Hive.hostname,
+          version: Gem::Specification.find_by_name('hive-runner').version.to_s,
+          runner_plugins: Hash[Gem::Specification.all.select{ |g| g.name =~ /hive-runner-/ }.map { |p| [p.name, p.version.to_s] }],
+          macs: Mac.addrs,
+          ips: [Hive.ip_address],
+          brand: Hive.config.brand? ? Hive.config.brand : 'BBC',
+          model: Hive.config.model? ? Hive.config.model : 'Hive',
+          operating_system_name: Sys::Uname.sysname,
+          operating_system_version: Sys::Uname.release,
+          device_type: 'Hive'
+        }
+      ) and Etc.respond_to?(:nprocessors) # Require Ruby >= 2.2
+        @hive_mind.add_statistics(
+          label: 'Processor count',
+          value: Etc.nprocessors,
+          format: 'integer'
+        )
+        @hive_mind.flush_statistics
+      end
+    end
+
+    @hive_mind
   end
 
   def self.register
