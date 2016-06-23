@@ -85,6 +85,22 @@ module Hive
           value: Etc.nprocessors,
           format: 'integer'
         )
+        if Chamber.env.diagnostics.hive.load_warning? && Chamber.env.diagnostics.hive.load_error?
+          @hive_mind.add_statistics(
+            [
+              {
+                label: 'Load average warning threshold',
+                value: Chamber.env.diagnostics.hive.load_warning,
+                format: 'float'
+              },
+              {
+                label: 'Load average error threshold',
+                value: Chamber.env.diagnostics.hive.load_error,
+                format: 'float'
+              }
+            ]
+          )
+        end
         @hive_mind.flush_statistics
       end
     end
