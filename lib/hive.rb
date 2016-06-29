@@ -85,7 +85,8 @@ module Hive
           value: Etc.nprocessors,
           format: 'integer'
         )
-        if Chamber.env.diagnostics.hive.load_warning? && Chamber.env.diagnostics.hive.load_error?
+         
+        if Chamber.env.has_key?('diagnostics') && Chamber.env.diagnostics.hive.load_warning? && Chamber.env.diagnostics.hive.load_error?
           @hive_mind.add_statistics(
             [
               {
