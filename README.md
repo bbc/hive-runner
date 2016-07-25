@@ -2,6 +2,12 @@
 
 Run automated jobs on devices
 
+## Requirements
+
+# Ruby (we currently use 2.2.0)
+# Linux or OSX
+# rvm on OSX (rbenv and others are not currently supported, see: https://waffle.io/bbc/hive-ci/cards/579613e206bf561900851d05)
+
 ## Quick start
 
 Install the hive-runner gem and set up your hive:
