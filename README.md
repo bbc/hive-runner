@@ -15,9 +15,7 @@ Install the hive-runner gem and set up your hive:
     gem install hive-runner
     hive_setup my_hive
 
-Follow the configuration instructions.
-
-Here is an example diagnostics stanza:
+Follow the configuration instructions. If you want to add diagnostics to your hive when asked, here is an example diagnostics stanza:
 
     diagnostics:
       hive:
