@@ -17,6 +17,13 @@ Install the hive-runner gem and set up your hive:
 
 Follow the configuration instructions.
 
+Here is an example diagnostics stanza:
+
+    diagnostics:
+      hive:
+        load_warning: 0.7
+        load_error: 1.5
+
 Start the Hive daemon:
 
     hived start
