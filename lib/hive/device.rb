@@ -31,7 +31,7 @@ module Hive
       end
     else
       parent_pid = Process.pid
-      @worker_pid = Process.spawn do 
+      @worker_pid = Process.fork do 
         object = Object
         @worker_class.split('::').each { |sub| object = object.const_get(sub) }
         object.new(@options.merge('parent_pid' => parent_pid, 'device_identity' => self.identity, 'port_allocator' => self.port_allocator, 'hive_id' => Hive.hive_mind.device_details['id']))
