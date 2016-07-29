@@ -24,7 +24,14 @@ end
 # Communication with daemon launcher
 comm_port = ENV.fetch('HIVE_COMM_PORT', 9999).to_i
 comm = TCPServer.open(comm_port)
-Signal.trap('USR1') do
+sig = nil
+if Hive.config.platform == 'Windows'
+ sig = 'INT'
+else
+ sig = 'USR1'
+end
+#Signal.trap('USR1') do
+Signal.trap(sig) do
   client = comm.accept
   client.puts "  Controllers in use:"
   Hive.register.controllers.each do |c|

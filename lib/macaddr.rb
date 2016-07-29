@@ -1,11 +1,9 @@
-# Copied on 26 May 2016 directly from https://github.com/tsilen/macaddr, which
-# is a fork of the official source of the Gem at
-# https://github.com/ahoward/macaddr but with a fix to get a full list of all
-# MAC addresses.
-# License is given as "same as ruby's" (sic).
-
 ##
-# Cross platform MAC address determination.
+# Cross platform MAC address determination.  Works for:
+# * /sbin/ifconfig
+# * /bin/ifconfig
+# * ifconfig
+# * ipconfig /all
 #
 # To return the first MAC address on the system:
 #
@@ -14,6 +12,7 @@
 # To return an array of all MAC addresses:
 #
 #   Mac.addresses
+#
 
 begin
   require 'rubygems'
@@ -21,10 +20,11 @@ rescue LoadError
   nil
 end
 
+require 'systemu'
 require 'socket'
 
 module Mac
-  VERSION = '1.7.1'
+  VERSION = '2.0.0'
 
   def Mac.version
     ::Mac::VERSION
@@ -32,6 +32,7 @@ module Mac
 
   def Mac.dependencies
     {
+      'systemu' => [ 'systemu' , '~> 2.6.2' ]
     }
   end
 
@@ -60,7 +61,7 @@ module Mac
     end
 
     def addresses
-      @mac_addresses ||= from_getifaddrs || []
+      @mac_addresses ||= from_getifaddrs || from_system
     end
 
     link   = Socket::PF_LINK   if Socket.const_defined? :PF_LINK
@@ -68,7 +69,7 @@ module Mac
     INTERFACE_PACKET_FAMILY = link || packet # :nodoc:
 
     ##
-    # Shorter aliases for #address and #addresses
+    # Shorter alias for #address
 
     alias_method "addr", "address"
     alias_method "addrs", "addresses"
@@ -97,7 +98,25 @@ module Mac
       end
     end
 
+    def from_system
+      cmds = '/sbin/ifconfig', '/bin/ifconfig', 'ifconfig', 'ipconfig /all', 'cat /sys/class/net/*/address'
+
+      output = nil
+      cmds.each do |cmd|
+        _, stdout, _ = systemu(cmd) rescue next
+        next unless stdout and stdout.size > 0
+        output = stdout and break
+      end
+      raise "all of #{ cmds.join ' ' } failed" unless output
+
+      lines = output.split(/\n/)
+
+      macs = lines.select{|line| line =~ RE}
+      macs.map!{|c| c[RE].strip}
+    end
   end
+
+  RE = %r/(?:[^:\-]|\A)(?:[0-9A-F][0-9A-F][:\-]){5}[0-9A-F][0-9A-F](?:[^:\-]|\Z)/io
 end
 
 MacAddr = Macaddr = Mac

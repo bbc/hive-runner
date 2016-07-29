@@ -149,13 +149,12 @@ module Hive
         @log.info "Setting job paths"
         @file_system = Hive::FileSystem.new(@job.job_id, Hive.config.logging.home, @log)
         set_job_state_to :preparing
-
-        if ! @job.repository.to_s.empty?
-          @log.info "Checking out the repository"
-          @log.debug "  #{@job.repository}"
-          @log.debug "  #{@file_system.testbed_path}"
-          checkout_code(@job.repository, @file_system.testbed_path)
-        end
+        #if ! @job.repository.to_s.empty?
+        #  @log.info "Checking out the repository"
+        #  @log.debug "  #{@job.repository}"
+        #  @log.debug "  #{@file_system.testbed_path}"
+        #  checkout_code(@job.repository, @file_system.testbed_path)
+        #end
 
         @log.info "Initialising execution script"
         @script = Hive::ExecutionScript.new(
@@ -378,7 +377,7 @@ module Hive
     # This just checks the presense of the parent process
     def keep_running?
       begin
-        Process.getpgid(@parent_pid)
+        Process.getpgid(@parent_pid) if Hive.config.platform != 'Windows'
         true
       rescue
         false

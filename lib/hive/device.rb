@@ -15,22 +15,31 @@ module Hive
       @port_allocator = options['port_allocator'] or Hive::PortAllocator.new(ports: [])
       @status = @options.has_key?('status') ? @options['status'] : 'none'
       @worker_class = self.class.to_s.sub('Device', 'Worker')
+      @threads = []
       require @worker_class.downcase.gsub(/::/, '/')
       raise ArgumentError, "Identity not set for #{self.class} device" if ! @identity
     end
 
     # Start the worker process
-    def start
+   def start
+   if Hive.config.platform == 'Windows'
+      object = Object
+      @worker_class.split('::').each{ |sub| object = object.const_get(sub)}
+      if @threads.count < 1
+        @threads << Thread.new { object.new(@options.merge('device_identity' => self.identity, 'port_allocator' => self.port_allocator, 'hive_id' => Hive.hive_mind.device_details['id'])) }
+        Hive.logger.info('Worker started in new thread #{@threads}')
+      end
+    else
       parent_pid = Process.pid
-      @worker_pid = Process.fork do
+      @worker_pid = Process.spawn do 
         object = Object
         @worker_class.split('::').each { |sub| object = object.const_get(sub) }
         object.new(@options.merge('parent_pid' => parent_pid, 'device_identity' => self.identity, 'port_allocator' => self.port_allocator, 'hive_id' => Hive.hive_mind.device_details['id']))
       end
       Process.detach @worker_pid
-
       Hive.logger.info("Worker started with pid #{@worker_pid}")
     end
+   end
 
     # Terminate the worker process
     def stop
@@ -38,9 +47,14 @@ module Hive
         count = 0
         while self.running? && count < 30 do
           count += 1
-          Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{count}]")
-          Process.kill 'TERM', @worker_pid
-          sleep 30
+	  if Hive.config.platform == 'Windows'
+            Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{count}]")
+	    Process.kill 'TERM', @worker_pid
+            sleep 30
+	  else
+	    Hive.logger.info("Attempting to terminate thread #{@threads}")
+	    Thread.kill(@threads)
+	  end
         end
         Process.kill 'KILL', @worker_pid if self.running?
       rescue => e
