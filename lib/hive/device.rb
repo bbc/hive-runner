@@ -47,16 +47,16 @@ module Hive
         count = 0
         while self.running? && count < 30 do
           count += 1
-	  if Hive.config.platform == 'Windows'
+	  if Hive.config.platform != 'Windows'
             Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{count}]")
 	    Process.kill 'TERM', @worker_pid
             sleep 30
+            Process.kill 'KILL', @worker_pid if self.running?
 	  else
 	    Hive.logger.info("Attempting to terminate thread #{@threads}")
 	    @threads.kill
 	  end
         end
-        Process.kill 'KILL', @worker_pid if self.running?
       rescue => e
         Hive.logger.info("Process had already terminated")
       end
