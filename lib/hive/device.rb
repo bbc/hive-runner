@@ -27,7 +27,7 @@ module Hive
       @worker_class.split('::').each{ |sub| object = object.const_get(sub)}
       if @threads.count < 1
         @threads << Thread.new { object.new(@options.merge('device_identity' => self.identity, 'port_allocator' => self.port_allocator, 'hive_id' => Hive.hive_mind.device_details['id'])) }
-        Hive.logger.info('Worker started in new thread #{@threads}')
+        Hive.logger.info("Worker started in new thread #{@threads}")
       end
     else
       parent_pid = Process.pid
@@ -53,7 +53,7 @@ module Hive
             sleep 30
 	  else
 	    Hive.logger.info("Attempting to terminate thread #{@threads}")
-	    Thread.kill(@threads)
+	    @threads.kill
 	  end
         end
         Process.kill 'KILL', @worker_pid if self.running?
