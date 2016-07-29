@@ -128,7 +128,7 @@ module Hive
 	  end
         rescue Timeout::Error
 	  if Hive.config.platform == 'Windows'	     
-             Thread.kill(@threads)
+             @threads.kill if @threads
 	  else
             Process.kill(-9, @pgid) if ! ( @keep_running.nil? || @keep_running.call )
           end
@@ -143,14 +143,15 @@ module Hive
     end
 
     def terminate
-      if @pgid
+      if Hive.config.platform == 'Windows'
+        @threads.kill if @threads
+      elsif @pgid
         begin
-	system("Taskkill /PID #{pid} /F")
-       #   Process.kill(-9, @pgid)
+          Process.kill(-9, @pgid)
         rescue => e
           @log.warn e
         end
-       # @pgid = nil
+        @pgid = nil
       end
     end
   end
