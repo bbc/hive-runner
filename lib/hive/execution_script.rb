@@ -104,7 +104,7 @@ module Hive
       while running
         begin
           Timeout.timeout(30) do
-	    if Hive.config.platform == 'Windows'
+	    if RbConfig::CONFIG['host_os'].include? "ming"
 	      thread = Thread.new do
 	        require 'open3'
 	        Open3.popen3(command) do |stdin, stdout, stderr, wait_thr |
