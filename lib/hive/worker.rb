@@ -376,7 +376,7 @@ module Hive
     # This just checks the presense of the parent process
     def keep_running?
       begin
-        Process.getpgid(@parent_pid) if Hive.config.platform != 'Windows'
+        Process.getpgid(@parent_pid) if RbConfig::CONFIG['host_os'].include? "darwin"
         true
       rescue
         false
