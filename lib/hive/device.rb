@@ -22,7 +22,7 @@ module Hive
 
     # Start the worker process
    def start
-   if Hive.config.platform == 'Windows'
+   if RbConfig::CONFIG['host_os'].include? "ming"
       object = Object
       @worker_class.split('::').each{ |sub| object = object.const_get(sub)}
       if @threads.count < 1
@@ -47,14 +47,15 @@ module Hive
         count = 0
         while self.running? && count < 30 do
           count += 1
-	  if Hive.config.platform != 'Windows'
+	  if RbConfig::CONFIG['host_os'].include? "ming"
             Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{count}]")
 	    Process.kill 'TERM', @worker_pid
             sleep 30
             Process.kill 'KILL', @worker_pid if self.running?
 	  else
 	    Hive.logger.info("Attempting to terminate thread #{@threads}")
-	    @threads.kill
+	    @threads[0].kill
+	    @threads = []
 	  end
         end
       rescue => e
