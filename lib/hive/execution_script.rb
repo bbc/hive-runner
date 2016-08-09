@@ -61,7 +61,7 @@ module Hive
 
     def run
       File.open(@path, 'w') do |f|
-        if Hive.config.platform == 'Windows'
+        if RbConfig::CONFIG['host_os'].include? "ming"
           @log.info 'bash.rb - Writing script out to batch file'
           @env.each do |key, value|
             if value.kind_of?(Array)
@@ -95,7 +95,7 @@ module Hive
       File.chmod(0700, @path) 
       command = "#{@path}" 
 
-      if Hive.config.platform != 'Windows' 
+      if !RbConfig::CONFIG['host_os'].include? "ming" 
         pid = Process.spawn @env_secure, "#{@path}", pgroup: true, in: '/dev/null', out: "#{@log_path}/stdout.log", err: "#{@log_path}/stderr.log"
         @pgid = Process.getpgid(pid)
       end
@@ -127,8 +127,11 @@ module Hive
             running = false
 	  end
         rescue Timeout::Error
-	  if Hive.config.platform == 'Windows'	     
-             @threads.kill if @threads
+	  if RbConfig::CONFIG['host_os'].include? "ming"
+	    if @threads
+	      @threads[0].kill
+	      @threads = []
+	    end
 	  else
             Process.kill(-9, @pgid) if ! ( @keep_running.nil? || @keep_running.call )
           end
@@ -143,8 +146,11 @@ module Hive
     end
 
     def terminate
-      if Hive.config.platform == 'Windows'
-        @threads.kill if @threads
+      if RbConfig::CONFIG['host_os'].include? "ming"
+        if @threads 
+          @threads[0].kill
+	  @threads = []
+	end
       elsif @pgid
         begin
           Process.kill(-9, @pgid)
