@@ -149,6 +149,7 @@ module Hive
         @log.info "Setting job paths"
         @file_system = Hive::FileSystem.new(@job.job_id, Hive.config.logging.home, @log)
         set_job_state_to :preparing
+
         if ! @job.repository.to_s.empty?
           @log.info "Checking out the repository"
           @log.debug "  #{@job.repository}"
@@ -361,6 +362,7 @@ module Hive
     end
     
     def testmine_config(checkout)
+      Dir.glob( "#{checkout}/.testmi{n,t}e.yml" ).first
     end
 
     def lion_config(checkout)
