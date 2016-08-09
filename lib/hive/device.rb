@@ -5,8 +5,9 @@ module Hive
   # The generic device class
   class Device
     attr_reader :type
-    attr_accessor :status
+    attr_accessor :status 
     attr_accessor :port_allocator
+    attr_accessor :threads
 
     # Initialise the device
     def initialize(options)
@@ -47,7 +48,7 @@ module Hive
         count = 0
         while self.running? && count < 30 do
           count += 1
-	  if RbConfig::CONFIG['host_os'].include? "ming"
+	  if !RbConfig::CONFIG['host_os'].include? "ming"
             Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{count}]")
 	    Process.kill 'TERM', @worker_pid
             sleep 30
