@@ -25,12 +25,12 @@ end
 comm_port = ENV.fetch('HIVE_COMM_PORT', 9999).to_i
 comm = TCPServer.open(comm_port)
 sig = nil
-if Hive.config.platform == 'Windows'
+if RbConfig::CONFIG['host_os'].include? "ming" 
  sig = 'INT'
 else
  sig = 'USR1'
 end
-#Signal.trap('USR1') do
+
 Signal.trap(sig) do
   client = comm.accept
   client.puts "  Controllers in use:"
