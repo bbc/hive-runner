@@ -61,7 +61,7 @@ module Hive
 
     def run
       File.open(@path, 'w') do |f|
-        if RbConfig::CONFIG['host_os'].include? "ming"
+        if RUBY_PLATFORM.include? "ming"
           @log.info 'bash.rb - Writing script out to batch file'
           @env.each do |key, value|
             if value.kind_of?(Array)
@@ -95,7 +95,7 @@ module Hive
       File.chmod(0700, @path) 
       command = "#{@path}" 
 
-      if !RbConfig::CONFIG['host_os'].include? "ming" 
+      if !RUBY_PLATFORM.include "ming"
         pid = Process.spawn @env_secure, "#{@path}", pgroup: true, in: '/dev/null', out: "#{@log_path}/stdout.log", err: "#{@log_path}/stderr.log"
         @pgid = Process.getpgid(pid)
       end
@@ -104,7 +104,7 @@ module Hive
       while running
         begin
           Timeout.timeout(30) do
-	    if RbConfig::CONFIG['host_os'].include? "ming"
+	    if RUBY_PLATFORM.include? "ming"
 	      thread = Thread.new do
 	        require 'open3'
 	        Open3.popen3(command) do |stdin, stdout, stderr, wait_thr |
@@ -127,7 +127,7 @@ module Hive
             running = false
 	  end
         rescue Timeout::Error
-	  if RbConfig::CONFIG['host_os'].include? "ming"
+	  if RUBY_PLATFORM.include? "ming"
 	    if @threads
 	      @threads[0].kill
 	      @threads = []
@@ -146,7 +146,7 @@ module Hive
     end
 
     def terminate
-      if RbConfig::CONFIG['host_os'].include? "ming"
+      if RUBY_PLATFORM.include? "ming"
         if @threads 
           @threads[0].kill
 	  @threads = []

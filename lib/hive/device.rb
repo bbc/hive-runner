@@ -23,7 +23,7 @@ module Hive
 
     # Start the worker process
    def start
-   if RbConfig::CONFIG['host_os'].include? "ming"
+   if RUBY_PLATFORM.include? "ming" 
       object = Object
       @worker_class.split('::').each{ |sub| object = object.const_get(sub)}
       if @threads.count < 1
@@ -48,14 +48,14 @@ module Hive
         count = 0
         while self.running? && count < 30 do
           count += 1
-	  if !RbConfig::CONFIG['host_os'].include? "ming"
+	  if !RUBY_PLATFORM.include? "ming"
             Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{count}]")
 	    Process.kill 'TERM', @worker_pid
             sleep 30
             Process.kill 'KILL', @worker_pid if self.running?
 	  else
 	    Hive.logger.info("Attempting to terminate thread #{@threads}")
-	    @threads[0].kill
+	    @threads.first.kill
 	    @threads = []
 	  end
         end
@@ -67,9 +67,9 @@ module Hive
 
     # Test the state of the worker process
     def running?
-      if @worker_pid
+      if @worker_pid or @threads.count > 0
         begin
-          Process.kill 0, @worker_pid
+          Process.kill 0, @worker_pid if @worker_pid 
           true
         rescue Errno::ESRCH
           false

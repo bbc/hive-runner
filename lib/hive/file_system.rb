@@ -30,7 +30,7 @@ module Hive
     end
 
     def executed_script_path
-      if RbConfig::CONFIG['host_os'].include? "ming" 
+      if RUBY_PLATFORM.include? "ming" 
         @bash_script_path ||= "#{testbed_path}/executed_script.bat"
       else
         @bash_script_path ||= "#{testbed_path}/executed_script.sh"
