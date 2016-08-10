@@ -148,7 +148,7 @@ module Hive
     def terminate
       if RUBY_PLATFORM.include? "ming"
         if @threads 
-          @threads[0].kill
+          @threads.first.kill
 	  @threads = []
 	end
       elsif @pgid
