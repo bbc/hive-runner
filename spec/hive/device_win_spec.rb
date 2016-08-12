@@ -1,16 +1,17 @@
 require 'spec_helper'
 
-# Using Hive::Device::Shell as a Hive::Device cannot be started on its own
-require 'hive/device/shell'
+# Using Hive::Windevice::Shell as a Hive::Windevice cannot be started on its own
+require 'hive/windevice/shell'
 
-describe Hive::Device do
+describe Hive::Windevice do
   attr_accessor :device
   after(:each) do
      `FOR /f "tokens=2 delims= " %%i IN ('TASKLIST ^| FINDSTR "ruby"') DO taskkill /PID %%i /F`
+     sleep 1
   end
 
   before(:each) do
-    @device = Hive::Device::Shell.new({'id' => 1})
+    @device = Hive::Windevice::Shell.new({'id' => 1})
   end
 
   describe '#start' do

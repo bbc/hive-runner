@@ -5,7 +5,7 @@ module Hive
   # The generic device class
   class Device
     attr_reader :type
-    attr_accessor :status 
+    attr_accessor :status
     attr_accessor :port_allocator
     attr_accessor :threads
 
@@ -23,14 +23,6 @@ module Hive
 
     # Start the worker process
    def start
-   if RUBY_PLATFORM.include? "ming" 
-      object = Object
-      @worker_class.split('::').each{ |sub| object = object.const_get(sub)}
-      if @threads.count < 1
-        @threads << Thread.new { object.new(@options.merge('device_identity' => self.identity, 'port_allocator' => self.port_allocator, 'hive_id' => Hive.hive_mind.device_details['id'])) }
-        Hive.logger.info("Worker started in new thread #{@threads}")
-      end
-    else
       parent_pid = Process.pid
       @worker_pid = Process.fork do 
         object = Object
@@ -39,7 +31,7 @@ module Hive
       end
       Process.detach @worker_pid
       Hive.logger.info("Worker started with pid #{@worker_pid}")
-    end
+    #end
    end
 
     # Terminate the worker process
@@ -48,16 +40,10 @@ module Hive
         count = 0
         while self.running? && count < 30 do
           count += 1
-	  if !RUBY_PLATFORM.include? "ming"
             Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{count}]")
 	    Process.kill 'TERM', @worker_pid
             sleep 30
             Process.kill 'KILL', @worker_pid if self.running?
-	  else
-	    Hive.logger.info("Attempting to terminate thread #{@threads}")
-	    @threads.first.kill
-	    @threads = []
-	  end
         end
       rescue => e
         Hive.logger.info("Process had already terminated")
@@ -69,7 +55,7 @@ module Hive
     def running?
       if @worker_pid or @threads.count > 0
         begin
-          Process.kill 0, @worker_pid if @worker_pid 
+          Process.kill 0, @worker_pid 
           true
         rescue Errno::ESRCH
           false
