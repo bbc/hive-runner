@@ -39,9 +39,9 @@ module Hive
         count = 0
         while self.running? && count < 30 do
           count += 1
-            Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{count}]")
-	    Process.kill 'TERM', @worker_pid
-            sleep 30
+          Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{count}]")
+          Process.kill 'TERM', @worker_pid
+          sleep 30
         end
         Process.kill 'KILL', @worker_pid if self.running?
       rescue => e
@@ -52,9 +52,9 @@ module Hive
 
     # Test the state of the worker process
     def running?
-      if @worker_pid 
+      if @worker_pid
         begin
-          Process.kill 0, @worker_pid 
+          Process.kill 0, @worker_pid
           true
         rescue Errno::ESRCH
           false
