@@ -22,17 +22,16 @@ module Hive
     end
 
     # Start the worker process
-   def start
+    def start
       parent_pid = Process.pid
-      @worker_pid = Process.fork do 
+      @worker_pid = Process.fork do
         object = Object
         @worker_class.split('::').each { |sub| object = object.const_get(sub) }
         object.new(@options.merge('parent_pid' => parent_pid, 'device_identity' => self.identity, 'port_allocator' => self.port_allocator, 'hive_id' => Hive.hive_mind.device_details['id']))
       end
       Process.detach @worker_pid
       Hive.logger.info("Worker started with pid #{@worker_pid}")
-    #end
-   end
+    end
 
     # Terminate the worker process
     def stop
@@ -43,8 +42,8 @@ module Hive
             Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{count}]")
 	    Process.kill 'TERM', @worker_pid
             sleep 30
-            Process.kill 'KILL', @worker_pid if self.running?
         end
+        Process.kill 'KILL', @worker_pid if self.running?
       rescue => e
         Hive.logger.info("Process had already terminated")
       end
@@ -53,7 +52,7 @@ module Hive
 
     # Test the state of the worker process
     def running?
-      if @worker_pid or @threads.count > 0
+      if @worker_pid 
         begin
           Process.kill 0, @worker_pid 
           true
