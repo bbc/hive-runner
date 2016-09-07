@@ -1,6 +1,6 @@
 # hive-runner
 
-Run automated jobs on devices
+Run automated jobs on devices - see the [change log](CHANGELOG.md) for release notes
 
 ## Requirements
 

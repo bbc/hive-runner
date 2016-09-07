@@ -11,7 +11,12 @@ if ARGV.length < 1
   exit 1
 end
 
-headless = ARGV.include?("--ni")
+mods = []
+OptionParser.new do |opts|
+  opts.on("--mod mod") do |mod|
+    mods << mod
+  end
+end.parse!
 
 dir = File.expand_path('', ARGV[0])
 if Dir.exists?(dir)
@@ -69,8 +74,20 @@ def add_modules
       mod[:device] = STDIN.gets.chomp
       mod[:name] = "hive-runner-#{mod[:device]}"
       puts ''
+      if yn "Get '#{mod[:name]}' from Github? "
+        print "Enter GIT account name: "
+        mod[:git_account] = STDIN.gets.chomp
+      end
 
-      puts "Module '#{mod[:name]}' from https://rubygems.org/gems/#{mod[:name]}"
+      puts ''
+      puts "Module '#{mod[:name]}'"
+      if mod.has_key?(:git_account)
+        puts "  from git@github.com:#{mod[:git_account]}/#{mod[:name]}"
+      else
+        puts "  from https://rubygems.org/gems/#{mod[:name]}"
+      end
+      puts ''
+
       if yn "Correct? "
         mods << mod
       end
@@ -129,9 +146,9 @@ def setup_hive(dir, mods)
     f.puts ''
     f.puts '  # Configuration for various network options'
     f.puts '  network:'
-    f.puts '    scheduler: http://localhost:3000'
-    f.puts '    #hive_mind: http://localhost:3001'
-    f.puts '    # Optional cert paths:'
+    f.puts '    scheduler: http://scheduler'
+    f.puts '    devicedb: http://devicedb'
+    f.puts '    #hive_mind: http://hive_mind'
     f.puts '    # cert: /path/to/certificate.pem'
     f.puts '    # cafile: /path/to/certificate-authorities.pem'
     f.puts ''
@@ -174,8 +191,11 @@ def setup_hive(dir, mods)
       puts "      - #{m[:device]}"
     end
   end
+  puts '  * Add to ~/.bashrc'
+  puts "      - export HIVE_CONFIG=#{dir}/config"
 end
 
-mods = []
-mods = add_modules unless headless
+mods = add_modules if mods.empty?
+require 'pry'
+binding.pry
 setup_hive(dir, mods)
