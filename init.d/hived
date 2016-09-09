@@ -1,0 +1,108 @@
+#!/bin/sh
+# kFreeBSD do not accept scripts as interpreters, using #!/bin/sh and sourcing.
+if [ true != "$INIT_D_SCRIPT_SOURCED" ] ; then
+    set "$0" "$@"; INIT_D_SCRIPT_SOURCED=true . /lib/init/init-d-script
+fi
+### BEGIN INIT INFO
+# Provides:          hived
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start the Hive Runner
+# Description:       The Hive Runner is part of the Hive CI test
+#                    automation framework. For more details see
+#                    https://bbc.github.io/hive-ci/
+# Description:       This file should be used to construct scripts to be
+#                    placed in /etc/init.d.  This example start a
+#                    single forking daemon capable of writing a pid
+#                    file.  To get other behavoirs, implemend
+#                    do_start(), do_stop() or other functions to
+#                    override the defaults in /lib/init/init-d-script.
+### END INIT INFO
+
+# Author: Joe Haig <joe.haig@bbc.co.uk>
+
+###############################################################################
+# CONFIGURATION
+#
+# Home directory of the Hive
+HIVE_HOME=/home/jhaig/test-hive
+# Select Ruby manager. Can be rvm, rbenv or uru
+# If this is not set (or set to something else) the system ruby will be used
+RUBY_MANAGER=uru
+# Ruby version to use. Will only be used if a Ruby manager is set
+RUBY_VERSION=231p112
+# User to run the Hive. Must have access to Ruby as configured ab obove
+USER=jhaig
+###############################################################################
+
+DESC="Hive Runner"
+SCRIPT=/tmp/hived_start
+LOG_DIRECTORY=/var/log/hived
+STDOUT_LOG=$LOG_DIRECTORY/hived.out
+STDERR_LOG=$LOG_DIRECTORY/hived.err
+if [ ! -d $LOG_DIRECTORY ]
+  mkdir -p $LOG_DIRECTORY
+  chown $USER $LOG_DIRECTORY
+fi
+
+PID=/var/run/hived.pid
+
+# Set up ruby
+if [ $RUBY_MANAGER == 'rvm' ]
+  then
+  CHOOSE_RUBY="rvm use $RUBY_VERSION"
+elif [ $RUBY_MANAGER == 'rbenv' ]
+  then
+  CHOOSE_RUBY="rbenv local $RUBY_VERSION"
+elif [ $RUBY_MANAGER == 'uru' ]
+  then
+  CHOOSE_RUBY="uru $RUBY_VERSION"
+fi
+
+rm $SCRIPT
+cat > $SCRIPT <<SCRIPT
+#!/bin/bash -l
+
+$CHOOSE_RUBY > $STDOUT_LOG 2> $STDERR_LOG
+cd /home/jhaig/test-hive > $STDOUT_LOG 2> $STDERR_LOG
+start_hive > $STDOUT_LOG 2> $STDERR_LOG&
+echo \$!
+SCRIPT
+chmod +x $SCRIPT
+
+sig() {
+  test -s "$PID" && kill -$1 `cat $PID`
+}
+
+case "$1" in
+  start)
+    log_daemon_msg "Starting Hive Runner" "hived" || true
+    sig 0 && log_daemon_msg "Already running" "hived" && exit 0
+    sudo -i -u $USER $SCRIPT > $PID
+    ;;
+  stop)
+    log_daemon_msg "Stopping Hive Runner" "hived" || true
+    sig 9 && rm $PID && exit 0
+    log_daemon_msg "Not running" "hived"
+    ;;
+  #reload)
+  #  echo "TODO: reload"
+  #  ;;
+  restart)
+    echo "TODO: restart"
+    log_daemon_msg "Stopping Hive Runner" "hived" || true
+    sig 9 && rm $PID
+    log_daemon_msg "Starting Hive Runner" "hived" || true
+    sudo -i -u $USER $SCRIPT > $PID
+    ;;
+  status)
+    echo "TODO: status"
+    ;;
+  *)
+    log_action_msg "Usage: /etc/init.d/hived {start|stop|restart|status}" || true
+    exit 1
+esac
+
+exit 0
