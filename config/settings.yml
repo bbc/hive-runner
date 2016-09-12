@@ -1,1 +1,42 @@
-dev-settings.yml
+test:
+  daemon_name: HIVE
+
+  controllers:
+    shell:
+      max_workers: 5
+      name_stub: SHELL_WORKER
+      queues:
+        - bash
+  
+  logging:
+    directory: /log/directory
+    pids: /pid/directory
+    main_filename: hive.log
+    main_level: DEBUG
+    worker_level: DEBUG
+    home: /path/to/test/home
+    homes_to_keep: 5
+  
+  timings:
+    worker_loop_interval: 5
+    controller_loop_interval: 5
+  
+  network:
+    scheduler: https://example.com/scheduler
+    devicedb: https://example.com/devicedb
+    cert: /path/to/certificate.pem
+    cafile: /path/to/certificate-authorities.pem
+
+  datastore:
+    filename: /path/to/datastore.db
+
+  errbit:
+    host: 'http://errbit_host.com:port'
+    project_id: true
+    project_key: 'project_key'
+  
+  diagnostics:
+    android:
+      parameter : criteria 
+    ios:
+      parameter : criteria 
