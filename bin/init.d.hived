@@ -27,14 +27,14 @@ fi
 # CONFIGURATION
 #
 # Home directory of the Hive
-HIVE_HOME=/home/jhaig/test-hive
+HIVE_HOME=###HIVE_HOME###
 # Select Ruby manager. Can be rvm, rbenv or uru
 # If this is not set (or set to something else) the system ruby will be used
-RUBY_MANAGER=uru
+RUBY_MANAGER=###RUBY_MANAGER###
 # Ruby version to use. Will only be used if a Ruby manager is set
-RUBY_VERSION=231p112
+RUBY_VERSION=###RUBY_VERSION###
 # User to run the Hive. Must have access to Ruby as configured ab obove
-USER=jhaig
+USER=###USER###
 ###############################################################################
 
 DESC="Hive Runner"
@@ -66,7 +66,7 @@ cat > $SCRIPT <<SCRIPT
 #!/bin/bash -l
 
 $CHOOSE_RUBY > $STDOUT_LOG 2> $STDERR_LOG
-cd /home/jhaig/test-hive > $STDOUT_LOG 2> $STDERR_LOG
+cd $HIVE_HOME > $STDOUT_LOG 2> $STDERR_LOG
 start_hive > $STDOUT_LOG 2> $STDERR_LOG&
 echo \$!
 SCRIPT
