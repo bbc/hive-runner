@@ -3,6 +3,8 @@
 require 'optparse'
 require 'fileutils'
 require 'terminal-table'
+require 'tempfile'
+require 'etc'
 
 if ARGV.length < 1
   puts "Usage:"
@@ -34,6 +36,50 @@ def yn question
     yn = STDIN.gets.chomp
   end
   yn =~ /^[yY]/
+end
+
+def os
+  if /mswin/ =~ RUBY_PLATFORM
+    'Windows'
+  elsif /darwin/ =~ RUBY_PLATFORM
+    'Mac'
+  elsif /linux/ =~ RUBY_PLATFORM
+    'Linux'
+  else
+    'Unknown'
+  end
+end
+
+def ruby_manager
+  ruby_versions = {}
+  managers = {
+    'rvm' => {
+      list: 'list',
+      match: '/^...(ruby-\S+)\s/'
+    },
+    'rbenv' => {
+      list: 'versions',
+      match: '/^..(\S*)\s/'
+    },
+    'uru' => {
+      list: 'list',
+      match: '/^....(\S+)\s/'
+    },
+  }
+  
+  managers.each do |m, details|
+    if system(m)
+      rubies = []
+      `#{m} #{details[:list]}`.split /\n/.each do |line|
+        if line =~ /#{details[:match]}/
+          rubies << $1
+        end
+        ruby_versions[m] = rubies
+      end
+    end
+  end
+
+  ruby_versions
 end
 
 def add_modules
@@ -80,7 +126,7 @@ def add_modules
   mods
 end
 
-def setup_hive(dir, mods)
+def setup_hive(dir, mods, daemons)
   FileUtils.mkdir_p("#{dir}/config")
   FileUtils.mkdir_p("#{dir}/log")
   FileUtils.mkdir_p("#{dir}/pids")
@@ -160,6 +206,27 @@ def setup_hive(dir, mods)
     exit
   end
 
+  if daemons
+    print "Setting up daemon ..."
+    puts ruby_manager
+    if os == 'Linux'
+      initd = Tempfile.new
+      File.readlines(File.expand_path('../init.d.hived', __FILE__)).each do |line|
+        line.sub! '###HIVE_HOME###', dir
+        line.sub! '###RUBY_MANAGER###', 'rbenv'
+        line.sub! '###RUBY_VERSION###', '2.3.1'
+        line.sub! '###USER###', Etc.getlogin
+        initd.write line
+      end
+      initd.close
+      system("sudo cp #{initd.path} /etc/init.d/hived")
+      system("sudo chmod 755 /etc/init.d/hived")
+    else
+      print "FAILED\n"
+      puts "  Cannot set up daemons for '#{os}'"
+    end
+  end
+
   puts ''
   puts 'Configuration required:'
   puts
@@ -180,4 +247,12 @@ end
 
 mods = []
 mods = add_modules unless headless
-setup_hive(dir, mods)
+
+puts
+puts "Operating System: #{os}"
+daemons = false
+if os != 'Unknown' && yn("Start daemon on boot? ")
+  daemons = true
+end
+
+setup_hive(dir, mods, daemons)
