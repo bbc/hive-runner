@@ -50,28 +50,28 @@ def os
   end
 end
 
-def ruby_manager
+def find_ruby
   ruby_versions = {}
-  managers = {
-    'rvm' => {
-      list: 'list',
-      match: '/^...(ruby-\S+)\s/'
-    },
+  manager_search = {
+    #'rvm' => {
+    #  list: 'list',
+    #  match: '/^...(ruby-\S+)/'
+    #},
     'rbenv' => {
       list: 'versions',
-      match: '/^..(\S*)\s/'
+      match: /^..(\S*)/
     },
-    'uru' => {
-      list: 'list',
-      match: '/^....(\S+)\s/'
-    },
+    #'uru' => {
+    #  list: 'list',
+    #  match: '/^....(\S+)/'
+    #},
   }
   
-  managers.each do |m, details|
-    if system(m)
+  manager_search.each do |m, details|
+    if system("which #{m} > /dev/null 2> /dev/null")
       rubies = []
-      `#{m} #{details[:list]}`.split /\n/.each do |line|
-        if line =~ /#{details[:match]}/
+      `#{m} #{details[:list]}`.split(/\n/).each do |line|
+        if line =~ details[:match] and $1 != 'system'
           rubies << $1
         end
         ruby_versions[m] = rubies
@@ -79,7 +79,15 @@ def ruby_manager
     end
   end
 
-  ruby_versions
+  if ruby_versions.length == 0
+    [ 'system', '' ]
+  elsif ruby_versions.length == 1 && ruby_versions[ruby_versions.keys.first].length == 1
+    [ruby_versions.keys.first, ruby_versions[ruby_versions.keys.first].first]
+  else
+    puts 'Multiple versions:'
+    puts ruby_versions
+    ruby_versions
+  end
 end
 
 def add_modules
@@ -195,26 +203,49 @@ def setup_hive(dir, mods, daemons)
     end
   end
 
-  print "Executing 'bundle install' ... "
-  Dir.chdir dir
-  if system("bundle install > bundle_install.out 2>&1")
-    print "SUCCESS\n"
-    File.delete('bundle_install.out')
-  else
-    print "FAILED\n"
-    puts "See #{dir}/bundle_install.out for details"
-    exit
-  end
-
   if daemons
     print "Setting up daemon ..."
-    puts ruby_manager
+    ruby_manager, ruby = find_ruby
+    if ruby
+      File.open("#{dir}/.ruby-version", 'w') do |rv|
+        rv.write ruby
+      end
+    end
+    puts "Manager: #{ruby_manager}"
+    puts "Ruby: #{ruby}"
     if os == 'Linux'
+      write_logs = '> $LOG_DIRECTORY/hive.out 2> $LOG_DIRECTORY/hive.err'
+      File.open("#{dir}/start_hive.sh", 'w', 0755) do |f|
+        f.write "#!/bin/bash -l\n"
+
+#        case ruby_manager
+#        when 'rvm'
+#          f.write "rvm use"
+#          f.write " #{ruby} #{write_logs}\n"
+#        when 'rbenv'
+#          File.open("#{dir}/.ruby-version", 'w') do |rv|
+#            rv.write ruby
+#          end
+#        when 'uru'
+#          f.write "uru"
+#          f.write " #{ruby} #{write_logs}\n"
+#        end
+
+        f.write "if [ x$LOG_DIRECTORY == 'x' ]\n"
+        f.write "then\n"
+        f.write "  LOG_DIRECTORY=.\n"
+        f.write "fi\n"
+
+        f.write "cd #{dir} #{write_logs}\n"
+        f.write "start_hive #{write_logs} &\n" 
+        f.write "echo $!\n"
+      end
+
       initd = Tempfile.new
       File.readlines(File.expand_path('../init.d.hived', __FILE__)).each do |line|
         line.sub! '###HIVE_HOME###', dir
-        line.sub! '###RUBY_MANAGER###', 'rbenv'
-        line.sub! '###RUBY_VERSION###', '2.3.1'
+        line.sub! '###RUBY_MANAGER###', ruby_manager
+        line.sub! '###RUBY_VERSION###', ruby
         line.sub! '###USER###', Etc.getlogin
         initd.write line
       end
@@ -225,6 +256,17 @@ def setup_hive(dir, mods, daemons)
       print "FAILED\n"
       puts "  Cannot set up daemons for '#{os}'"
     end
+  end
+
+  print "Executing 'bundle install' ... "
+  Dir.chdir dir
+  if system("bundle install > bundle_install.out 2>&1")
+    print "SUCCESS\n"
+    File.delete('bundle_install.out')
+  else
+    print "FAILED\n"
+    puts "See #{dir}/bundle_install.out for details"
+    exit
   end
 
   puts ''

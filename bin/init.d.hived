@@ -30,47 +30,25 @@ fi
 HIVE_HOME=###HIVE_HOME###
 # Select Ruby manager. Can be rvm, rbenv or uru
 # If this is not set (or set to something else) the system ruby will be used
-RUBY_MANAGER=###RUBY_MANAGER###
+#RUBY_MANAGER=###RUBY_MANAGER###
 # Ruby version to use. Will only be used if a Ruby manager is set
-RUBY_VERSION=###RUBY_VERSION###
+#RUBY_VERSION=###RUBY_VERSION###
 # User to run the Hive. Must have access to Ruby as configured ab obove
 USER=###USER###
 ###############################################################################
 
 DESC="Hive Runner"
-SCRIPT=/tmp/hived_start
 LOG_DIRECTORY=/var/log/hived
-STDOUT_LOG=$LOG_DIRECTORY/hived.out
-STDERR_LOG=$LOG_DIRECTORY/hived.err
+SCRIPT=$HIVE_HOME/start_hive.sh
+#STDOUT_LOG=$LOG_DIRECTORY/hived.out
+#STDERR_LOG=$LOG_DIRECTORY/hived.err
 if [ ! -d $LOG_DIRECTORY ]
+then
   mkdir -p $LOG_DIRECTORY
   chown $USER $LOG_DIRECTORY
 fi
 
 PID=/var/run/hived.pid
-
-# Set up ruby
-if [ $RUBY_MANAGER == 'rvm' ]
-  then
-  CHOOSE_RUBY="rvm use $RUBY_VERSION"
-elif [ $RUBY_MANAGER == 'rbenv' ]
-  then
-  CHOOSE_RUBY="rbenv local $RUBY_VERSION"
-elif [ $RUBY_MANAGER == 'uru' ]
-  then
-  CHOOSE_RUBY="uru $RUBY_VERSION"
-fi
-
-rm $SCRIPT
-cat > $SCRIPT <<SCRIPT
-#!/bin/bash -l
-
-$CHOOSE_RUBY > $STDOUT_LOG 2> $STDERR_LOG
-cd $HIVE_HOME > $STDOUT_LOG 2> $STDERR_LOG
-start_hive > $STDOUT_LOG 2> $STDERR_LOG&
-echo \$!
-SCRIPT
-chmod +x $SCRIPT
 
 sig() {
   test -s "$PID" && kill -$1 `cat $PID`
@@ -80,7 +58,7 @@ case "$1" in
   start)
     log_daemon_msg "Starting Hive Runner" "hived" || true
     sig 0 && log_daemon_msg "Already running" "hived" && exit 0
-    sudo -i -u $USER $SCRIPT > $PID
+    sudo -i -u $USER LOG_DIRECTORY=$LOG_DIRECTORY $SCRIPT > $PID
     ;;
   stop)
     log_daemon_msg "Stopping Hive Runner" "hived" || true
