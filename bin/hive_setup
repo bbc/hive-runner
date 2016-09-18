@@ -53,10 +53,10 @@ end
 def find_ruby
   ruby_versions = {}
   manager_search = {
-    #'rvm' => {
-    #  list: 'list',
-    #  match: '/^...(ruby-\S+)/'
-    #},
+    'rvm' => {
+      list: 'list',
+      match: /^...(ruby-\S+)/
+    },
     'rbenv' => {
       list: 'versions',
       match: /^..(\S*)/
@@ -80,9 +80,14 @@ def find_ruby
   end
 
   if ruby_versions.length == 0
-    [ 'system', '' ]
+    [ nil, 'system' ]
   elsif ruby_versions.length == 1 && ruby_versions[ruby_versions.keys.first].length == 1
-    [ruby_versions.keys.first, ruby_versions[ruby_versions.keys.first].first]
+    mgr = ruby_versions.keys.first
+    version = ruby_versions[mgr].first
+    [
+      ruby_versions.keys.first,
+      version,
+    ]
   else
     puts 'Multiple versions:'
     puts ruby_versions
@@ -206,7 +211,7 @@ def setup_hive(dir, mods, daemons)
   if daemons
     print "Setting up daemon ..."
     ruby_manager, ruby = find_ruby
-    if ruby
+    if ruby_manager
       File.open("#{dir}/.ruby-version", 'w') do |rv|
         rv.write ruby
       end
@@ -217,19 +222,6 @@ def setup_hive(dir, mods, daemons)
       write_logs = '> $LOG_DIRECTORY/hive.out 2> $LOG_DIRECTORY/hive.err'
       File.open("#{dir}/start_hive.sh", 'w', 0755) do |f|
         f.write "#!/bin/bash -l\n"
-
-#        case ruby_manager
-#        when 'rvm'
-#          f.write "rvm use"
-#          f.write " #{ruby} #{write_logs}\n"
-#        when 'rbenv'
-#          File.open("#{dir}/.ruby-version", 'w') do |rv|
-#            rv.write ruby
-#          end
-#        when 'uru'
-#          f.write "uru"
-#          f.write " #{ruby} #{write_logs}\n"
-#        end
 
         f.write "if [ x$LOG_DIRECTORY == 'x' ]\n"
         f.write "then\n"
@@ -244,8 +236,6 @@ def setup_hive(dir, mods, daemons)
       initd = Tempfile.new
       File.readlines(File.expand_path('../init.d.hived', __FILE__)).each do |line|
         line.sub! '###HIVE_HOME###', dir
-        line.sub! '###RUBY_MANAGER###', ruby_manager
-        line.sub! '###RUBY_VERSION###', ruby
         line.sub! '###USER###', Etc.getlogin
         initd.write line
       end
@@ -259,10 +249,9 @@ def setup_hive(dir, mods, daemons)
   end
 
   print "Executing 'bundle install' ... "
-  Dir.chdir dir
-  if system("bundle install > bundle_install.out 2>&1")
+  if system("bash -l -c 'cd #{dir}; bundle install > bundle_install.out 2>&1'")
     print "SUCCESS\n"
-    File.delete('bundle_install.out')
+    File.delete("#{dir}/bundle_install.out")
   else
     print "FAILED\n"
     puts "See #{dir}/bundle_install.out for details"
