@@ -13,12 +13,6 @@ fi
 # Description:       The Hive Runner is part of the Hive CI test
 #                    automation framework. For more details see
 #                    https://bbc.github.io/hive-ci/
-# Description:       This file should be used to construct scripts to be
-#                    placed in /etc/init.d.  This example start a
-#                    single forking daemon capable of writing a pid
-#                    file.  To get other behavoirs, implemend
-#                    do_start(), do_stop() or other functions to
-#                    override the defaults in /lib/init/init-d-script.
 ### END INIT INFO
 
 # Author: Joe Haig <joe.haig@bbc.co.uk>
@@ -69,8 +63,15 @@ case "$1" in
     sudo -i -u $USER $SCRIPT > $PID
     ;;
   status)
-    sig 0 && log_daemon_msg "Status: running" && exit 1
-    log_daemon_msg "Status: not running" && exit 0
+    if sig "USR1"
+    then
+      telnet localhost 9999 2> /dev/null
+      log_daemon_msg "Status: running ("`cat $PID`")"
+      exit 1
+    else
+      log_daemon_msg "Status: not running"
+      exit 0
+    fi
     ;;
   *)
     log_action_msg "Usage: /etc/init.d/hived {start|stop|restart|status}" || true
