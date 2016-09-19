@@ -28,11 +28,6 @@ fi
 #
 # Home directory of the Hive
 HIVE_HOME=###HIVE_HOME###
-# Select Ruby manager. Can be rvm, rbenv or uru
-# If this is not set (or set to something else) the system ruby will be used
-#RUBY_MANAGER=###RUBY_MANAGER###
-# Ruby version to use. Will only be used if a Ruby manager is set
-#RUBY_VERSION=###RUBY_VERSION###
 # User to run the Hive. Must have access to Ruby as configured ab obove
 USER=###USER###
 ###############################################################################
@@ -40,8 +35,6 @@ USER=###USER###
 DESC="Hive Runner"
 LOG_DIRECTORY=/var/log/hived
 SCRIPT=$HIVE_HOME/start_hive.sh
-#STDOUT_LOG=$LOG_DIRECTORY/hived.out
-#STDERR_LOG=$LOG_DIRECTORY/hived.err
 if [ ! -d $LOG_DIRECTORY ]
 then
   mkdir -p $LOG_DIRECTORY
