@@ -50,13 +50,13 @@ sig() {
 case "$1" in
   start)
     log_daemon_msg "Starting Hive Runner" "hived" || true
-    sig 0 && log_daemon_msg "Already running" "hived" && exit 0
+    sig 0 && log_daemon_msg "Already running" && exit 0
     sudo -i -u $USER LOG_DIRECTORY=$LOG_DIRECTORY $SCRIPT > $PID
     ;;
   stop)
     log_daemon_msg "Stopping Hive Runner" "hived" || true
     sig 9 && rm $PID && exit 0
-    log_daemon_msg "Not running" "hived"
+    log_daemon_msg "Not running"
     ;;
   #reload)
   #  echo "TODO: reload"
@@ -69,7 +69,8 @@ case "$1" in
     sudo -i -u $USER $SCRIPT > $PID
     ;;
   status)
-    echo "TODO: status"
+    sig 0 && log_daemon_msg "Status: running" && exit 1
+    log_daemon_msg "Status: not running" && exit 0
     ;;
   *)
     log_action_msg "Usage: /etc/init.d/hived {start|stop|restart|status}" || true
