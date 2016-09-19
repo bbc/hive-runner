@@ -51,57 +51,45 @@ end
 
 def find_ruby use_default = false
   ruby_versions = []
-  manager_search = {
-    'rvm' => {
-      list: 'list',
-      match: /^.(.).(ruby-\S+)/
-    },
-    'rbenv' => {
-      list: 'versions',
-      match: /^(.).(\S*)/
-    },
-    #'uru' => {
-    #  list: 'list',
-    #  match: '/^....(\S+)/'
-    #},
-  }
 
+  manager = nil
+  if system("which rvm > /dev/null 2> /dev/null")
+    list = `rvm list`.split /\n/
+    match = /^.(.).(ruby-\S+)/
+  elsif system("which rbenv > /dev/null 2> /dev/null")
+    list = `rbenv versions`.split /\n/
+    match = /^(.).(\S+)/
+  else
+    return ['system', 1]
+  end
+
+  version_table = Terminal::Table.new headings: ['#', 'Version', '']
   default = nil
-  manager_search.each do |m, details|
-    if system("which #{m} > /dev/null 2> /dev/null")
-      `#{m} #{details[:list]}`.split(/\n/).each do |line|
-        if line =~ details[:match]
-          default = ruby_versions.length if $1 == '*'
-          ruby_versions << [ m, $2, $1 ]
-        end
-      end
+  list.each do |line|
+    if line =~ match
+      default = ruby_versions.length if $1 == '*'
+      ruby_versions << $2
+      version_table.add_row [ ruby_versions.length, $2, $1 == '*' ? 'Default' : '' ]
     end
   end
 
   if ruby_versions.length == 0
-    [ nil, 'system', 0 ]
+    [ 'system', 0 ]
   elsif ruby_versions.length == 1
-    ruby_versions[0][0..1] << 1
+    [ ruby_versions[0], 1 ]
   elsif use_default && ! default.nil?
-    ruby_versions[default][0..1] << ruby_versions.length
+    [ ruby_versions[default], ruby_versions.length ]
   else
     puts
     puts 'Multiple ruby versions available:'
-
-    table = Terminal::Table.new headings: ['#', 'Manager', 'Version', '']
-    ruby_versions.each_with_index do |rv, i|
-      table.add_row [ i+1, rv[0], rv[1], rv[2] == '*' ? 'Default' : '' ]
-    end
-
-    puts table
+    puts version_table
     puts ''
     opt = -1
     while opt <= 0 || opt > ruby_versions.length
       print "[1 - #{ruby_versions.length}] > "
       opt = STDIN.gets.chomp.to_i
     end
-
-    ruby_versions[opt-1][0..1] << ruby_versions.length
+    [ ruby_versions[opt-1], ruby_versions.length ]
   end
 end
 
@@ -109,7 +97,7 @@ def gather_options
   # Choose options
   opt = ''
   mods = []
-  ruby_manager, ruby, nrubies = find_ruby true
+  ruby, nrubies = find_ruby true
   daemons = ( os != 'Unknown' )
 
   while opt.upcase != 'X'
@@ -156,7 +144,7 @@ def gather_options
         mods << mod
       end
     when '2'
-      ruby_manager, ruby, nrubies = find_ruby
+      ruby, nrubies = find_ruby
     when '3'
       daemons = ! daemons if os != 'Unknown'
     end
@@ -231,6 +219,9 @@ def setup_hive(options)
     f.puts ''
     f.puts '  # Configuration for diagnostic plugins'
     f.puts '  diagnostics:'
+    f.puts '    hive:'
+    f.puts '      load_warning: 0.7'
+    f.puts '      load_error: 1.5'
   end
 
   File.open("#{dir}/Gemfile", 'w') do |f|
@@ -243,7 +234,8 @@ def setup_hive(options)
     end
   end
 
-  puts "Setting ruby ... "
+  puts '=========================='
+  print "Setting ruby ... "
   File.open("#{dir}/.ruby-version", 'w') do |rv|
     rv.write ruby
   end
@@ -330,7 +322,7 @@ if headless
     mods: [],
     daemons: ( os != 'Unknown' )
   }
-  ruby_manager, options[:ruby], nrubies = find_ruby true
+  options[:ruby], nrubies = find_ruby true
 else
   options = gather_options unless headless
 end
