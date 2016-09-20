@@ -21,12 +21,12 @@ module Hive
 
   if Chamber.env.logging?
     if Chamber.env.logging.directory?
-      LOG_DIRECTORY = Chamber.env.logging.directory
+      LOG_DIRECTORY = File.expand_path Chamber.env.logging.directory
     else
       fail 'Missing log directory'
     end
     if Chamber.env.logging.pids?
-      PIDS_DIRECTORY = Chamber.env.logging.pids
+      PIDS_DIRECTORY = File.expand_path Chamber.env.logging.pids
     else
       PIDS_DIRECTORY = LOG_DIRECTORY
     end
