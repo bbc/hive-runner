@@ -1,8 +1,4 @@
 #!/bin/sh
-# kFreeBSD do not accept scripts as interpreters, using #!/bin/sh and sourcing.
-if [ true != "$INIT_D_SCRIPT_SOURCED" ] ; then
-    set "$0" "$@"; INIT_D_SCRIPT_SOURCED=true . /lib/init/init-d-script
-fi
 ### BEGIN INIT INFO
 # Provides:          hived
 # Required-Start:    $remote_fs $syslog
@@ -17,16 +13,16 @@ fi
 
 # Author: Joe Haig <joe.haig@bbc.co.uk>
 
-###############################################################################
-# CONFIGURATION
-#
-# Home directory of the Hive
-HIVE_HOME=###HIVE_HOME###
-# User to run the Hive. Must have access to Ruby as configured ab obove
-USER=###USER###
-###############################################################################
+. /etc/hived.conf
 
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:$HIVE_HOME
+PIDFILE=$HIVE_HOME/hived.pid
+DAEMON=$HIVE_HOME/start_hive.sh
+NAME=hived
 DESC="Hive Runner"
+SCRIPTNAME=/etc/init.d/"$NAME"
+. /lib/lsb/init-functions
+
 LOG_DIRECTORY=/var/log/hived
 SCRIPT=$HIVE_HOME/start_hive.sh
 if [ ! -d $LOG_DIRECTORY ]
@@ -35,32 +31,27 @@ then
   chown $USER $LOG_DIRECTORY
 fi
 
-PID=/var/run/hived.pid
-
-sig() {
-  test -s "$PID" && kill -$1 `cat $PID`
-}
-
 case "$1" in
   start)
     log_daemon_msg "Starting Hive Runner" "hived" || true
-    sig 0 && log_daemon_msg "Already running" && exit 0
-    sudo -i -u $USER LOG_DIRECTORY=$LOG_DIRECTORY $SCRIPT > $PID
+    /sbin/start-stop-daemon --background --start --nicelevel 10 --quiet --oknodo --chdir $HIVE_HOME --startas $DAEMON --pidfile $PIDFILE --chuid $USER -- $DAEMON -p $PIDFILE
+    log_end_msg $?
     ;;
   stop)
     log_daemon_msg "Stopping Hive Runner" "hived" || true
-    sig 9 && rm $PID && exit 0
-    log_daemon_msg "Not running"
+    /sbin/start-stop-daemon --stop --pidfile $PIDFILE
+    RETVAL=$?
+    [ $RETVAL -eq 0 ] && [ -e "$PIDFILE" ] && rm -f $PIDFILE
+    log_end_msg $RETVAL
     ;;
   #reload)
   #  echo "TODO: reload"
   #  ;;
   restart)
-    echo "TODO: restart"
     log_daemon_msg "Stopping Hive Runner" "hived" || true
-    sig 9 && rm $PID
+    /sbin/start-stop-daemon --stop --pidfile $PIDFILE
     log_daemon_msg "Starting Hive Runner" "hived" || true
-    sudo -i -u $USER $SCRIPT > $PID
+    /sbin/start-stop-daemon --background --start --nicelevel 10 --quiet --oknodo --chdir $HIVE_HOME --startas $DAEMON --pidfile $PIDFILE --chuid $USER -- $DAEMON -p $PIDFILE
     ;;
   status)
     if sig "USR1"
@@ -72,6 +63,8 @@ case "$1" in
       log_daemon_msg "Status: not running"
       exit 0
     fi
+    #sig "USR1" && telnet localhost 9999 && log_daemon_msg "Status: running ("`cat $PID`")" && exit 1
+    #log_daemon_msg "Status: not running" && exit 0
     ;;
   *)
     log_action_msg "Usage: /etc/init.d/hived {start|stop|restart|status}" || true

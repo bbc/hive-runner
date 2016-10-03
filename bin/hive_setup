@@ -244,32 +244,35 @@ def setup_hive(options)
   print "Creating daemon startup script..."
   if os == 'Linux'
     startup_script = "#{dir}/hived.init"
-    write_logs = '> $LOG_DIRECTORY/hive.out 2> $LOG_DIRECTORY/hive.err'
+    config_file = "#{dir}/hived.conf"
+    write_logs = '> $LOG_DIRECTORY/hived.out 2> $LOG_DIRECTORY/hived.err'
     File.open("#{dir}/start_hive.sh", 'w', 0755) do |f|
       f.write "#!/bin/bash -l\n"
 
-      f.write "if [ x$LOG_DIRECTORY == 'x' ]\n"
+      f.write "if [ -f /etc/hived.conf ]\n"
       f.write "then\n"
-      f.write "  LOG_DIRECTORY=.\n"
+      f.write "  . /etc/hived.conf\n"
+      f.write "else\n"
+      f.write "  . #{config_file}\n"
       f.write "fi\n"
 
-      f.write "cd #{dir} #{write_logs}\n"
+      f.write "cd $HIVE_HOME #{write_logs}\n"
       f.write "start_hive #{write_logs} &\n" 
       f.write "echo $!\n"
     end
 
-    File.open("#{dir}/hived.init", 'w') do |initd|
-      File.readlines(File.expand_path('../init.d.hived', __FILE__)).each do |line|
-        line.sub! '###HIVE_HOME###', dir
-        line.sub! '###USER###', Etc.getlogin
-        initd.write line
-      end
+    FileUtils.cp(File.expand_path('../init.d.hived', __FILE__), startup_script)
+
+    File.open(config_file, 'w') do |conf|
+      conf.write "HIVE_HOME=#{dir}\n"
+      conf.write "USER=#{Etc.getlogin}\n"
+      conf.write "LOG_DIRECTORY=#{dir}/log\n"
     end
     print "SUCCESS\n"
 
     print "Moving daemon startup script... "
     if daemons
-      if system("sudo cp #{startup_script} /etc/init.d/hived") && system("sudo chmod 755 /etc/init.d/hived")
+      if system("sudo cp #{startup_script} /etc/init.d/hived") && system("sudo chmod 755 /etc/init.d/hived") && system("sudo cp #{config_file} /etc/hived.conf")
         print "SUCCESS\n"
       else
         daemons = false
