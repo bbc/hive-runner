@@ -16,7 +16,6 @@
 . /etc/hived.conf
 
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:$HIVE_HOME
-PIDFILE=$HIVE_HOME/hived.pid
 DAEMON=$HIVE_HOME/start_hive.sh
 NAME=hived
 DESC="Hive Runner"

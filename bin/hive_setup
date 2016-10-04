@@ -257,7 +257,7 @@ def setup_hive(options)
       f.write "fi\n"
 
       f.write "cd $HIVE_HOME #{write_logs}\n"
-      f.write "start_hive #{write_logs} &\n" 
+      f.write "start_hive -p $PIDFILE #{write_logs} &\n" 
       f.write "echo $!\n"
     end
 
@@ -267,6 +267,7 @@ def setup_hive(options)
       conf.write "HIVE_HOME=#{dir}\n"
       conf.write "USER=#{Etc.getlogin}\n"
       conf.write "LOG_DIRECTORY=#{dir}/log\n"
+      conf.write "PIDFILE=#{dir}/hived.pid\n"
     end
     print "SUCCESS\n"
 
