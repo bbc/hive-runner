@@ -56,8 +56,12 @@ module Hive
 
     def check_build_integrity( destination_path )
       output = `file #{destination_path}`
-      if output =~ /zip/
+      if output =~ /\s[Zz]ip\s/
         result = `zip -T #{destination_path}`
+        @log.info(result)
+        $? == 0
+      elsif output =~ /\sgzip\s/
+        result = `tar -tzf #{destination_path} > /dev/null`
         @log.info(result)
         $? == 0
       else

@@ -7,11 +7,11 @@ RSpec.describe Hive::FileSystem do
     before(:all) do
       `touch test.sh`
       `zip test.zip test.sh`
-      `tar -czvf test.tar.gz test.sh`
+      `tar -czf test.tar.gz test.sh`
     end
 
     after(:all) do
-      `rm test.zip test.sh tar.tar.gz`
+      `rm test.zip test.sh test.tar.gz`
     end
 
     it 'checks zip file integrity correctly' do
