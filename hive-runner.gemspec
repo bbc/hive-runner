@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'sys-cpu', '~> 0.7'
   s.add_runtime_dependency 'airbrake-ruby', '~> 1.2.2'
   s.add_development_dependency 'codeclimate-test-reporter', '~> 0.6.0'
+  s.add_development_dependency 'simplecov', '~> 0.12'
   s.add_development_dependency 'rspec', '~> 3.3'
   s.add_development_dependency 'rubocop', '~> 0.34'
   s.add_development_dependency 'webmock', '~> 1.21'
