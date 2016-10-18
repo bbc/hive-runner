@@ -1,0 +1,73 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          hived
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start the Hive Runner
+# Description:       The Hive Runner is part of the Hive CI test
+#                    automation framework. For more details see
+#                    https://bbc.github.io/hive-ci/
+### END INIT INFO
+
+# Author: Joe Haig <joe.haig@bbc.co.uk>
+
+. /etc/hived.conf
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:$HIVE_HOME
+DAEMON=$HIVE_HOME/start_hive.sh
+NAME=hived
+DESC="Hive Runner"
+SCRIPTNAME=/etc/init.d/"$NAME"
+. /lib/lsb/init-functions
+
+LOG_DIRECTORY=/var/log/hived
+SCRIPT=$HIVE_HOME/start_hive.sh
+if [ ! -d $LOG_DIRECTORY ]
+then
+  mkdir -p $LOG_DIRECTORY
+  chown $USER $LOG_DIRECTORY
+fi
+
+case "$1" in
+  start)
+    log_daemon_msg "Starting Hive Runner" "hived" || true
+    /sbin/start-stop-daemon --background --start --nicelevel 10 --quiet --oknodo --chdir $HIVE_HOME --startas $DAEMON --pidfile $PIDFILE --chuid $USER -- $DAEMON -p $PIDFILE
+    log_end_msg $?
+    ;;
+  stop)
+    log_daemon_msg "Stopping Hive Runner" "hived" || true
+    /sbin/start-stop-daemon --stop --pidfile $PIDFILE
+    RETVAL=$?
+    [ $RETVAL -eq 0 ] && [ -e "$PIDFILE" ] && rm -f $PIDFILE
+    log_end_msg $RETVAL
+    ;;
+  #reload)
+  #  echo "TODO: reload"
+  #  ;;
+  restart)
+    log_daemon_msg "Stopping Hive Runner" "hived" || true
+    /sbin/start-stop-daemon --stop --pidfile $PIDFILE
+    log_daemon_msg "Starting Hive Runner" "hived" || true
+    /sbin/start-stop-daemon --background --start --nicelevel 10 --quiet --oknodo --chdir $HIVE_HOME --startas $DAEMON --pidfile $PIDFILE --chuid $USER -- $DAEMON -p $PIDFILE
+    ;;
+  status)
+    if sig "USR1"
+    then
+      telnet localhost 9999 2> /dev/null
+      log_daemon_msg "Status: running ("`cat $PID`")"
+      exit 1
+    else
+      log_daemon_msg "Status: not running"
+      exit 0
+    fi
+    #sig "USR1" && telnet localhost 9999 && log_daemon_msg "Status: running ("`cat $PID`")" && exit 1
+    #log_daemon_msg "Status: not running" && exit 0
+    ;;
+  *)
+    log_action_msg "Usage: /etc/init.d/hived {start|stop|restart|status}" || true
+    exit 1
+esac
+
+exit 0

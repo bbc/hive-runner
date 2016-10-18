@@ -3,6 +3,7 @@
 require 'optparse'
 require 'fileutils'
 require 'terminal-table'
+require 'etc'
 
 if ARGV.length < 1
   puts "Usage:"
@@ -36,10 +37,69 @@ def yn question
   yn =~ /^[yY]/
 end
 
-def add_modules
+def os
+  if /mswin/ =~ RUBY_PLATFORM
+    'Windows'
+  elsif /darwin/ =~ RUBY_PLATFORM
+    'Mac'
+  elsif /linux/ =~ RUBY_PLATFORM
+    'Linux'
+  else
+    'Unknown'
+  end
+end
+
+def find_ruby use_default = false
+  ruby_versions = []
+
+  manager = nil
+  if system("which rvm > /dev/null 2> /dev/null")
+    list = `rvm list`.split /\n/
+    match = /^.(.).(ruby-\S+)/
+  elsif system("which rbenv > /dev/null 2> /dev/null")
+    list = `rbenv versions`.split /\n/
+    match = /^(.).(\S+)/
+  else
+    return ['system', 1]
+  end
+
+  version_table = Terminal::Table.new headings: ['#', 'Version', '']
+  default = nil
+  list.each do |line|
+    if line =~ match
+      default = ruby_versions.length if $1 == '*'
+      ruby_versions << $2
+      version_table.add_row [ ruby_versions.length, $2, $1 == '*' ? 'Default' : '' ]
+    end
+  end
+
+  if ruby_versions.length == 0
+    [ 'system', 0 ]
+  elsif ruby_versions.length == 1
+    [ ruby_versions[0], 1 ]
+  elsif use_default && ! default.nil?
+    [ ruby_versions[default], ruby_versions.length ]
+  else
+    puts
+    puts 'Multiple ruby versions available:'
+    puts version_table
+    puts ''
+    opt = -1
+    while opt <= 0 || opt > ruby_versions.length
+      print "[1 - #{ruby_versions.length}] > "
+      opt = STDIN.gets.chomp.to_i
+    end
+    [ ruby_versions[opt-1], ruby_versions.length ]
+  end
+end
+
+def gather_options
   # Choose options
   opt = ''
   mods = []
+  ruby, nrubies = find_ruby true
+  daemons = ( os != 'Unknown' )
+
   while opt.upcase != 'X'
     table = Terminal::Table.new headings: ['Device', 'Module', 'Source']
     mods.each do |mod|
@@ -54,8 +114,17 @@ def add_modules
 
     puts ''
     puts table
+    puts "Operating System: #{os}"
+    puts "Set up daemon script: #{daemons ? 'Yes (requires admin access)' : 'No'}"
+    print "Ruby version: #{ruby}"
+    print " (#{nrubies} versions available)" if nrubies > 1
+    puts ''
     puts ''
     puts '1) Add module'
+    puts '2) Change ruby version'
+    if os != 'Unknown'
+      puts "3) #{ daemons ? 'Do not s' : 'S'}et up daemon script"
+    end
     puts 'X) Continue'
     puts ''
     print "> "
@@ -74,13 +143,26 @@ def add_modules
       if yn "Correct? "
         mods << mod
       end
+    when '2'
+      ruby, nrubies = find_ruby
+    when '3'
+      daemons = ! daemons if os != 'Unknown'
     end
   end
 
-  mods
+  {
+    mods: mods,
+    daemons: daemons,
+    ruby: ruby
+  }
 end
 
-def setup_hive(dir, mods)
+def setup_hive(options)
+  dir = options[:dir]
+  mods = options[:mods]
+  daemons = options[:daemons]
+  ruby = options[:ruby] || 'system'
+
   FileUtils.mkdir_p("#{dir}/config")
   FileUtils.mkdir_p("#{dir}/log")
   FileUtils.mkdir_p("#{dir}/pids")
@@ -137,6 +219,9 @@ def setup_hive(dir, mods)
     f.puts ''
     f.puts '  # Configuration for diagnostic plugins'
     f.puts '  diagnostics:'
+    f.puts '    hive:'
+    f.puts '      load_warning: 0.7'
+    f.puts '      load_error: 1.5'
   end
 
   File.open("#{dir}/Gemfile", 'w') do |f|
@@ -149,11 +234,65 @@ def setup_hive(dir, mods)
     end
   end
 
-  print "Executing 'bundle install' ... "
-  Dir.chdir dir
-  if system("bundle install > bundle_install.out 2>&1")
+  puts '=========================='
+  print "Setting ruby ... "
+  File.open("#{dir}/.ruby-version", 'w') do |rv|
+    rv.write ruby
+  end
+  print "SUCCESS\n"
+
+  print "Creating daemon startup script..."
+  if os == 'Linux'
+    startup_script = "#{dir}/hived.init"
+    config_file = "#{dir}/hived.conf"
+    write_logs = '> $LOG_DIRECTORY/hived.out 2> $LOG_DIRECTORY/hived.err'
+    File.open("#{dir}/start_hive.sh", 'w', 0755) do |f|
+      f.write "#!/bin/bash -li\n"
+
+      f.write "if [ -f /etc/hived.conf ]\n"
+      f.write "then\n"
+      f.write "  . /etc/hived.conf\n"
+      f.write "else\n"
+      f.write "  . #{config_file}\n"
+      f.write "fi\n"
+
+      f.write "cd $HIVE_HOME #{write_logs}\n"
+      f.write "start_hive -p $PIDFILE #{write_logs} &\n" 
+      f.write "echo $!\n"
+    end
+
+    FileUtils.cp(File.expand_path('../init.d.hived', __FILE__), startup_script)
+
+    File.open(config_file, 'w') do |conf|
+      conf.write "HIVE_HOME=#{dir}\n"
+      conf.write "USER=#{Etc.getlogin}\n"
+      conf.write "LOG_DIRECTORY=#{dir}/log\n"
+      conf.write "PIDFILE=#{dir}/hived.pid\n"
+    end
     print "SUCCESS\n"
-    File.delete('bundle_install.out')
+
+    print "Moving daemon startup script... "
+    if daemons
+      if system("sudo cp #{startup_script} /etc/init.d/hived") && system("sudo chmod 755 /etc/init.d/hived") && system("sudo cp #{config_file} /etc/hived.conf")
+        print "SUCCESS\n"
+      else
+        daemons = false
+        print "FAILED\n"
+      end
+    else
+      print "SKIPPED\n"
+    end
+  else
+    startup_script = '??'
+    daemons = false
+    print "FAILED\n"
+    puts "  Cannot set up daemons for '#{os}'"
+  end
+
+  print "Executing 'bundle install' ... "
+  if system("bash -l -c 'cd #{dir}; gem install bundler; bundle install' > #{dir}/bundle_install.out 2>&1")
+    print "SUCCESS\n"
+    File.delete("#{dir}/bundle_install.out")
   else
     print "FAILED\n"
     puts "See #{dir}/bundle_install.out for details"
@@ -176,8 +315,22 @@ def setup_hive(dir, mods)
   end
   puts '  * Add to ~/.bashrc'
   puts "      - export HIVE_CONFIG=#{dir}/config"
+  if ! daemons
+    puts '  * Move daemons startup script to correct location'
+    puts "      - File currently at '#{startup_script}'"
+  end
 end
 
-mods = []
-mods = add_modules unless headless
-setup_hive(dir, mods)
+if headless
+  options = {
+    mods: [],
+    daemons: ( os != 'Unknown' )
+  }
+  options[:ruby], nrubies = find_ruby true
+else
+  options = gather_options unless headless
+end
+
+options[:dir] = dir
+
+setup_hive options

@@ -12,8 +12,15 @@ $LOAD_PATH << File.expand_path('../../lib', __FILE__)
 require 'socket'
 require 'terminal-table'
 require 'hive'
+require 'optparse'
 
 $PROGRAM_NAME = Hive::DAEMON_NAME
+
+OptionParser.new do |opts|
+  opts.on('-p', '--pidfile PIDFILE', 'PID file') do |pid|
+    File.write(pid, Process.pid)
+  end
+end.parse!
 
 # Version information
 gems = {}
