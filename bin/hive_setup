@@ -247,7 +247,7 @@ def setup_hive(options)
     config_file = "#{dir}/hived.conf"
     write_logs = '> $LOG_DIRECTORY/hived.out 2> $LOG_DIRECTORY/hived.err'
     File.open("#{dir}/start_hive.sh", 'w', 0755) do |f|
-      f.write "#!/bin/bash -l\n"
+      f.write "#!/bin/bash -li\n"
 
       f.write "if [ -f /etc/hived.conf ]\n"
       f.write "then\n"
