@@ -21,12 +21,12 @@ module Hive
 
   if Chamber.env.logging?
     if Chamber.env.logging.directory?
-      LOG_DIRECTORY = Chamber.env.logging.directory
+      LOG_DIRECTORY = File.expand_path Chamber.env.logging.directory
     else
       fail 'Missing log directory'
     end
     if Chamber.env.logging.pids?
-      PIDS_DIRECTORY = Chamber.env.logging.pids
+      PIDS_DIRECTORY = File.expand_path Chamber.env.logging.pids
     else
       PIDS_DIRECTORY = LOG_DIRECTORY
     end
@@ -86,7 +86,7 @@ module Hive
           format: 'integer'
         )
          
-        if Chamber.env.has_key?('diagnostics') && Chamber.env.diagnostics.hive.load_warning? && Chamber.env.diagnostics.hive.load_error?
+        if Chamber.env.diagnostics? && Chamber.env.diagnostics.hive? && Chamber.env.diagnostics.hive.load_warning? && Chamber.env.diagnostics.hive.load_error?
           @hive_mind.add_statistics(
             [
               {

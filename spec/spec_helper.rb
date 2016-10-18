@@ -1,7 +1,12 @@
 require 'rspec'
 
-require 'simplecov'
-SimpleCov.start
+if ENV['CI']
+  require 'codeclimate-test-reporter'
+  CodeClimate::TestReporter.start
+else
+  require 'simplecov'
+  SimpleCov.start
+end
 
 ENV['HIVE_ENVIRONMENT'] ||= 'test'
 ENV['HIVE_CONFIG'] = File.expand_path('../configs', __FILE__)
