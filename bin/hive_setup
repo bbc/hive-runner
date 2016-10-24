@@ -304,7 +304,7 @@ def setup_hive(options)
   puts
   puts '  * Add to config/settings.yml'
   puts '      - scheduler'
-  puts '      - devicedb'
+  puts '      - hive_mind'
   puts '      - cert'
   puts '      - cafile'
   if mods.length > 0

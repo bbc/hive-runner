@@ -23,7 +23,7 @@ test:
   
   network:
     scheduler: https://example.com/scheduler
-    devicedb: https://example.com/devicedb
+    hive_mind: https://example.com/hive_mind
     cert: /path/to/certificate.pem
     cafile: /path/to/certificate-authorities.pem
 
