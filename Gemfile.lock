@@ -7,7 +7,6 @@ PATH
       chamber (~> 2.7)
       code_cache (~> 0.2)
       daemons (~> 1.2)
-      devicedb_comms (~> 0.1)
       hive-messages (~> 1.0.3)
       mind_meld (~> 0.1.8)
       mono_logger (~> 1.1)
@@ -45,6 +44,8 @@ GEM
       hashie (~> 3.3)
       thor (~> 0.19.1)
     code_cache (0.2.0)
+    codeclimate-test-reporter (0.6.0)
+      simplecov (>= 0.7.1, < 1.0.0)
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
     crack (0.4.3)
@@ -52,9 +53,6 @@ GEM
     daemons (1.2.4)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
-    devicedb_comms (0.1.1)
-      activesupport (>= 4.0, < 4.3)
-      virtus (~> 1.0)
     diff-lcs (1.2.5)
     docile (1.1.5)
     equalizer (0.0.11)
@@ -148,10 +146,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  codeclimate-test-reporter (~> 0.6.0)
   hive-runner!
   rspec (~> 3.3)
   rubocop (~> 0.34)
-  simplecov (~> 0.10)
+  simplecov (~> 0.12)
   webmock (~> 1.21)
 
 BUNDLED WITH
