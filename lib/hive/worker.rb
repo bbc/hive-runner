@@ -189,7 +189,9 @@ module Hive
         pre_script(@job, @file_system, @script)
 
         @log.info "Running execution script"
-        exit_value = @script.run
+        exit_value = @script.run {
+          upload_files(@job, @file_system.results_path, @file_system.logs_path)
+        }
         @job.end(exit_value)
       rescue => e
         exception = e

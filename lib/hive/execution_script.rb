@@ -59,7 +59,7 @@ module Hive
       File.join(scripts_dir, 'hive-script-helper.sh')
     end
 
-    def run
+    def run &update
       @log.info 'bash.rb - Writing script out to file'
       File.open(@path, 'w') do |f|
         f.write("#!/bin/bash --login\n")
@@ -96,7 +96,7 @@ module Hive
           end
         rescue Timeout::Error
           Process.kill(-9, @pgid) if ! ( @keep_running.nil? || @keep_running.call )
-          # Do something. Eg, upload log files.
+          update.call if update
         end
       end
 
