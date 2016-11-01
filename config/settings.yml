@@ -27,9 +27,6 @@ test:
     cert: /path/to/certificate.pem
     cafile: /path/to/certificate-authorities.pem
 
-  datastore:
-    filename: /path/to/datastore.db
-
   errbit:
     host: 'http://errbit_host.com:port'
     project_id: true
