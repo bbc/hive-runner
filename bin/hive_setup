@@ -283,10 +283,11 @@ def setup_hive(options)
       print "SKIPPED\n"
     end
   else
-    startup_script = '??'
+    #startup_script = '??'
+    startup_script = false
     daemons = false
-    print "FAILED\n"
-    puts "  Cannot set up daemons for '#{os}'"
+    #print "FAILED\n"
+    #puts "  Cannot set up daemons for '#{os}'"
   end
 
   print "Executing 'bundle install' ... "
@@ -316,8 +317,10 @@ def setup_hive(options)
   puts '  * Add to ~/.bashrc'
   puts "      - export HIVE_CONFIG=#{dir}/config"
   if ! daemons
-    puts '  * Move daemons startup script to correct location'
-    puts "      - File currently at '#{startup_script}'"
+    if startup_script
+      puts '  * Move daemons startup script to correct location'
+      puts "      - File currently at '#{startup_script}'"
+    end
   end
 end
 
