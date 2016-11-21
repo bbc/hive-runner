@@ -4,6 +4,8 @@ module Hive
   # Hive logging
   # Allow logging to be written to multiple locations.
   class Log
+    attr_accessor :hive_mind
+
     # Create the logger:
     #
     #   # No log files will be written
@@ -34,8 +36,8 @@ module Hive
     #   log.add_logger( STDOUT, 'DEBUG' )
     def add_logger(stream, level)
       log = MonoLogger.new(stream)
-      log.formatter = proc do |severity, datetime, _progname, msg|
-        "#{severity[0, 1]} #{datetime.strftime('%Y-%m-%d %H:%M:%S')}: #{msg}\n"
+      log.formatter = proc do |severity, datetime, progname, msg|
+        "#{severity[0, 1]} #{datetime.strftime('%Y-%m-%d %H:%M:%S')} -- #{progname}: #{msg}\n"
       end
       log.level = MonoLogger.const_get(level)
       @loggers[stream] = log
@@ -51,10 +53,53 @@ module Hive
       @loggers.delete(stream)
     end
 
-    MonoLogger::Severity.constants.each do |level|
-      define_method(level.downcase) do |*args|
-        @loggers.each { |_s, l| l.send(level.downcase, *args) }
+    # These methods were originally created using define_method as they are all
+    # the same. However, blocks cannot be used with define_method.
+    def debug(*args, &block)
+      write_log('debug', *args, &block)
+    end
+
+    def info(*args, &block)
+      write_log('info', *args, &block)
+    end
+
+    def warn(*args, &block)
+      write_log('warn', *args, &block)
+    end
+
+    def error(*args, &block)
+      write_log('error', *args, &block)
+    end
+
+    def fatal(*args, &block)
+      write_log('fatal', *args, &block)
+    end
+
+    def unknown(*args, &block)
+      write_log('unknown', *args, &block)
+    end
+
+    private
+    def write_log(level, *args, &block)
+      @loggers.each do |_s, l|
+        if block
+          l.send(level, *args) { yield }
+        else
+          l.send(level, *args)
+        end
+      end
+      if self.hive_mind
+        params = { state: level }
+        if block
+          params[:component] = args[0]
+          params[:message] = yield
+        else
+          params[:message] = args[0]
+        end
+
+        self.hive_mind.set_state params
       end
     end
+
   end
 end
