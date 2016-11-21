@@ -5,6 +5,7 @@ module Hive
     # The Shell worker
     class Shell < Worker
       def initialize(options = {})
+        @default_component ||= "#{self.class.to_s} [#{$$}]"
         super
       end
 
@@ -16,6 +17,10 @@ module Hive
         @options['queues'] || []
       end
 
+      # Parameters for uniquely identifying the device
+      def hive_mind_device_identifiers
+        { id: @hive_id }
+      end
     end
   end
 end

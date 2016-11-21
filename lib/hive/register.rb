@@ -49,6 +49,11 @@ module Hive
         housekeeping
         check_controllers
         sleep Hive.config.timings.controller_loop_interval
+
+        # For the moment, clear Hive Mind logs each time
+        # TODO Something better so that warnings and errors are not hidden
+        Hive.logger.clear
+        Hive.logger.debug('Hive Mind log cleared')
       end
     end
 

@@ -5,6 +5,7 @@ module Hive
   # Allow logging to be written to multiple locations.
   class Log
     attr_accessor :hive_mind
+    attr_accessor :default_progname
 
     # Create the logger:
     #
@@ -79,23 +80,28 @@ module Hive
       write_log('unknown', *args, &block)
     end
 
+    # Currently this will clear the Hive Mind log but do nothing to the local
+    # files
+    def clear(component = nil)
+      if self.hive_mind
+        self.hive_mind.clear_state component: component
+      end
+    end
+
     private
     def write_log(level, *args, &block)
+      progname = ( block && args.length > 0 ) ? args[0] : @default_progname
+
       @loggers.each do |_s, l|
-        if block
-          l.send(level, *args) { yield }
-        else
-          l.send(level, *args)
-        end
+        l.send(level, progname) { block ? yield : args[0] }
       end
+
       if self.hive_mind
-        params = { state: level }
-        if block
-          params[:component] = args[0]
-          params[:message] = yield
-        else
-          params[:message] = args[0]
-        end
+        params = {
+          state: level,
+          component: progname,
+          message: block ? yield : args[0]
+        }
 
         self.hive_mind.set_state params
       end
