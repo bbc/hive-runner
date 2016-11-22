@@ -110,9 +110,12 @@ module Hive
     def terminate
       if @pgid
         begin
+          @log.debug "Ensuring process #{@pgid} is terminated"
           Process.kill(-9, @pgid)
+        rescue Errno::ESRCH
+          @log.debug "Process #{@pgid} already dead"
         rescue => e
-          @log.warn e
+          @log.warn "Unexpected error while terminating process #{@pgid}: #{e}"
         end
         @pgid = nil
       end
