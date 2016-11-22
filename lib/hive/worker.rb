@@ -30,6 +30,7 @@ module Hive
       @parent_pid = @options['parent_pid']
       @device_id = @options['id']
       @hive_id = @options['hive_id']
+      @default_component ||= self.class.to_s
       @hive_mind ||= mind_meld_klass.new(
         url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
         pem: Chamber.env.network.cert ? Chamber.env.network.cert : nil,
@@ -45,6 +46,8 @@ module Hive
         "#{LOG_DIRECTORY}/#{pid}.#{@device_identity}.log",
         Hive.config.logging.worker_level || 'INFO'
       )
+      @log.hive_mind = @hive_mind
+      @log.default_progname = @default_component
 
       self.update_queues
 
@@ -70,8 +73,9 @@ module Hive
           diagnostics
           update_queues
           poll_queue
+          @log.clear
         rescue DeviceNotReady => e
-          @log.info("#{e.message}\n");
+          @log.warn("#{e.message}\n");
         rescue StandardError => e
           @log.warn("Worker loop aborted: #{e.message}\n  : #{e.backtrace.join("\n  : ")}")
         end

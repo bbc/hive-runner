@@ -54,7 +54,14 @@ module Hive
       if Hive.config.logging.console_level?
         @logger.add_logger(STDOUT, Hive.config.logging.console_level)
       end
+
+      @logger.default_progname = 'Hive core'
     end
+
+    if ! @logger.hive_mind
+      @logger.hive_mind = @hive_mind
+    end
+
     @logger
   end
 
@@ -103,6 +110,9 @@ module Hive
           )
         end
         @hive_mind.flush_statistics
+        if @logger
+          @logger.hive_mind = @hive_mind
+        end
       end
     end
 
