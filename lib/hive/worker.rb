@@ -158,7 +158,7 @@ module Hive
           @log.info "Checking out the repository"
           @log.debug "  #{@job.repository}"
           @log.debug "  #{@file_system.testbed_path}"
-          checkout_code(@job.repository, @file_system.testbed_path)
+          checkout_code(@job.repository, @file_system.testbed_path, @job.branch=nil)
         end
 
         @log.info "Initialising execution script"
@@ -374,8 +374,8 @@ module Hive
     end
 
     # Get a checkout of the repository
-    def checkout_code(repository, checkout_directory)
-      CodeCache.repo(repository).checkout(:head, checkout_directory) or raise "Unable to checkout repository #{repository}"
+    def checkout_code(repository, checkout_directory, branch=nil)
+      CodeCache.repo(repository).checkout(:head, checkout_directory, branch) or raise "Unable to checkout repository #{repository}"
     end
 
     # Determine whether to keep the worker running
