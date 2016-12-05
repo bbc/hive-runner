@@ -70,10 +70,10 @@ module Hive
       @log.info('Starting worker')
       while keep_running?
         begin
+          @log.clear
           diagnostics
           update_queues
           poll_queue
-          @log.clear
         rescue DeviceNotReady => e
           @log.warn("#{e.message}\n");
         rescue StandardError => e
