@@ -7,6 +7,7 @@ module Hive
     attr_reader :type
     attr_accessor :status
     attr_accessor :port_allocator
+    attr_accessor :threads
 
     # Initialise the device
     def initialize(options)
@@ -15,6 +16,7 @@ module Hive
       @port_allocator = options['port_allocator'] or Hive::PortAllocator.new(ports: [])
       @status = @options.has_key?('status') ? @options['status'] : 'none'
       @worker_class = self.class.to_s.sub('Device', 'Worker')
+      @threads = []
       require @worker_class.downcase.gsub(/::/, '/')
       raise ArgumentError, "Identity not set for #{self.class} device" if ! @identity
     end
@@ -28,7 +30,6 @@ module Hive
         object.new(@options.merge('parent_pid' => parent_pid, 'device_identity' => self.identity, 'port_allocator' => self.port_allocator, 'hive_id' => Hive.hive_mind.device_details['id']))
       end
       Process.detach @worker_pid
-
       Hive.logger.info("Worker started with pid #{@worker_pid}")
     end
 

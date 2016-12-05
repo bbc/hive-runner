@@ -13,7 +13,8 @@ module Hive
 
     def initialize(config = {})
       @config = config
-      @device_class = self.class.to_s.sub('Controller', 'Device')
+      @device_class = self.class.to_s.sub('Controller', 'Device') if RUBY_PLATFORM.include? "darwin"
+      @device_class = self.class.to_s.sub('Controller', 'Windevice') if RUBY_PLATFORM.include? "ming"
       require @device_class.downcase.gsub(/::/, '/')
       Hive.logger.info("Controller '#{self.class}' created")
       @port_range_size = (@config.has_key?('port_range_size') ? @config['port_range_size'] : 0)

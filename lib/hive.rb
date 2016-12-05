@@ -92,7 +92,6 @@ module Hive
           value: Etc.nprocessors,
           format: 'integer'
         )
-         
         if Chamber.env.diagnostics? && Chamber.env.diagnostics.hive? && Chamber.env.diagnostics.hive.load_warning? && Chamber.env.diagnostics.hive.load_error?
           @hive_mind.add_statistics(
             [
@@ -115,7 +114,6 @@ module Hive
         end
       end
     end
-
     @hive_mind
   end
 
