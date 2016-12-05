@@ -13,10 +13,10 @@ module Hive
 
     def initialize(config = {})
       @config = config
-      if RUBY_PLATFORM.include? "darwin"
-        @device_class = self.class.to_s.sub('Controller', 'Device')
-      else
+      if RUBY_PLATFORM.include? "ming"
         @device_class = self.class.to_s.sub('Controller', 'Windevice')
+      else
+        @device_class = self.class.to_s.sub('Controller', 'Device')
       end
       require @device_class.downcase.gsub(/::/, '/')
       Hive.logger.info("Controller '#{self.class}' created")
