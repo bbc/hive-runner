@@ -32,10 +32,10 @@ end
 comm_port = ENV.fetch('HIVE_COMM_PORT', 9999).to_i
 comm = TCPServer.open(comm_port)
 sig = nil
-if RUBY_PLATFORM.include? "ming"
- sig = 'INT'
-else
+if RUBY_PLATFORM.include? "darwin"
  sig = 'USR1'
+else
+ sig = 'INT'
 end
 
 Signal.trap(sig) do
