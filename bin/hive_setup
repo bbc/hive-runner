@@ -98,7 +98,7 @@ def gather_options
   opt = ''
   mods = []
   ruby, nrubies = find_ruby true
-  daemons = ( os != 'Unknown' )
+  daemons = false
 
   while opt.upcase != 'X'
     table = Terminal::Table.new headings: ['Device', 'Module', 'Source']
@@ -123,7 +123,7 @@ def gather_options
     puts '1) Add module'
     puts '2) Change ruby version'
     if os != 'Unknown'
-      puts "3) #{ daemons ? 'Do not s' : 'S'}et up daemon script"
+      puts "3) #{ daemons ? 'Do not s' : 'S'}et up daemon script (experimental)"
     end
     puts 'X) Continue'
     puts ''
@@ -241,38 +241,38 @@ def setup_hive(options)
   end
   print "SUCCESS\n"
 
-  print "Creating daemon startup script..."
-  if os == 'Linux'
-    startup_script = "#{dir}/hived.init"
-    config_file = "#{dir}/hived.conf"
-    write_logs = '> $LOG_DIRECTORY/hived.out 2> $LOG_DIRECTORY/hived.err'
-    File.open("#{dir}/start_hive.sh", 'w', 0755) do |f|
-      f.write "#!/bin/bash -li\n"
+  print "Creating daemon startup script ... "
+  if daemons
+    if os == 'Linux'
+      startup_script = "#{dir}/hived.init"
+      config_file = "#{dir}/hived.conf"
+      write_logs = '> $LOG_DIRECTORY/hived.out 2> $LOG_DIRECTORY/hived.err'
+      File.open("#{dir}/start_hive.sh", 'w', 0755) do |f|
+        f.write "#!/bin/bash -li\n"
 
-      f.write "if [ -f /etc/hived.conf ]\n"
-      f.write "then\n"
-      f.write "  . /etc/hived.conf\n"
-      f.write "else\n"
-      f.write "  . #{config_file}\n"
-      f.write "fi\n"
+        f.write "if [ -f /etc/hived.conf ]\n"
+        f.write "then\n"
+        f.write "  . /etc/hived.conf\n"
+        f.write "else\n"
+        f.write "  . #{config_file}\n"
+        f.write "fi\n"
 
-      f.write "cd $HIVE_HOME #{write_logs}\n"
-      f.write "start_hive -p $PIDFILE #{write_logs} &\n" 
-      f.write "echo $!\n"
-    end
+        f.write "cd $HIVE_HOME #{write_logs}\n"
+        f.write "start_hive -p $PIDFILE #{write_logs} &\n"
+        f.write "echo $!\n"
+      end
 
-    FileUtils.cp(File.expand_path('../init.d.hived', __FILE__), startup_script)
+      FileUtils.cp(File.expand_path('../init.d.hived', __FILE__), startup_script)
 
-    File.open(config_file, 'w') do |conf|
-      conf.write "HIVE_HOME=#{dir}\n"
-      conf.write "USER=#{Etc.getlogin}\n"
-      conf.write "LOG_DIRECTORY=#{dir}/log\n"
-      conf.write "PIDFILE=#{dir}/hived.pid\n"
-    end
-    print "SUCCESS\n"
+      File.open(config_file, 'w') do |conf|
+        conf.write "HIVE_HOME=#{dir}\n"
+        conf.write "USER=#{Etc.getlogin}\n"
+        conf.write "LOG_DIRECTORY=#{dir}/log\n"
+        conf.write "PIDFILE=#{dir}/hived.pid\n"
+      end
+      print "SUCCESS\n"
 
-    print "Moving daemon startup script... "
-    if daemons
+      print "Moving daemon startup script ... "
       if system("sudo cp #{startup_script} /etc/init.d/hived") && system("sudo chmod 755 /etc/init.d/hived") && system("sudo cp #{config_file} /etc/hived.conf")
         print "SUCCESS\n"
       else
@@ -280,14 +280,15 @@ def setup_hive(options)
         print "FAILED\n"
       end
     else
-      print "SKIPPED\n"
+      #startup_script = '??'
+      print "SKIPPED (not available on #{os})\n"
+      startup_script = false
+      daemons = false
+      #print "FAILED\n"
+      #puts "  Cannot set up daemons for '#{os}'"
     end
   else
-    #startup_script = '??'
-    startup_script = false
-    daemons = false
-    #print "FAILED\n"
-    #puts "  Cannot set up daemons for '#{os}'"
+    print "SKIPPED\n"
   end
 
   print "Executing 'bundle install' ... "
