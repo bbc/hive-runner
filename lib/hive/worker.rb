@@ -54,7 +54,7 @@ module Hive
       @port_allocator = (@options.has_key?('port_allocator') ? @options['port_allocator'] : Hive::PortAllocator.new(ports: []))
       
       platform = self.class.to_s.scan(/[^:][^:]*/)[2].downcase
-      @diagnostic_runner = Hive::DiagnosticRunner.new(@options, Hive.config.diagnostics, platform) if Hive.config.diagnostics? && Hive.config.diagnostics[platform]
+      @diagnostic_runner = Hive::DiagnosticRunner.new(@options, Hive.config.diagnostics, platform, @hive_mind) if Hive.config.diagnostics? && Hive.config.diagnostics[platform]
 
       Hive::Messages.configure do |config|
         config.base_path = Hive.config.network.scheduler
