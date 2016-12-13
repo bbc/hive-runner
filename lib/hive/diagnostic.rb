@@ -44,12 +44,12 @@ module Hive
 
     def pass(message= {}, data = {})
       Hive.logger.info("#{@device_api.serial_no} => #{message}")
-      Hive::Results.new("pass", message, data )
+      Hive::Results.new("pass", message, data, @hive_mind)
     end
 
     def fail(message ={}, data = {})
       Hive.logger.info("#{@device_api.serial_no} => #{message}")
-      Hive::Results.new("fail", message, data)
+      Hive::Results.new("fail", message, data, @hive_mind)
     end
   end
 end
