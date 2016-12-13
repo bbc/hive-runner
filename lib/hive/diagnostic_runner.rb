@@ -2,7 +2,7 @@ module Hive
   class DiagnosticRunner
     attr_accessor :diagnostics, :options
 
-    def initialize(options, diagnostics_config, platform, hive_mind)
+    def initialize(options, diagnostics_config, platform, hive_mind=nil)
       @options = options
       @platform = platform
       @hive_mind = hive_mind

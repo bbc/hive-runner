@@ -1,7 +1,7 @@
 module Hive
   class Results
     attr_reader :timestamp
-    def initialize( state, message, data = {}, hive_mind)
+    def initialize( state, message, data = {}, hive_mind=nil)
       @state = state
       @message = message
       @data = data  
@@ -38,8 +38,10 @@ module Hive
     end
 
     def submit_results
-       @hive_mind.add_statistics(formulate_results)
-       @hive_mind.flush_statistics
+       if @hive_mind
+      	 @hive_mind.add_statistics(formulate_results)
+      	 @hive_mind.flush_statistics
+       end
     end
 
   end

@@ -10,7 +10,7 @@ module Hive
     attr_accessor :last_run
     attr_reader :config, :device_api
 
-    def initialize(config, options, hive_mind)
+    def initialize(config, options, hive_mind=nil)
       @options = options
       @config = config
       @serial = @options['serial']
