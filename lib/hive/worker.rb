@@ -121,8 +121,8 @@ module Hive
     end
 
     def reservation_details
-      @log.debug "Reservations details: hive_id=#{@hive_id}, worker_pid=#{Process.pid}"
-      { hive_id: @hive_id, worker_pid: Process.pid }
+      @log.debug "Reservations details: hive_id=#{@hive_id}, worker_pid=#{Process.pid}, device_id=#{@hive_mind.id}"
+      { hive_id: @hive_id, worker_pid: Process.pid, device_id: @hive_mind.id }
     end
 
     # Execute a job
@@ -146,7 +146,7 @@ module Hive
       end
 
       @log.info('Job starting')
-      @job.prepare(@device_id)
+      @job.prepare(@hive_mind.id)
       
       exception = nil
       begin
