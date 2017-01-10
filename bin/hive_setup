@@ -184,7 +184,7 @@ def setup_hive(options)
     f.puts '      name_stub: SHELL_WORKER'
     mods.each do |m|
       f.puts "    #{m[:device]}:"
-      f.puts '      # Number of ports to allocate to each #{m[:device]} worker'
+      f.puts "      # Number of ports to allocate to each #{m[:device]} worker"
       f.puts '      port_range_size: 50'
       f.puts "      name_stub: #{m[:device].upcase}_WORKER"
     end
