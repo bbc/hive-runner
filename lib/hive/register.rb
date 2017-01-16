@@ -80,9 +80,10 @@ module Hive
 
           # Remove any devices that have not been rediscovered
           (@devices[c.class] - new_device_list[c.class]).each do |d|
-            @port_allocator.release_port_range(d.port_allocator)
-            d.stop
-            @devices[c.class].delete(d)
+            if d.stop
+              @port_allocator.release_port_range(d.port_allocator)
+              @devices[c.class].delete(d)
+            end
           end
 
           # Add any new devices
