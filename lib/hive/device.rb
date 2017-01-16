@@ -34,11 +34,11 @@ module Hive
 
     # Terminate the worker process
     def stop
-      @count = @count.nil? ? 0 : @count + 1
+      @stop_count = @stop_count.nil? ? 0 : @stop_count + 1
 
       if self.running?
-        if @count < 30
-          Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{@count}]")
+        if @stop_count < 30
+          Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{@stop_count}]")
           Process.kill 'TERM', @worker_pid
         else
           Hive.logger.info("Killing process #{@worker_pid}")
@@ -50,7 +50,7 @@ module Hive
         false
       else
         @worker_pid = nil
-        @count = nil
+        @stop_count = nil
         true
       end
     end
