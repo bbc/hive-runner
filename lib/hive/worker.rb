@@ -71,9 +71,8 @@ module Hive
       while keep_running?
         begin
           @log.clear
-          diagnostics
           update_queues
-          poll_queue
+          poll_queue if diagnostics
         rescue DeviceNotReady => e
           @log.warn("#{e.message}\n");
         rescue StandardError => e
@@ -232,10 +231,11 @@ module Hive
 
     # Diagnostics function to be extended in child class, as required
     def diagnostics
-      @diagnostic_runner.run if !@diagnostic_runner.nil?
+      retn = @diagnostic_runner.run if !@diagnostic_runner.nil?
       status = device_status
       status = set_device_status('happy') if status == 'busy'
       raise DeviceNotReady.new("Current device status: '#{status}'") if status != 'happy'
+      retn
     end
 
     # Current state of the device
