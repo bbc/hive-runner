@@ -231,6 +231,7 @@ module Hive
 
     # Diagnostics function to be extended in child class, as required
     def diagnostics
+      retn = true
       retn = @diagnostic_runner.run if !@diagnostic_runner.nil?
       status = device_status
       status = set_device_status('happy') if status == 'busy'
