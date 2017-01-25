@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   # Awaiting a fix for this gem
   # See lib/macaddr.rb
   #s.add_runtime_dependency 'macaddr', '~> 1.7'
+  s.add_runtime_dependency 'systemu'
   s.add_runtime_dependency 'activerecord', '~> 4.2'
   s.add_runtime_dependency 'mono_logger', '~> 1.1'
   s.add_runtime_dependency 'daemons', '~> 1.2'

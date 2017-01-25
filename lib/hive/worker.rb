@@ -383,7 +383,7 @@ module Hive
     # This just checks the presense of the parent process
     def keep_running?
       begin
-        Process.getpgid(@parent_pid)
+        Process.getpgid(@parent_pid) if !RUBY_PLATFORM.include? "ming"
         true
       rescue
         false

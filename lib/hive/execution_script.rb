@@ -60,55 +60,98 @@ module Hive
     end
 
     def run
-      @log.info 'bash.rb - Writing script out to file'
       File.open(@path, 'w') do |f|
-        f.write("#!/bin/bash --login\n")
-        f.write(". #{helper_path}\n")
-        f.write("# Set environment\n")
-        @env.each do |key, value|
+        if RUBY_PLATFORM.include? "ming"
+          @log.info 'bash.rb - Writing script out to batch file'
+          @env.each do |key, value|
+            if value.kind_of?(Array)
+              f.write("SET #{key}=(" + value.collect { |v| "'#{v.to_s.gsub("'", '\'"\'"\'')}'" }.join(' ') + ")\n" )
+            else
+              f.write("SET #{key}='#{value.to_s.gsub("'", '\'"\'"\'')}'\n")
+	    end
+          end
+          f.write("cd %HIVE_WORKING_DIRECTORY%")
+        else
+          @log.info 'bash.rb - Writing script out to file'
+          f.write("#!/bin/bash --login\n")
+          f.write(". #{helper_path}\n")
+          f.write("# Set environment\n")
+          @env.each do |key, value|
           # An escaped ' in a single quoted string in bash looks like '"'"'
-          if value.kind_of?(Array)
-            f.write("export #{key}=(" + value.collect { |v| "'#{v.to_s.gsub("'", '\'"\'"\'')}'" }.join(' ') + ")\n" )
-          else
-            f.write("export #{key}='#{value.to_s.gsub("'", '\'"\'"\'')}'\n")
+            if value.kind_of?(Array)
+              f.write("export #{key}=(" + value.collect { |v| "'#{v.to_s.gsub("'", '\'"\'"\'')}'" }.join(' ') + ")\n" )
+            else  
+              f.write("export #{key}='#{value.to_s.gsub("'", '\'"\'"\'')}'\n")
+	    end
+            @env_unset.each do |var|
+              f.write("unset #{var}\n")
+            end
+            f.write("cd $HIVE_WORKING_DIRECTORY")
           end
         end
-        @env_unset.each do |var|
-          f.write("unset #{var}\n")
-        end
-        f.write("cd $HIVE_WORKING_DIRECTORY")
         f.write("\n# Test execution\n")
         f.write(@script_lines.join("\n"))
+      end  
+      File.chmod(0700, @path) 
+      command = "#{@path}" 
+
+      if !RUBY_PLATFORM.include "ming"
+        pid = Process.spawn @env_secure, "#{@path}", pgroup: true, in: '/dev/null', out: "#{@log_path}/stdout.log", err: "#{@log_path}/stderr.log"
+        @pgid = Process.getpgid(pid)
       end
-      File.chmod(0700, @path)
-
-      pid = Process.spawn @env_secure, "#{@path}", pgroup: true, in: '/dev/null', out: "#{@log_path}/stdout.log", err: "#{@log_path}/stderr.log"
-      @pgid = Process.getpgid(pid)
-
       exit_value = nil
       running = true
       while running
         begin
           Timeout.timeout(30) do
-            Process.wait pid
-            exit_value = $?.exitstatus
+	    if RUBY_PLATFORM.include? "ming"
+	      thread = Thread.new do
+	        require 'open3'
+	        Open3.popen3(command) do |stdin, stdout, stderr, wait_thr |
+	          out = File.open("#{@log_path}/stdout.log", "w"){|f|
+	            f.write(stdout.read)
+	          }
+	          unless (err = stderr.read).empty? then
+	            error = File.open("#{@log_path}/stderr.log", "w"){|e|
+	              e.write(err)
+	            }
+	          end
+	          exit_value = wait_thr.value.success?
+		end
+	      end
+	      thread.join 
+	    else
+              Process.wait pid
+              exit_value = $?.exitstatus
+	    end
             running = false
-          end
+	  end
         rescue Timeout::Error
-          Process.kill(-9, @pgid) if ! ( @keep_running.nil? || @keep_running.call )
-          # Do something. Eg, upload log files.
+	  if RUBY_PLATFORM.include? "ming"
+	    if @threads
+	      @threads[0].kill
+	      @threads = []
+	    end
+	  else
+            Process.kill(-9, @pgid) if ! ( @keep_running.nil? || @keep_running.call )
+          end
+	  # Do something. Eg, upload log files.
         end
       end
 
       # Kill off anything that is still running
       terminate
-
       # Return exit value of the script
       exit_value
     end
 
     def terminate
-      if @pgid
+      if RUBY_PLATFORM.include? "ming"
+        if @threads 
+          @threads.first.kill
+	  @threads = []
+	end
+      elsif @pgid
         begin
           @log.debug "Ensuring process #{@pgid} is terminated"
           Process.kill(-9, @pgid)
