@@ -2,12 +2,17 @@ require 'timeout'
 
 module Hive
   class ExecutionScript
+    attr_writer :run_loop_check_time
+    attr_writer :run_loop_check_method
+
     def initialize(config)
       @path = config[:file_system].executed_script_path
       @log_path = config[:file_system].logs_path
       @log = config[:log]
       @keep_running = config[:keep_running]
       @log.debug "Creating execution script with path=#{@path}"
+      @run_loop_check_time = config[:run_loop_check_time] || 30
+      @run_loop_check_method = config[:run_loop_check_method] || lambda {}
       @env = {
         'HIVE_SCHEDULER' => Hive.config.network.scheduler,
         'HIVE_WORKING_DIRECTORY' => config[:file_system].testbed_path
@@ -89,13 +94,14 @@ module Hive
       running = true
       while running
         begin
-          Timeout.timeout(30) do
+          Timeout.timeout(@run_loop_check_time) do
             Process.wait pid
             exit_value = $?.exitstatus
             running = false
           end
         rescue Timeout::Error
           Process.kill(-9, @pgid) if ! ( @keep_running.nil? || @keep_running.call )
+          @run_loop_check_method.call if @run_loop_check_method
           # Do something. Eg, upload log files.
         end
       end
