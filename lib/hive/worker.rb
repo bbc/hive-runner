@@ -385,9 +385,12 @@ module Hive
     # This just checks the presense of the parent process
     def keep_running?
       begin
-        if @job_start_time 
+        if @job_start_time and Hive.config.timings.job_timeout 
           execution_time =  Time.now - @job_start_time
-          return false if execution_time.to_i >= Hive.config.timings.job_timeout
+          if execution_time.to_i >= Hive.config.timings.job_timeout
+             @job_start_time = nil
+             return false
+          end
         end
         Process.getpgid(@parent_pid)
         true
