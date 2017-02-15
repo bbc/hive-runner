@@ -2,7 +2,11 @@ require 'timeout'
 
 module Hive
   class ExecutionScript
-    def initialize(config)
+  
+  class TimeoutError < StandardError
+  end
+
+   def initialize(config)
       @path = config[:file_system].executed_script_path
       @log_path = config[:file_system].logs_path
       @log = config[:log]
@@ -96,6 +100,7 @@ module Hive
           end
         rescue Timeout::Error
           Process.kill(-9, @pgid) if ! ( @keep_running.nil? || @keep_running.call )
+          raise TimeoutError.new("Timed out after #{Hive.config.timings.job_timeout} seconds")
           # Do something. Eg, upload log files.
         end
       end

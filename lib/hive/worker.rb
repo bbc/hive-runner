@@ -88,9 +88,11 @@ module Hive
       @job = reserve_job
       if @job.nil?
         @log.info('No job found')
+        @job_start_time = nil
       else
         @log.info('Job starting')
         begin
+          @job_start_time = Time.now
           execute_job
         rescue => e
           @log.info("Error running test: #{e.message}\n : #{e.backtrace.join("\n :")}")
@@ -383,6 +385,10 @@ module Hive
     # This just checks the presense of the parent process
     def keep_running?
       begin
+        if @job_start_time 
+          execution_time =  Time.now - @job_start_time
+          return false if execution_time.to_i >= Hive.config.timings.job_timeout
+        end
         Process.getpgid(@parent_pid)
         true
       rescue
@@ -407,6 +413,7 @@ module Hive
 
     # Do whatever device cleanup is required
     def cleanup
+      @job_start_time = nil
     end
 
     # Allocate a port
