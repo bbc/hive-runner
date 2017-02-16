@@ -416,7 +416,6 @@ module Hive
 
     # Do whatever device cleanup is required
     def cleanup
-      @job_start_time = nil
     end
 
     # Allocate a port
