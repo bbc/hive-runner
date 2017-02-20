@@ -31,6 +31,7 @@ module Hive
       @device_id = @options['id']
       @hive_id = @options['hive_id']
       @default_component ||= self.class.to_s
+      @current_job_start_time = nil
       @hive_mind ||= mind_meld_klass.new(
         url: Chamber.env.network.hive_mind? ? Chamber.env.network.hive_mind : nil,
         pem: Chamber.env.network.cert ? Chamber.env.network.cert : nil,
@@ -91,6 +92,7 @@ module Hive
       else
         @log.info('Job starting')
         begin
+          @current_job_start_time = Time.now
           execute_job
         rescue => e
           @log.info("Error running test: #{e.message}\n : #{e.backtrace.join("\n :")}")
@@ -380,12 +382,36 @@ module Hive
     end
 
     # Determine whether to keep the worker running
-    # This just checks the presense of the parent process
     def keep_running?
+      @log.info("Keep Running check ")
+      if exceeded_time_limit? && parent_process_dead?
+        return false
+      else
+        return true
+      end
+    end
+
+    def exceeded_time_limit?
+      if @job && !@job.nil?
+        @log.info(@job.inspect)
+        if max_time = @job.execution_variables.job_timeout
+          elapsed = (Time.now - @current_job_start_time).to_i
+          @log.debug("Elapsed = #{elapsed} seconds, Max = #{max_time} minutes")
+          if elapsed > max_time.to_i * 60          
+            @log.warn("Job has exceeded max time of #{max_time} minutes")
+            return true 
+          end
+        end
+      end
+      false
+    end
+
+    def parent_process_dead?
       begin
         Process.getpgid(@parent_pid)
         true
       rescue
+        @log.warn("Parent process appears to have terminated")
         false
       end
     end
