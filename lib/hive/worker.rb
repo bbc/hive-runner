@@ -69,7 +69,7 @@ module Hive
       end
 
       @log.info('Starting worker')
-      while keep_running?
+      while keep_worker_running?
         begin
           @log.clear
           update_queues
@@ -166,7 +166,7 @@ module Hive
         @script = Hive::ExecutionScript.new(
           file_system: @file_system,
           log: @log,
-          keep_running: ->() { self.keep_running? }
+          keep_running: ->() { self.keep_script_running? }
         )
         @script.append_bash_cmd "mkdir -p #{@file_system.testbed_path}/#{@job.execution_directory}"
         @script.append_bash_cmd "cd #{@file_system.testbed_path}/#{@job.execution_directory}"
@@ -381,10 +381,21 @@ module Hive
       CodeCache.repo(repository).checkout(:head, checkout_directory, branch) or raise "Unable to checkout repository #{repository}"
     end
 
-    # Determine whether to keep the worker running
-    def keep_running?
-      @log.info("Keep Running check ")
-      if exceeded_time_limit? && parent_process_dead?
+    # Keep the worker process running
+    def keep_worker_running?
+      @log.debug("Keep Worker Running check ")
+      if parent_process_dead?
+        @log.info("Think parent process is dead")
+        false
+      else
+        true
+      end
+    end
+    
+    # Keep the execution script running
+    def keep_script_running?
+      @log.debug("Keep Running check ")
+      if exceeded_time_limit? || parent_process_dead?
         return false
       else
         return true
@@ -393,8 +404,7 @@ module Hive
 
     def exceeded_time_limit?
       if @job && !@job.nil?
-        @log.info(@job.inspect)
-        if max_time = @job.execution_variables.job_timeout
+        if max_time = @job.execution_variables.job_timeout rescue nil
           elapsed = (Time.now - @current_job_start_time).to_i
           @log.debug("Elapsed = #{elapsed} seconds, Max = #{max_time} minutes")
           if elapsed > max_time.to_i * 60          
@@ -409,10 +419,10 @@ module Hive
     def parent_process_dead?
       begin
         Process.getpgid(@parent_pid)
-        true
+        false
       rescue
         @log.warn("Parent process appears to have terminated")
-        false
+        true
       end
     end
 

@@ -95,8 +95,10 @@ module Hive
             running = false
           end
         rescue Timeout::Error
+          @log.debug("Sub-process keep_running check")
           Process.kill(-9, @pgid) if ! ( @keep_running.nil? || @keep_running.call )
-          # Do something. Eg, upload log files.
+          
+          # TODO Upload in-progress script logs
         end
       end
 
