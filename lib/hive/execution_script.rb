@@ -100,7 +100,7 @@ module Hive
           end
         rescue Timeout::Error
           if ! ( @keep_running.nil? || @keep_running.call )
-            Process.kill(-9, @pgid) if ! ( @keep_running.nil? || @keep_running.call )
+            Process.kill(-9, @pgid)
             raise TimeoutError.new("Timed out after #{Hive.config.timings.job_timeout} seconds")
           end
           # Do something. Eg, upload log files.
