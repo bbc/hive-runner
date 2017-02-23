@@ -96,10 +96,7 @@ module Hive
           end
         rescue Timeout::Error
           @log.debug("Sub-process keep_running check")
-          if ! ( @keep_running.nil? || @keep_running.call )
-             Process.kill(-9, @pgid)
-             raise TimeoutError.new("Timed out after #{Hive.config.timings.job_timeout} seconds")
-          end
+          Process.kill(-9, @pgid) if ! ( @keep_running.nil? || @keep_running.call )
           
           # TODO Upload in-progress script logs
         end
