@@ -16,7 +16,7 @@ test:
     worker_level: DEBUG
     home: /path/to/test/home
     homes_to_keep: 5
-    #hm_logs_to_delete: info or debug or warn or error
+    #hm_logs_to_delete: info
   
   timings:
     worker_loop_interval: 5
