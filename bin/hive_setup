@@ -203,6 +203,7 @@ def setup_hive(options)
     f.puts '    worker_level: INFO'
     f.puts "    home: #{dir}/workspaces"
     f.puts '    homes_to_keep: 5'
+    f.puts '    #hm_logs_to_delete: info'
     f.puts ''
     f.puts '  # Timing configuration'
     f.puts '  timings:'
