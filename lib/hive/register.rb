@@ -52,7 +52,7 @@ module Hive
 
         # For the moment, clear Hive Mind logs each time
         # TODO Something better so that warnings and errors are not hidden
-        Hive.logger.clear
+        Hive.logger.clear({component:  Hive.logger.default_progname, level: Hive.config.logging.hm_logs_to_delete})
         Hive.logger.debug('Hive Mind log cleared')
       end
     end
