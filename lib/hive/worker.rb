@@ -71,7 +71,7 @@ module Hive
       @log.info('Starting worker')
       while keep_worker_running?
         begin
-          @log.clear
+          @log.clear(@default_component, Hive.config.logging.hm_logs_to_delete)
           update_queues
           poll_queue if diagnostics
         rescue DeviceNotReady => e

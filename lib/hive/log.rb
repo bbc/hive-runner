@@ -82,9 +82,9 @@ module Hive
 
     # Currently this will clear the Hive Mind log but do nothing to the local
     # files
-    def clear(component = nil)
+    def clear(component = nil, level = nil)
       if self.hive_mind
-        self.hive_mind.clear_state component: component
+        self.hive_mind.clear_state component: component, level: level
       end
     end
 
