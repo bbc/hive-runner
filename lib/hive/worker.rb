@@ -207,7 +207,6 @@ module Hive
 
         # Upload results
         @file_system.finalise_results_directory
-        upload_files(@job, @file_system.results_path, @file_system.logs_path)
         upload_results(@job, "#{@file_system.testbed_path}/#{@job.execution_directory}", @file_system.results_path)
       rescue => e
         @log.error( "Post execution failed: " + e.message)
@@ -217,9 +216,19 @@ module Hive
       if exception
         @job.error( exception.message )
         set_job_state_to :completed
+        begin
+          upload_files(@job, @file_system.results_path, @file_system.logs_path)
+        rescue => e
+          @log.error("Exception while uploading files: #{e.backtrace.join("\n  : ")}")
+        end
         raise exception
       else
         @job.complete
+        begin
+          upload_files(@job, @file_system.results_path, @file_system.logs_path)
+        rescue => e
+          @log.error("Exception while uploading files: #{e.backtrace.join("\n  : ")}")
+        end
       end
 
       Signal.trap('TERM') do
