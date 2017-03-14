@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'hive-runner'
-  s.version     = '2.1.23'
+  s.version     = '2.1.24'
   s.date        = Time.now.strftime("%Y-%m-%d")
   s.summary     = 'Hive Runner'
   s.description = 'Core component of the Hive CI runner'
