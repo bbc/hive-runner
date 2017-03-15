@@ -148,7 +148,7 @@ module Hive
 
       @log.info('Job starting')
       @job.prepare(@hive_mind.id)
-      
+sleep 20
       exception = nil
       begin
         @log.info "Setting job paths"
@@ -188,11 +188,11 @@ module Hive
         @script.append_bash_cmd @job.command
 
         set_job_state_to :running
-        @job.start
 
         @log.info "Pre-execution setup"
         pre_script(@job, @file_system, @script)
 
+        @job.start
         @log.info "Running execution script"
         exit_value = @script.run
         @job.end(exit_value)
