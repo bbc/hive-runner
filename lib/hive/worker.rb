@@ -148,7 +148,6 @@ module Hive
 
       @log.info('Job starting')
       @job.prepare(@hive_mind.id)
-sleep 20
       exception = nil
       begin
         @log.info "Setting job paths"
