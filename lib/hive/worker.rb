@@ -172,6 +172,7 @@ module Hive
 
         @log.info "Setting the execution variables in the environment"
         @script.set_env 'HIVE_RESULTS', @file_system.results_path
+        @script.set_env 'HIVE_SCRIPT_ERRORS', @file_system.script_errors_file
         @job.execution_variables.to_h.each_pair do |var, val|
           @script.set_env "HIVE_#{var.to_s}".upcase, val if ! val.kind_of?(Array)
         end
@@ -212,15 +213,20 @@ module Hive
         @log.error("  : #{e.backtrace.join("\n  : ")}")
       end
 
-      if exception
-        @job.error( exception.message )
+      if exception or File.size(@file_system.script_errors_file) > 0
         set_job_state_to :completed
         begin
           upload_files(@job, @file_system.results_path, @file_system.logs_path)
         rescue => e
           @log.error("Exception while uploading files: #{e.backtrace.join("\n  : ")}")
         end
-        raise exception
+        if exception
+          @job.error( exception.message )
+          raise exception
+        else
+          @job.error( 'Errors raised by execution script' )
+          raise 'See errors file for errors reported in test.'
+        end
       else
         @job.complete
         begin
@@ -406,7 +412,7 @@ module Hive
     # Keep the execution script running
     def keep_script_running?
       @log.debug("Keep Running check ")
-      if exceeded_time_limit? || parent_process_dead?
+      if exceeded_time_limit? or parent_process_dead? or File.size(@file_system.script_errors_file) > 0
         return false
       else
         return true
