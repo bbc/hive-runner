@@ -11,6 +11,7 @@ module Hive
       make_directory(results_path)
       make_directory(logs_path)
       make_directory(testbed_path)
+      FileUtils.touch(script_errors_file)
     end
 
     def home_path
@@ -23,6 +24,10 @@ module Hive
 
     def logs_path
       @logs_path ||= "#{home_path}/logs"
+    end
+
+    def script_errors_file
+      @script_errors_file ||= File.expand_path('script_errors.txt', logs_path)
     end
 
     def testbed_path
