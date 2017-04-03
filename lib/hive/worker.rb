@@ -412,7 +412,7 @@ module Hive
     # Keep the execution script running
     def keep_script_running?
       @log.debug("Keep Running check ")
-      if exceeded_time_limit? || parent_process_dead?
+      if exceeded_time_limit? or parent_process_dead? or File.size(@file_system.script_errors_file) > 0
         return false
       else
         return true
