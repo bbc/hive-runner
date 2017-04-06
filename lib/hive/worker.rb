@@ -216,6 +216,7 @@ module Hive
       if exception or File.size(@file_system.script_errors_file) > 0
         set_job_state_to :completed
         begin
+          after_error(@job, @file_system, @script)
           upload_files(@job, @file_system.results_path, @file_system.logs_path)
         rescue => e
           @log.error("Exception while uploading files: #{e.backtrace.join("\n  : ")}")
@@ -249,6 +250,7 @@ module Hive
     def diagnostics
       retn = true
       retn = @diagnostic_runner.run if !@diagnostic_runner.nil?
+      @log.info('Diagnostics failed') if not retn
       status = device_status
       status = set_device_status('happy') if status == 'busy'
       raise DeviceNotReady.new("Current device status: '#{status}'") if status != 'happy'
@@ -445,6 +447,10 @@ module Hive
 
     # Any setup required before the execution script
     def pre_script(job, file_system, script)
+    end
+
+    # Any tasks to do after a script has terminated with an error
+    def after_error(job, file_system, script)
     end
 
     # Any device specific steps immediately after the execution script
