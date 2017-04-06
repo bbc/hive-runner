@@ -250,6 +250,7 @@ module Hive
     def diagnostics
       retn = true
       retn = @diagnostic_runner.run if !@diagnostic_runner.nil?
+      @log.info('Diagnostics failed') if not retn
       status = device_status
       status = set_device_status('happy') if status == 'busy'
       raise DeviceNotReady.new("Current device status: '#{status}'") if status != 'happy'
