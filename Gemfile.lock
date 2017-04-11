@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hive-runner (2.1.26)
+    hive-runner (2.1.27)
       activerecord (~> 4.2)
       airbrake-ruby (~> 1.2.2)
       chamber (~> 2.7)
