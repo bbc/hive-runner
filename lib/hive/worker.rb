@@ -8,6 +8,7 @@ require 'hive/messages'
 require 'hive/port_allocator'
 require 'code_cache'
 require 'res'
+require 'fileutils'
 
 module Hive
   # The generic worker class
@@ -249,7 +250,9 @@ module Hive
     # Diagnostics function to be extended in child class, as required
     def diagnostics
       retn = true
+      protect
       retn = @diagnostic_runner.run if !@diagnostic_runner.nil?
+      unprotect
       @log.info('Diagnostics failed') if not retn
       status = device_status
       status = set_device_status('happy') if status == 'busy'
@@ -499,6 +502,19 @@ module Hive
     # Parameters for uniquely identifying the device
     def hive_mind_device_identifiers
       { id: @device_id }
+    end
+
+    private
+    def protect
+      @protect_file = File.expand_path("#{Process.pid}.protect", PIDS_DIRECTORY)
+      @log.debug("Protecting worker with #{@protect_file}")
+      FileUtils.touch @protect_file
+    end
+
+    def unprotect
+      @log.debug("Unprotecting worker with #{@protect_file}")
+      File.unlink @protect_file if @protect_file
+      @protect_file = nil
     end
   end
 end

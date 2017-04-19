@@ -34,24 +34,31 @@ module Hive
 
     # Terminate the worker process
     def stop
-      @stop_count = @stop_count.nil? ? 0 : @stop_count + 1
-
-      if self.running?
-        if @stop_count < 30
-          Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{@stop_count}]")
-          Process.kill 'TERM', @worker_pid
-        else
-          Hive.logger.info("Killing process #{@worker_pid}")
-          Process.kill 'KILL', @worker_pid if self.running?
-        end
-      end
-
-      if self.running?
+      protect_file = File.expand_path("#{@worker_pid}.protect", PIDS_DIRECTORY)
+      Hive.logger.debug("Checking for protected file: #{protect_file}")
+      if File.exists? File.expand_path("#{@worker_pid}.protect", PIDS_DIRECTORY)
+        Hive.logger.debug("PID #{@worker_pid} is protected")
         false
       else
-        @worker_pid = nil
-        @stop_count = nil
-        true
+        @stop_count = @stop_count.nil? ? 0 : @stop_count + 1
+
+        if self.running?
+          if @stop_count < 30
+            Hive.logger.info("Attempting to terminate process #{@worker_pid} [#{@stop_count}]")
+            Process.kill 'TERM', @worker_pid
+          else
+            Hive.logger.info("Killing process #{@worker_pid}")
+            Process.kill 'KILL', @worker_pid if self.running?
+          end
+        end
+
+        if self.running?
+          false
+        else
+          @worker_pid = nil
+          @stop_count = nil
+          true
+        end
       end
     end
 
