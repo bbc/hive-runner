@@ -53,6 +53,10 @@ module Hive
       @env.delete(var)
       @env_unset << var
     end
+
+    def get_env(var)
+      @env[var]
+    end
     
     def helper_path
       scripts_dir = File.expand_path(File.dirname(__FILE__) + "../../../scripts/")
