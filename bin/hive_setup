@@ -196,12 +196,12 @@ def setup_hive(options)
     f.puts ''
     f.puts '  # Logging configuration'
     f.puts '  logging:'
-    f.puts "    directory: #{dir}/log"
-    f.puts "    pids: #{dir}/pids"
+    f.puts "    directory: <%=ENV['HIVE_RUNNER_PATH'] || '#{dir}' %>/log"
+    f.puts "    pids: <%=ENV['HIVE_RUNNER_PATH'] || '#{dir}' %>/pids"
     f.puts '    main_filename: hive.log'
     f.puts '    main_level: INFO'
     f.puts '    worker_level: INFO'
-    f.puts "    home: #{dir}/workspaces"
+    f.puts "    home: <%=ENV['HIVE_RUNNER_PATH'] || '#{dir}' %>/workspaces"
     f.puts '    homes_to_keep: 5'
     f.puts '    #hm_logs_to_delete: info'
     f.puts ''
@@ -212,8 +212,8 @@ def setup_hive(options)
     f.puts ''
     f.puts '  # Configuration for various network options'
     f.puts '  network:'
-    f.puts '    scheduler: http://localhost:3000'
-    f.puts '    #hive_mind: http://localhost:3001'
+    f.puts "    scheduler: <%=ENV['HIVE_CI_URL'] || 'http://localhost:3000' %>"
+    f.puts "    #hive_mind: <%=ENV['HIVE_MIND_URL'] || 'http://localhost:3001' %>"
     f.puts '    # Optional cert paths:'
     f.puts '    # cert: /path/to/certificate.pem'
     f.puts '    # cafile: /path/to/certificate-authorities.pem'
@@ -318,6 +318,10 @@ def setup_hive(options)
   end
   puts '  * Add to ~/.bashrc'
   puts "      - export HIVE_CONFIG=#{dir}/config"
+  puts "      - export HIVE_RUNNER_PATH=#{dir}"
+  puts '  * Add to ~/.bashrc if you want to point specific url'
+  puts "      - export HIVE_CI_URL=http://host_address:3000"
+  puts "      - export HIVE_MIND_URL=http://host_address:3001"
   if ! daemons
     if startup_script
       puts '  * Move daemons startup script to correct location'
