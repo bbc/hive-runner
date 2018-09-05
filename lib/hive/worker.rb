@@ -426,7 +426,7 @@ module Hive
 
     def exceeded_time_limit?
       if @job && !@job.nil?
-        if max_time = @job.execution_variables.job_timeout rescue nil
+        if max_time = @job.execution_variables.job_timeout.to_i rescue nil
           elapsed = (Time.now - @current_job_start_time).to_i
           @log.debug("Elapsed = #{elapsed} seconds, Max = #{max_time} minutes")
           if elapsed > max_time.to_i * 60          
