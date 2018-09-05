@@ -41,7 +41,7 @@ describe Hive::Register do
       expect(register.devices.length).to be 10 # 5 for each controller
     end
 
-    it "allows one controller's devices to update if another fails" do
+    xit "allows one controller's devices to update if another fails" do
       controller_list = {}
       register.controllers.each do |c|
         controller_list[c.class] = c
